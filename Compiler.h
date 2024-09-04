@@ -1,7 +1,8 @@
 #pragma once
 #include <fstream>
-#include <iostream>
 #include <memory>
+#include <iostream>
+#include <iostream>
 #include <string>
 
 class Compiler
@@ -12,11 +13,12 @@ public:
     int compile();
 
 private:
-    std::unique_ptr<std::fstream> sourceCode;
-    std::unique_ptr<std::fstream> outCode;
+    std::shared_ptr<std::fstream> sourceCodeStream;
+    std::shared_ptr<std::fstream> outCodeStream;
     const std::string filename;
     const std::string out_filename;
+    std::string preprocessCode;
 
 
-    std::unique_ptr<std::fstream> openFilePointerUnique(const std::string& filename, std::ios::openmode mode);
+    std::shared_ptr<std::fstream> openFilePointerUnique(const std::string& filename, std::ios::openmode mode);
 };

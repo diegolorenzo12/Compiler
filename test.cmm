@@ -1,4 +1,11 @@
 int main()
 {
-    return 0;
+    std::string = " kgfmskjfdn                 s gkdas dsjf a "
+
+    return 0; //comment         here ansfdkj
 }
+/*
+
+THIS IS A BLOCK COMMENT
+
+*/

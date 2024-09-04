@@ -132,9 +132,15 @@
   <ItemGroup>
     <ClCompile Include="Compiler.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="HandwrittenLexer.cpp" />
+    <ClCompile Include="TableDrivenLexer.cpp" />
+    <ClCompile Include="TableDrivenLexer.h" />
+    <ClCompile Include="Token.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Compiler.h" />
+    <ClInclude Include="HandwrittenLexer.h" />
+    <ClInclude Include="Token.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
