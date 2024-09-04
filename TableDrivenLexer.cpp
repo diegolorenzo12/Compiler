@@ -169,7 +169,7 @@ TableDrivenLexer::TableDrivenLexer(std::shared_ptr<std::fstream> sourceCodeStrea
     transitionTable[0]['a'] = 21;
     transitionTable[21]['u'] = 22;
     transitionTable[22]['t'] = 23;
-    transitionTable[23]['0'] = 1;
+    transitionTable[23]['o'] = 1;
 
 
     //break
@@ -203,6 +203,8 @@ TableDrivenLexer::TableDrivenLexer(std::shared_ptr<std::fstream> sourceCodeStrea
     transitionTable[32]['s'] = 33;
     transitionTable[33]['t'] = 1;
 
+    //char (add letter)
+
     //default
     transitionTable[0]['d'] = 38;
     transitionTable[38]['e'] = 39;
@@ -231,14 +233,16 @@ TableDrivenLexer::TableDrivenLexer(std::shared_ptr<std::fstream> sourceCodeStrea
     transitionTable[49]['s'] = 50;
     transitionTable[50]['e'] = 1;
 
+    //enum (add later)
+
 
     //extern
     transitionTable[0]['e'] = 48;
     transitionTable[48]['x'] = 51;
-    transitionTable[52]['t'] = 52;
-    transitionTable[53]['e'] = 53;
-    transitionTable[54]['r'] = 54;
-    transitionTable[1]['n'] = 1;
+    transitionTable[51]['t'] = 52;
+    transitionTable[52]['e'] = 53;
+    transitionTable[53]['r'] = 54;
+    transitionTable[54]['n'] = 1;
 
     //float
     transitionTable[0]['f'] = 55;
