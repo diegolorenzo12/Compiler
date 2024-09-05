@@ -474,13 +474,10 @@ void TableDrivenLexer::tokenize() {
         if (currentState == 0 && std::isspace(currentChar)) {
             continue;  // Skip whitespace when in state 0
         }
-        // Get the next state from the transition table
         int nextState = transitionTable[currentState][static_cast<unsigned char>(currentChar)];
 
-        // If the next state is an error, we need to backtrack
         if (nextState == static_cast<int>(State::Error)) {
             if (lastAcceptedState != -1) {
-                // Backtrack: Use the last accepted token and state
                 std::string finalToken = lastAcceptedToken;
                 if (stateTypes[lastAcceptedState] != StateType::StringLiteral && stateTypes[lastAcceptedState] != StateType::Comment) {
                     finalToken = removeSpaces(finalToken);
@@ -488,29 +485,23 @@ void TableDrivenLexer::tokenize() {
 
                 std::cout << "Token: " << finalToken << ", Type: " << getTokenTypeString(stateTypes[lastAcceptedState]) << std::endl;
 
-                // Reset stream to the last accepted position
                 sourceCodeStream->clear();
                 sourceCodeStream->seekg(lastAcceptedPos);
 
-                // Clear current token and reset state
                 currentToken.clear();
                 currentState = 0;
                 lastAcceptedState = -1;  // Reset accepted state
             }
             else {
-                // No accepted state found, throw an error
                 std::cerr << "Lexical Error: Unexpected character '" << currentChar << "' at state " << currentState << std::endl;
                 return;
             }
         }
         else {
-            // Append the character to the current token
             currentToken += currentChar;
             currentState = nextState;
 
-            // Check if the next state is an accepted state
             if (stateTypes[currentState] != StateType::Error && stateTypes[currentState] != StateType::Start) {
-                // Update last accepted state and token
                 lastAcceptedState = currentState;
                 lastAcceptedToken = currentToken;
                 lastAcceptedPos = sourceCodeStream->tellg();  // Save stream position
@@ -518,7 +509,6 @@ void TableDrivenLexer::tokenize() {
         }
     }
 
-    // Handle any remaining accepted token at the end of the input
     if (lastAcceptedState != -1) {
         std::string finalToken = lastAcceptedToken;
 
@@ -529,7 +519,6 @@ void TableDrivenLexer::tokenize() {
         std::cout << "Token: " << finalToken << ", Type: " << getTokenTypeString(stateTypes[lastAcceptedState]) << std::endl;
     }
     else if (!currentToken.empty()) {
-        // Handle error if we have leftover tokens with no accepted state
         std::cerr << "Lexical Error: Unexpected end of input while processing token '" << currentToken << "'." << std::endl;
     }
 }
