@@ -16,6 +16,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include=".gitignore" />
+    <None Include="D:\Descargas\Compiladores diseño.md" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
