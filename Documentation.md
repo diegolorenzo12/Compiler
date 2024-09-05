@@ -53,7 +53,11 @@ Este proyecto tiene como objetivo desarrollar un compilador completo en C++, que
 
   - Las palabras claves, tokens, idenfiticadores, etc son las mismas que las del lenguaje c.
 
-- **Ejemplos:**
+- **Diagrama:**
+
+  ![Automata Compilador identifier, keyword](https://github.com/user-attachments/assets/695c0dce-311f-41f3-afb7-6a2bc6482d45)
+![Automata Compilador operator, constant, punctiation](https://github.com/user-attachments/assets/335a3b7c-0970-485b-887f-e8e05a3d3649)
+
 
 ## Análisis Sintáctico
 
