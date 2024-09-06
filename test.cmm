@@ -1,5 +1,6 @@
 int main()
 {
+i nt
     std::string = " kgfmskjfdn                 s gkdas dsjf a "
 	
 for (int i = 1; i <= 10; i++) 
