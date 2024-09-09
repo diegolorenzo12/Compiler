@@ -1,15 +1,17 @@
 #pragma once
 #include <string>
 
-enum class TokenType {
+enum class TokenType
+{
     KEYWORD,
     IDENTIFIER,
     PUNCTUATION,
     CONSTANT,
     OPERATOR,
+    STRING_LITERAL,
+    COMMENT,
     UNKNOWN
 };
-
 
 class Token {
 public:
