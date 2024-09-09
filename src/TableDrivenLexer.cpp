@@ -1,5 +1,4 @@
 #include "TableDrivenLexer.h"
-#include <algorithm>
 
 
 TableDrivenLexer::TableDrivenLexer(std::shared_ptr<std::fstream> sourceCodeStream) :sourceCodeStream(sourceCodeStream) {
@@ -483,7 +482,9 @@ void TableDrivenLexer::tokenize() {
                     finalToken = removeSpaces(finalToken);
                 }
 
-                std::cout << "Token: " << finalToken << ", Type: " << getTokenTypeString(stateTypes[lastAcceptedState]) << std::endl;
+                //std::cout << "Token: " << finalToken << ", Type: " << getTokenTypeString(stateTypes[lastAcceptedState]) << std::endl;
+                TokenType tokenType = StateTypeToTokenType(stateTypes[lastAcceptedState]);
+                tokens.emplace_back(finalToken, tokenType);
 
                 sourceCodeStream->clear();
                 sourceCodeStream->seekg(lastAcceptedPos);
@@ -516,9 +517,53 @@ void TableDrivenLexer::tokenize() {
         if (stateTypes[lastAcceptedState] != StateType::StringLiteral && stateTypes[lastAcceptedState] != StateType::Comment) {
             finalToken = removeSpaces(finalToken);
         }
-        std::cout << "Token: " << finalToken << ", Type: " << getTokenTypeString(stateTypes[lastAcceptedState]) << std::endl;
+        TokenType tokenType = StateTypeToTokenType(stateTypes[lastAcceptedState]);
+        tokens.emplace_back(finalToken, tokenType);
     }
     else if (!currentToken.empty()) {
         std::cerr << "Lexical Error: Unexpected end of input while processing token '" << currentToken << "'." << std::endl;
     }
+}
+
+TokenType TableDrivenLexer::StateTypeToTokenType(StateType stateType)
+{
+    switch (stateType)
+    {
+    case StateType::Keyword:
+        return TokenType::KEYWORD;
+    case StateType::Identifier:
+        return TokenType::IDENTIFIER;
+    case StateType::Punctuation:
+        return TokenType::PUNCTUATION;
+    case StateType::Constant:
+        return TokenType::CONSTANT;
+    case StateType::Operator:
+        return TokenType::OPERATOR;
+    case StateType::StringLiteral:
+        return TokenType::STRING_LITERAL;
+    case StateType::Comment:
+        return TokenType::COMMENT;
+    default:
+        return TokenType::UNKNOWN;
+    }
+}
+
+void TableDrivenLexer::printTokens() const
+{
+    if (tokens.empty())
+    {
+        std::cout << "No tokens to print." << std::endl;
+        return;
+    }
+
+    for (const Token &token : tokens)
+    {
+        std::cout << "Token: " << token.getValue() << ", Type: " << token.getTypeAsString() << std::endl;
+    }
+}
+
+
+const std::vector<Token> &TableDrivenLexer::getTokens() const
+{
+    return tokens;
 }

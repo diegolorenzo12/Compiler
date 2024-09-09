@@ -40,6 +40,8 @@ int Compiler::compile() {
 
     TableDrivenLexer lexer(this->sourceCodeStream);
     lexer.tokenize();
+    lexer.printTokens();
+    const std::vector<Token> &tokens = lexer.getTokens();
     //std::vector<Token> tokens = lexer.tokenize();
     //lexer.printTokens(tokens);
 
