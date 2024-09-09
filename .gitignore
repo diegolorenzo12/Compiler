@@ -479,3 +479,9 @@ FodyWeavers.xsd
 ### VisualStudio Patch ###
 # Additional files built by Visual Studio
 
+/build
+/lib
+/CMakeFiles/
+/CMakeCache.txt
+/cmake_install.cmake
+/Makefile
