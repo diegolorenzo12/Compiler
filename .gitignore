@@ -486,3 +486,5 @@ FodyWeavers.xsd
 /cmake_install.cmake
 /Makefile
 /.vscode
+/Testing
+CMakeUserPresets.json
