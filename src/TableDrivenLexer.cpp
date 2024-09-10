@@ -468,8 +468,13 @@ void TableDrivenLexer::tokenize() {
     std::string currentToken = "";  // Accumulate characters for the current token
     std::string lastAcceptedToken = "";  // Track the token at the last accepted state
     std::streampos lastAcceptedPos;  // Position in the stream for backtracking
+    int lineNumber = 1;
 
     while (sourceCodeStream->get(currentChar)) {
+        if (currentChar == '\n')
+        {
+            lineNumber++; 
+        }
         if (currentState == 0 && std::isspace(currentChar)) {
             continue;  // Skip whitespace when in state 0
         }
@@ -484,7 +489,8 @@ void TableDrivenLexer::tokenize() {
 
                 //std::cout << "Token: " << finalToken << ", Type: " << getTokenTypeString(stateTypes[lastAcceptedState]) << std::endl;
                 TokenType tokenType = StateTypeToTokenType(stateTypes[lastAcceptedState]);
-                tokens.emplace_back(finalToken, tokenType);
+                //tokens.emplace_back(finalToken, tokenType);
+                tokens.emplace_back(finalToken, tokenType, lineNumber);
 
                 sourceCodeStream->clear();
                 sourceCodeStream->seekg(lastAcceptedPos);
@@ -518,7 +524,8 @@ void TableDrivenLexer::tokenize() {
             finalToken = removeSpaces(finalToken);
         }
         TokenType tokenType = StateTypeToTokenType(stateTypes[lastAcceptedState]);
-        tokens.emplace_back(finalToken, tokenType);
+        //tokens.emplace_back(finalToken, tokenType);
+        tokens.emplace_back(finalToken, tokenType, lineNumber);
     }
     else if (!currentToken.empty()) {
         std::cerr << "Lexical Error: Unexpected end of input while processing token '" << currentToken << "'." << std::endl;
@@ -559,6 +566,8 @@ void TableDrivenLexer::printTokens() const
     for (const Token &token : tokens)
     {
         std::cout << "Token: " << token.getValue() << ", Type: " << token.getTypeAsString() << std::endl;
+
+        //std::cout << "Token: " << token.getValue() << ", Type: " << token.getTypeAsString() << ", Line:  "<< token.getLineNumber() << std::endl;
     }
 }
 

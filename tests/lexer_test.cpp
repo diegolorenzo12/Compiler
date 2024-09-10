@@ -52,24 +52,25 @@ TEST(LexerTest, BasicKeywordAndIdentifier)
     std::remove("temp_source_code.txt");
 }
 
-// TEST(LexerTest, KeywordTest){
-//     std::string sourceCode = "auto break case char const continue default do double else enum extern float for goto if int long register return short signed sizeof static struct switch typedef union unsigned void volatile while";
-//     std::shared_ptr<std::fstream> stream = std::make_shared<std::fstream>();
-//     stream->open("temp_source_code.cmm", std::ios::out); //32
-//     *stream << sourceCode;
-//     stream->close();
-//     stream->open("temp_source_code.cmm", std::ios::in);
+TEST(LexerTest, KeywordTest){
+    std::string sourceCode = "auto break case const continue default do double else extern float for goto if int long register return short signed sizeof static struct switch typedef union unsigned void volatile while";
+    std::shared_ptr<std::fstream> stream = std::make_shared<std::fstream>();
+    stream->open("temp_source_code.cmm", std::ios::out);
+    *stream << sourceCode;
+    stream->close();
+    stream->open("temp_source_code.cmm", std::ios::in);
 
-//     TableDrivenLexer lexer(stream);
-//     lexer.tokenize();
-//     const std::vector<Token> &tokens = lexer.getTokens();
+    TableDrivenLexer lexer(stream);
+    lexer.tokenize();
+    const std::vector<Token> &tokens = lexer.getTokens();
 
-//     ASSERT_EQ(tokens.size(), 32); // 32 total tokens
-    
-//     for(int i=0; i<=32; i++){
-//         EXPECT_EQ(tokens[i].getType(), TokenType::PUNCTUATION);
-//     }
+    ASSERT_EQ(tokens.size(), 30); // 30 total tokens
 
-//     stream->close();
-//     std::remove("temp_source_code.cmm");
-// }
+
+    for(auto i: tokens){
+        EXPECT_EQ(i.getTypeAsString(), "KEYWORD");
+    }
+
+    stream->close();
+    std::remove("temp_source_code.cmm");
+}
