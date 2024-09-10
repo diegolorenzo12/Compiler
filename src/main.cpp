@@ -4,8 +4,7 @@
 
 
 int main() {
-    Compiler compiler("../tests/test.cmm", "../tests/test", 0);
-
+    Compiler compiler("../example/test.cmm", "../example/test", 0);
 
     int res = compiler.compile();
     if (res == 0)

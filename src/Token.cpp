@@ -18,6 +18,9 @@ std::string Token::getTypeAsString() const {
     case TokenType::PUNCTUATION: return "PUNCTUATION";
     case TokenType::OPERATOR: return "OPERATOR";
     case TokenType::CONSTANT: return "CONSTANT";
-    default: return "UNKNOWN";
+    case TokenType::STRING_LITERAL: return "STRING_LITERAL";
+    case TokenType::COMMENT: return "COMMENT";
+    default:
+        return "UNKNOWN";
     }
 }

@@ -9,7 +9,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 # If Conan toolchain is used, include it
-include(${CMAKE_BINARY_DIR}/conan/conan_toolchain.cmake)
+include(${CMAKE_BINARY_DIR}/conan_toolchain.cmake)
 
 # Define the source files
 set(SOURCES
@@ -19,7 +19,7 @@ set(SOURCES
     src/Token.cpp
 )
 
-# Add the executable target
+# Add the executable target for the compiler
 add_executable(Compiler ${SOURCES})
 
 # Include header files directory (so the compiler knows where to find them)
@@ -32,22 +32,33 @@ set_target_properties(Compiler PROPERTIES
     LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
 )
 
-# Find the Google Test package (provided by Conan)
-find_package(GTest REQUIRED)
 
-# Link Google Test to the Compiler target for testing
-target_link_libraries(Compiler GTest::gtest GTest::gtest_main)
+file(COPY ${CMAKE_SOURCE_DIR}/example DESTINATION ${CMAKE_BINARY_DIR}/bin)
 
-# Copy the tests directory to the appropriate output directory (Debug/Release)
-file(COPY ${CMAKE_SOURCE_DIR}/tests DESTINATION ${CMAKE_BINARY_DIR}/bin)
 
-# Optionally set default build type (for non-IDE environments)
-if(NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE Debug CACHE STRING "Choose the type of build." FORCE)
+if(NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE Debug CACHE STRING "Choose the type of build." FORCE)
 endif()
 
 # Enable testing
 enable_testing()
 
-# Add tests (optional, for example purposes)
-add_test(NAME CompilerTests COMMAND Compiler)
+# Find Google Test (provided by Conan)
+find_package(GTest REQUIRED)
+
+# Add the test executable
+add_executable(lexer_test tests/lexer_test.cpp)
+
+# Include directories for lexer_test (same as Compiler)
+target_include_directories(lexer_test PUBLIC ${CMAKE_SOURCE_DIR}/include)
+
+# Link Google Test libraries to the lexer_test executable
+target_link_libraries(lexer_test GTest::gtest GTest::gtest_main)
+
+target_sources(lexer_test PRIVATE
+    src/TableDrivenLexer.cpp
+    src/Token.cpp
+)
+
+# Register the test with CTest
+add_test(NAME LexerTest COMMAND lexer_test)
