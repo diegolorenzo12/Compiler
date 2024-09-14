@@ -2,6 +2,28 @@
 
 A compiler for a C-like programming language, with a reduced set of instructions.
 
+## Table of Contents
+
+- [Summary](#summary)
+- [Motivation and Problem to Solve](#motivation-and-problem-to-solve)
+- [Project Objectives](#project-objectives)
+- [State of the Art](#state-of-the-art)
+- [Compiler Architecture and Design](#compiler-architecture-and-design)
+  - [Block Diagram](#block-diagram)
+  - [Data Flow Explanation](#data-flow-explanation)
+  - [Design Decisions](#design-decisions)
+- [Lexical Analysis](#lexical-analysis)
+  - [Automata](#automata)
+- [Syntax Analysis](#syntax-analysis)
+- [Semantic Analysis](#semantic-analysis)
+- [Installation and Running](#installation-and-running)
+- [Testing and Validation](#testing-and-validation)
+- [Tools and Development Environment](#tools-and-development-environment)
+- [Demonstration](#demonstration)
+- [Challenges and Solutions](#challenges-and-solutions)
+- [Conclusions and Future Work](#conclusions-and-future-work)
+- [References](#references)
+
 ## Summary
 
 This project aims to develop a complete compiler, covering everything from lexical analysis to final code generation. The compiler will allow for the translation of source code written in a C-- into machine code.
@@ -61,6 +83,44 @@ Both or this DFA are the same, but were broken down into 2 images to view more e
   - Use of grammars and syntax trees.
 
 - **Examples:**
+
+## Installation and Running
+
+### Prerequisites
+
+If you don't have Conan installed, run the following:
+
+```bash
+pip install conan
+conan profile detect
+```
+
+### Install Conan packages (gtest)
+
+From the root of the project directory, run the following command to install Conan packages:
+
+```bash
+conan install . --build=missing --output-folder=build -s build_type=Debug
+```
+
+### Build the Project
+
+To build the project, run the following:
+
+```bash
+cd build/
+cmake ..
+cmake --build .
+```
+
+### Build and Run the Project
+
+To build and run the project, execute:
+
+```bash
+cd build/
+cmake --build . --target run
+```
 
 ## Testing and Validation
 
