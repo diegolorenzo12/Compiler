@@ -407,12 +407,12 @@ void Automata::addTransitionForSpecificChars(int sourceState, int destinationSta
 
 int Automata::makeTransition(int currentState, char input){
     if (currentState < 0 || currentState >= NUM_STATES) {
-        std::cerr << "Error: currentState index out of bounds." << std::endl;
+        std::cerr << "Error: currentState index out of bounds while making transition." << std::endl;
         return -1; 
     }
 
     if (input < 0 || input >= ASCII_SIZE) {
-        std::cerr << "Error: input index out of bounds." << std::endl;
+        std::cerr << "Error: input index out of bounds making transition." << std::endl;
         return -1; // or handle it appropriately
     }
 
@@ -425,7 +425,7 @@ bool Automata::isErrorState(int state){
 
 StateType Automata::getStateType(int state){
     if (state < 0 || state >= NUM_STATES) {
-        std::cerr << "Error: currentState index out of bounds." << std::endl;
+        std::cerr << "Error: currentState index out of bounds "<< state <<", resolving to error state." << std::endl;
         return StateType::Error; 
     }
     return stateTypes[state];

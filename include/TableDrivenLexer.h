@@ -7,6 +7,8 @@
 #include <iostream>
 #include "Token.h"
 #include "Automata.h"
+#include "TokenBuffer.h"
+
 
 #define ASCII_SIZE 128
 #define NUM_STATES 131

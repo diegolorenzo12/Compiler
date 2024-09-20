@@ -17,10 +17,11 @@ void TableDrivenLexer::tokenize() {
     char currentChar;
     int currentState = 0;  // Start state
     int lastAcceptedState = -1;  // Track the last valid (accepted) state
-    std::string currentToken = "";  // Accumulate characters for the current token
     std::string lastAcceptedToken = "";  // Track the token at the last accepted state
     std::streampos lastAcceptedPos;  // Position in the stream for backtracking
     int lineNumber = 1;
+
+    TokenBuffer currentToken;
 
     while (sourceCodeStream->get(currentChar)) {
         if (currentChar == '\n')
@@ -39,16 +40,14 @@ void TableDrivenLexer::tokenize() {
                 return;
             }
 
-            std::string finalToken = lastAcceptedToken;
-
             TokenType tokenType = StateTypeToTokenType(automata.getStateType(lastAcceptedState));
-            //tokens.emplace_back(finalToken, tokenType);
-            tokens.emplace_back(finalToken, tokenType, lineNumber);
+            tokens.emplace_back(lastAcceptedToken, tokenType, lineNumber);
 
             sourceCodeStream->clear();
             sourceCodeStream->seekg(lastAcceptedPos);
 
             currentToken.clear();
+            lastAcceptedToken.clear();
 
             //reset state
             currentState = 0;
@@ -56,28 +55,24 @@ void TableDrivenLexer::tokenize() {
             
         }
         else {
-            currentToken += currentChar;
+            currentToken.add(currentChar);
             currentState = nextState;
             lastAcceptedState = currentState;
-            lastAcceptedToken = currentToken;
+            lastAcceptedToken = currentToken.getString();
             lastAcceptedPos = sourceCodeStream->tellg();  // Save stream position
         }
     }
 
-    if(lastAcceptedState == -1 && !currentToken.empty()){
-        std::cerr << "Lexical Error: Unexpected end of input while processing token '" << currentToken << "'." << std::endl;
+    if(lastAcceptedState == -1){
+        if( !currentToken.isEmpty()){
+            std::cerr << "Lexical Error: Unexpected end of input while processing token '" << currentToken.getString() << "'." << std::endl;
+
+        }
         return;
     }
-
-    std::string finalToken = lastAcceptedToken;
-
-    // Remove spaces if not a string literal
-    // if (automata.getStateType(lastAcceptedState) != StateType::StringLiteral) {
-    //     finalToken = removeSpaces(finalToken);
-    // }
-
+    //if ended without processing
     TokenType tokenType = StateTypeToTokenType(automata.getStateType(lastAcceptedState));
-    tokens.emplace_back(finalToken, tokenType, lineNumber);
+    tokens.emplace_back(lastAcceptedToken, tokenType, lineNumber);
 }
 
 TokenType TableDrivenLexer::StateTypeToTokenType(StateType stateType)
