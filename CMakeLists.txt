@@ -15,6 +15,7 @@ set(SOURCES
     src/Compiler.cpp
     src/TableDrivenLexer.cpp
     src/Token.cpp
+    src/Automata.cpp
 )
 
 add_executable(Compiler ${SOURCES})

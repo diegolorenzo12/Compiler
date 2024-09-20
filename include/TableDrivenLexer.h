@@ -6,34 +6,10 @@
 #include <algorithm>
 #include <iostream>
 #include "Token.h"
+#include "Automata.h"
 
 #define ASCII_SIZE 128
 #define NUM_STATES 131
-
-enum class State
-{
-    Start,
-    keyword,
-    Identifier,
-    Punctuation,
-    Constant,
-    Operator,
-    Error,
-};
-
-enum class StateType {
-    Start,
-    Keyword,
-    Identifier,
-    Punctuation,
-    StringLiteral,
-    Constant,
-    Operator,
-    Comment,
-    Error,
-};
-
-
 
 class TableDrivenLexer {
 public:
@@ -46,14 +22,9 @@ public:
 
 private:
     std::shared_ptr<std::fstream> sourceCodeStream;
-    void addTransitionExcludingChars(int sourceState, int destinationState, const std::vector<char>& excludedChars);
-    void addTransitionForSpecificChars(int sourceState, int destinationState, const std::vector<char>& specificChars);
     TokenType StateTypeToTokenType(StateType stateType);
 
 
-    int transitionTable[NUM_STATES][ASCII_SIZE];
-    StateType stateTypes[NUM_STATES];
-
+    Automata automata;
     std::string getTokenTypeString(StateType stateType);
-
 };
