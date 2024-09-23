@@ -8,6 +8,8 @@
 #include "Token.h"
 #include "Automata.h"
 #include "TokenBuffer.h"
+#include "TokenTable.h"
+
 
 
 #define ASCII_SIZE 128
@@ -17,10 +19,8 @@ class TableDrivenLexer {
 public:
     TableDrivenLexer(std::shared_ptr<std::fstream> sourceCodeStream);
     void tokenize();
-    void printTokens() const;
-    const std::vector<Token> &getTokens() const;
-
-    std::vector<Token> tokens;
+    //void printTokens() const;
+    const TokenTable &getTokens() const;
 
 private:
     std::shared_ptr<std::fstream> sourceCodeStream;
@@ -29,4 +29,5 @@ private:
 
     Automata automata;
     std::string getTokenTypeString(StateType stateType);
+    TokenTable tokens;
 };

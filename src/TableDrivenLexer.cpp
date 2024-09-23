@@ -41,7 +41,8 @@ void TableDrivenLexer::tokenize() {
             }
 
             TokenType tokenType = StateTypeToTokenType(automata.getStateType(lastAcceptedState));
-            tokens.emplace_back(lastAcceptedToken, tokenType, lineNumber);
+            tokens.push_back(Token(lastAcceptedToken, tokenType, lineNumber));
+            //tokens.emplace_back(lastAcceptedToken, tokenType, lineNumber);
 
             sourceCodeStream->clear();
             sourceCodeStream->seekg(lastAcceptedPos);
@@ -72,7 +73,9 @@ void TableDrivenLexer::tokenize() {
     }
     //if ended without processing
     TokenType tokenType = StateTypeToTokenType(automata.getStateType(lastAcceptedState));
-    tokens.emplace_back(lastAcceptedToken, tokenType, lineNumber);
+    //tokens.emplace_back(lastAcceptedToken, tokenType, lineNumber);
+    tokens.push_back(Token(lastAcceptedToken, tokenType, lineNumber));
+
 }
 
 TokenType TableDrivenLexer::StateTypeToTokenType(StateType stateType)
@@ -98,22 +101,22 @@ TokenType TableDrivenLexer::StateTypeToTokenType(StateType stateType)
     }
 }
 
-void TableDrivenLexer::printTokens() const
-{
-    if (tokens.empty())
-    {
-        std::cout << "No tokens to print." << std::endl;
-        return;
-    }
+// void TableDrivenLexer::printTokens() const
+// {
+//     if (tokens.empty())
+//     {
+//         std::cout << "No tokens to print." << std::endl;
+//         return;
+//     }
 
-    for (const Token &token : tokens)
-    {
-        std::cout << "Token: " << token.getValue() << ", Type: " << token.getTypeAsString() << std::endl;
-    }
-}
+//     for (const Token &token : tokens)
+//     {
+//         std::cout << "Token: " << token.getValue() << ", Type: " << token.getTypeAsString() << std::endl;
+//     }
+// }
 
 
-const std::vector<Token> &TableDrivenLexer::getTokens() const
+const TokenTable &TableDrivenLexer::getTokens() const
 {
     return tokens;
 }

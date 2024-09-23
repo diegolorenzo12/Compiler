@@ -17,6 +17,7 @@ set(SOURCES
     src/Token.cpp
     src/Automata.cpp
     src/TokenBuffer.cpp
+    src/TokenTable.cpp
 )
 
 add_executable(Compiler ${SOURCES})
