@@ -15,6 +15,9 @@ set(SOURCES
     src/Compiler.cpp
     src/TableDrivenLexer.cpp
     src/Token.cpp
+    src/Automata.cpp
+    src/TokenBuffer.cpp
+    src/TokenTable.cpp
 )
 
 add_executable(Compiler ${SOURCES})
@@ -58,6 +61,9 @@ target_link_libraries(lexer_test GTest::gtest_main)
 target_sources(lexer_test PRIVATE
     src/TableDrivenLexer.cpp
     src/Token.cpp
+    src/TokenBuffer.cpp
+    src/Automata.cpp
+    src/TokenTable.cpp
 )
 
 # Register the test with CTest

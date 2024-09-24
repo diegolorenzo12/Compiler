@@ -1,5 +1,6 @@
 #include "Compiler.h"
 #include "TableDrivenLexer.h"
+#include "TokenTable.h"
 
 
 std::shared_ptr<std::fstream> Compiler::openFilePointerUnique(const std::string& filename, std::ios::openmode mode) {
@@ -40,8 +41,10 @@ int Compiler::compile() {
 
     TableDrivenLexer lexer(this->sourceCodeStream);
     lexer.tokenize();
-    lexer.printTokens();
-    const std::vector<Token> &tokens = lexer.getTokens();
+    TokenTable tokens = lexer.getTokens();
+    
+    tokens.printTokens();
+    //const std::vector<Token> &tokens = lexer.getTokens();
 
 
     return 0;
