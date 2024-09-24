@@ -1,8 +1,11 @@
 #include <gtest/gtest.h>
 #include "TableDrivenLexer.h"
+#include "TokenTable.h"
+#include "Token.h"
 #include <memory>
 #include <fstream>
 #include <sstream>
+#include <iostream>
 
 
 TEST(LexerTest, BasicKeywordAndIdentifier)
@@ -17,36 +20,44 @@ TEST(LexerTest, BasicKeywordAndIdentifier)
 
     TableDrivenLexer lexer(stream);
     lexer.tokenize();
-    const std::vector<Token> &tokens = lexer.getTokens();
+    TokenTable &tokens = lexer.getTokens(); 
 
     ASSERT_EQ(tokens.size(), 9); // Expect 9 tokens: int, main, (, ), {, return, 0, ;}
 
-    EXPECT_EQ(tokens[0].getType(), TokenType::KEYWORD);
-    EXPECT_EQ(tokens[0].getValue(), "int");
+    EXPECT_EQ(tokens.front().getType(), TokenType::KEYWORD);
+    EXPECT_EQ(tokens.front().getValue(), "int");
+    tokens.pop_front();
 
-    EXPECT_EQ(tokens[1].getType(), TokenType::IDENTIFIER);
-    EXPECT_EQ(tokens[1].getValue(), "main");
+    EXPECT_EQ(tokens.front().getType(), TokenType::IDENTIFIER);
+    EXPECT_EQ(tokens.front().getValue(), "main");
+    tokens.pop_front();
 
-    EXPECT_EQ(tokens[2].getType(), TokenType::PUNCTUATION);
-    EXPECT_EQ(tokens[2].getValue(), "(");
+    EXPECT_EQ(tokens.front().getType(), TokenType::PUNCTUATION);
+    EXPECT_EQ(tokens.front().getValue(), "(");
+    tokens.pop_front();
 
-    EXPECT_EQ(tokens[3].getType(), TokenType::PUNCTUATION);
-    EXPECT_EQ(tokens[3].getValue(), ")");
+    EXPECT_EQ(tokens.front().getType(), TokenType::PUNCTUATION);
+    EXPECT_EQ(tokens.front().getValue(), ")");
+    tokens.pop_front();
 
-    EXPECT_EQ(tokens[4].getType(), TokenType::PUNCTUATION);
-    EXPECT_EQ(tokens[4].getValue(), "{");
+    EXPECT_EQ(tokens.front().getType(), TokenType::PUNCTUATION);
+    EXPECT_EQ(tokens.front().getValue(), "{");
+    tokens.pop_front();
 
-    EXPECT_EQ(tokens[5].getType(), TokenType::KEYWORD);
-    EXPECT_EQ(tokens[5].getValue(), "return");
+    EXPECT_EQ(tokens.front().getType(), TokenType::KEYWORD);
+    EXPECT_EQ(tokens.front().getValue(), "return");
+    tokens.pop_front();
 
-    EXPECT_EQ(tokens[6].getType(), TokenType::CONSTANT);
-    EXPECT_EQ(tokens[6].getValue(), "0");
+    EXPECT_EQ(tokens.front().getType(), TokenType::CONSTANT);
+    EXPECT_EQ(tokens.front().getValue(), "0");
+    tokens.pop_front();
 
-    EXPECT_EQ(tokens[7].getType(), TokenType::PUNCTUATION);
-    EXPECT_EQ(tokens[7].getValue(), ";");
+    EXPECT_EQ(tokens.front().getType(), TokenType::PUNCTUATION);
+    EXPECT_EQ(tokens.front().getValue(), ";");
+    tokens.pop_front();
 
-    EXPECT_EQ(tokens[8].getType(), TokenType::PUNCTUATION);
-    EXPECT_EQ(tokens[8].getValue(), "}");
+    EXPECT_EQ(tokens.front().getType(), TokenType::PUNCTUATION);
+    EXPECT_EQ(tokens.front().getValue(), "}");
 
     // Clean up temporary file
     stream->close();
@@ -59,18 +70,22 @@ TEST(LexerTest, KeywordTest){
     stream->open("temp_source_code.cmm", std::ios::out);
     *stream << sourceCode;
     stream->close();
-    stream->open("temp_source_code.cmm", std::ios::in);
 
+    stream->open("temp_source_code.cmm", std::ios::in);
     TableDrivenLexer lexer(stream);
+
     lexer.tokenize();
-    const std::vector<Token> &tokens = lexer.getTokens();
+
+    TokenTable &tokens = lexer.getTokens();
 
     ASSERT_EQ(tokens.size(), 30); // 30 total tokens
 
+    while(!tokens.isEmpty()){
 
-    for(auto i: tokens){
-        EXPECT_EQ(i.getTypeAsString(), "KEYWORD");
+        EXPECT_EQ(tokens.front().getTypeAsString(), "KEYWORD");
+        tokens.pop_front();
     }
+
 
     stream->close();
     std::remove("temp_source_code.cmm");

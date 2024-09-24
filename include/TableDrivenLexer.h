@@ -19,8 +19,8 @@ class TableDrivenLexer {
 public:
     TableDrivenLexer(std::shared_ptr<std::fstream> sourceCodeStream);
     void tokenize();
-    //void printTokens() const;
-    const TokenTable &getTokens() const;
+    TokenTable &getTokens();
+
 
 private:
     std::shared_ptr<std::fstream> sourceCodeStream;

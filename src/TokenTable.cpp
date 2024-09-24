@@ -4,9 +4,21 @@
 void TokenTable::push_back(Token t){
     tokens.push_back(t);
 }
-//std::string getTokens();
+
+void TokenTable::pop_front(){
+    tokens.pop_front();
+}
+
+Token TokenTable::front(){
+    return tokens.front();
+}
+
 bool TokenTable::isEmpty(){
     return tokens.empty();
+}
+
+int TokenTable::size(){
+    return tokens.size();
 }
 
 void TokenTable::clear(){

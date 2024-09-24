@@ -3,7 +3,6 @@
 
 class TokenBuffer{
 public:
-    //TokenBuffer();
     void add(char c);
     std::string getString();
     bool isEmpty();

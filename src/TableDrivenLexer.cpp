@@ -101,22 +101,9 @@ TokenType TableDrivenLexer::StateTypeToTokenType(StateType stateType)
     }
 }
 
-// void TableDrivenLexer::printTokens() const
-// {
-//     if (tokens.empty())
-//     {
-//         std::cout << "No tokens to print." << std::endl;
-//         return;
-//     }
 
-//     for (const Token &token : tokens)
-//     {
-//         std::cout << "Token: " << token.getValue() << ", Type: " << token.getTypeAsString() << std::endl;
-//     }
-// }
-
-
-const TokenTable &TableDrivenLexer::getTokens() const
+TokenTable &TableDrivenLexer::getTokens()
 {
     return tokens;
 }
+

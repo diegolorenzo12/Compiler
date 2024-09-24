@@ -63,6 +63,7 @@ target_sources(lexer_test PRIVATE
     src/Token.cpp
     src/TokenBuffer.cpp
     src/Automata.cpp
+    src/TokenTable.cpp
 )
 
 # Register the test with CTest
