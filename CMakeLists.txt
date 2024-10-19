@@ -10,14 +10,24 @@ project(Compiler VERSION 1.0 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
+# Find Flex
+find_package(FLEX REQUIRED)
+
+# Specify the lexer source file
+find_package(FLEX REQUIRED)
+include_directories("C:/Program Files (x86)/GnuWin32/include") # FlexLexer.h is in this directory
+
+
+set(FLEX_INPUT src/scanner.l)
+FLEX_TARGET(MyLexer ${FLEX_INPUT} ${CMAKE_CURRENT_BINARY_DIR}/lex.yy.cc)
+
+# Add the generated lexer file to the sources
 set(SOURCES
     src/main.cpp
     src/Compiler.cpp
-    src/TableDrivenLexer.cpp
     src/Token.cpp
-    src/Automata.cpp
-    src/TokenBuffer.cpp
     src/TokenTable.cpp
+    ${FLEX_MYLEXER_OUTPUTS} # Add the generated lexer file
 )
 
 add_executable(Compiler ${SOURCES})
@@ -30,13 +40,11 @@ set_target_properties(Compiler PROPERTIES
     LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
 )
 
-
 file(COPY ${CMAKE_SOURCE_DIR}/example DESTINATION ${CMAKE_BINARY_DIR}/bin)
 
 if(NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Debug CACHE STRING "Choose the type of build." FORCE)
 endif()
-
 
 enable_testing()
 
@@ -45,7 +53,6 @@ set(gtest_DIR "${CMAKE_BINARY_DIR}/gtest")
 find_package(GTest CONFIG REQUIRED)
 get_target_property(GTEST_INCLUDE_DIRS GTest::gtest INTERFACE_INCLUDE_DIRECTORIES)
 message("GTEST_INCLUDE_DIRS: ${GTEST_INCLUDE_DIRS}")
-
 
 # Add the test executable
 add_executable(lexer_test tests/lexer_test.cpp)
@@ -59,11 +66,9 @@ target_include_directories(lexer_test PUBLIC
 target_link_libraries(lexer_test GTest::gtest_main)
 
 target_sources(lexer_test PRIVATE
-    src/TableDrivenLexer.cpp
     src/Token.cpp
-    src/TokenBuffer.cpp
-    src/Automata.cpp
     src/TokenTable.cpp
+    src/lex.yy.cc
 )
 
 # Register the test with CTest
