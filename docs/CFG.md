@@ -1,6 +1,6 @@
 # Compiler CFG Documentation
 
-This document provides the Context-Free Grammar (CFG) for the language used in the compiler.
+This document provides the Context-Free Grammar (CFG) for the language used in the compiler. This only shows the CFG with left recursion. To see the CFG with left recursion removed, refer to the [CFG-LR](CFG-LR.md) file.
 ## Terminals
 
 1. **`IDENTIFIER`**
@@ -170,8 +170,8 @@ The language supports either declarations or function declarations externally or
 
 <a id="declaration"></a>
 **DECLARATION → <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[DECLARATION_SPECIFIERS](#declaration_specifiers) ';' | <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[DECLARATION_SPECIFIERS](#declaration_specifiers) [INIT_DECLARATOR_LIST](#init_declarator_list) ';'**
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[DECLARATION_SPECIFIERS](#declaration_specifiers) ; | <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[DECLARATION_SPECIFIERS](#declaration_specifiers) [INIT_DECLARATOR_LIST](#init_declarator_list) ;**
 
 _Description:_  
 This represents the entire process of defining a variable, function, or type.
@@ -198,7 +198,7 @@ This is for all declaration specifiers
 <a id="init_declarator_list"></a>
 **INIT_DECLARATOR_LIST → <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[INIT_DECLARATOR](#init_declarator) | <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;INIT_DECLARATOR_LIST ',' [INIT_DECLARATOR](#init_declarator)**
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;INIT_DECLARATOR_LIST  ,  [INIT_DECLARATOR](#init_declarator)**
 
 Used to declare one or more variables, optionally specifying the initial value
 
@@ -210,7 +210,7 @@ x = 1, y = 2 // Used for declaration with initializers
 
 <a id="init_declarator"></a>
 **INIT_DECLARATOR → <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[DECLARATOR](#declarator) '=' [INITIALIZER](#initializer) | <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[DECLARATOR](#declarator)  =  [INITIALIZER](#initializer) | <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[DECLARATOR](#declarator)**
 
 For initializing variables
@@ -269,8 +269,8 @@ A declaration of a function follows a declaration specifier (the function type),
 
 <a id="struct_or_union_specifier"></a>
 **STRUCT_SPECIFIER → <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;struct '{' [STRUCT_DECLARATION_LIST](#struct_declaration_list) '}' | <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;struct IDENTIFIER '{' [STRUCT_DECLARATION_LIST](#struct_declaration_list) '}' | <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;struct  {  [STRUCT_DECLARATION_LIST](#struct_declaration_list)  }  | <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;struct IDENTIFIER  {  [STRUCT_DECLARATION_LIST](#struct_declaration_list)  }  | <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;struct IDENTIFIER**
 
 For parsing structs specifiers
@@ -299,8 +299,8 @@ struct str {
 
 <a id="struct_declaration"></a>
 **STRUCT_DECLARATION → <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[SPECIFIER_QUALIFIER_LIST](#specifier_qualifier_list) ';' | <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[SPECIFIER_QUALIFIER_LIST](#specifier_qualifier_list) [STRUCT_DECLARATOR_LIST](#struct_declarator_list) ';'**
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[SPECIFIER_QUALIFIER_LIST](#specifier_qualifier_list)  ;  | <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[SPECIFIER_QUALIFIER_LIST](#specifier_qualifier_list) [STRUCT_DECLARATOR_LIST](#struct_declarator_list)  ; **
 
 <a id="specifier_qualifier_list"></a>
 **SPECIFIER_QUALIFIER_LIST → <br>
@@ -320,16 +320,16 @@ volatile const int
 <a id="struct_declarator_list"></a>
 **STRUCT_DECLARATOR_LIST → <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[DECLARATOR](#declarator) | <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;STRUCT_DECLARATOR_LIST ',' [DECLARATOR](#declarator)**
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;STRUCT_DECLARATOR_LIST  ,  [DECLARATOR](#declarator)**
 
 List of declarations in a struct
 
 <a id="enum_specifier"></a>
 **ENUM_SPECIFIER → <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;enum '{' [ENUMERATOR_LIST](#enumerator_list) '}' | <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;enum '{' [ENUMERATOR_LIST](#enumerator_list) ',' '}' | <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;enum IDENTIFIER '{' [ENUMERATOR_LIST](#enumerator_list) '}' | <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;enum IDENTIFIER '{' [ENUMERATOR_LIST](#enumerator_list) ',' '}' | <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;enum  {  [ENUMERATOR_LIST](#enumerator_list)  }  | <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;enum  {  [ENUMERATOR_LIST](#enumerator_list)  ,   }  | <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;enum IDENTIFIER  {  [ENUMERATOR_LIST](#enumerator_list)  }  | <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;enum IDENTIFIER  {  [ENUMERATOR_LIST](#enumerator_list)  ,   }  | <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;enum IDENTIFIER**
 
 For declaring enums
@@ -342,7 +342,7 @@ enum week{Mon, Tue, Wed, Thur, Fri, Sat, Sun , }; //also valid in c
 <a id="enumerator_list"></a>
 **ENUMERATOR_LIST → <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[ENUMERATOR](#enumerator) | <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ENUMERATOR_LIST ',' [ENUMERATOR](#enumerator)**
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ENUMERATOR_LIST  ,  [ENUMERATOR](#enumerator)**
 
 ```c
 Mon = 1, Tue, Wed, Thur, Fri, Sat, Sun
@@ -350,7 +350,7 @@ Mon = 1, Tue, Wed, Thur, Fri, Sat, Sun
 
 <a id="enumerator"></a>
 **ENUMERATOR → <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;IDENTIFIER '=' IDENTIFIER | <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;IDENTIFIER  =  IDENTIFIER | <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;IDENTIFIER**
 
 ```c
@@ -375,36 +375,36 @@ func_name(int a, float b)
 <a id="direct_declarator"></a>
 **DIRECT_DECLARATOR → <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;IDENTIFIER | <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'(' [DECLARATOR](#declarator) ')' | <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;DIRECT_DECLARATOR '[' ']' | <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;DIRECT_DECLARATOR '[' '*' ']' | <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;DIRECT_DECLARATOR '[' static [TYPE_QUALIFIER_LIST](#type_qualifier_list) [ASSIGNMENT_EXPRESSION](#assignment_expression) ']' | <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;DIRECT_DECLARATOR '[' static [ASSIGNMENT_EXPRESSION](#assignment_expression) ']' | <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;DIRECT_DECLARATOR '[' [TYPE_QUALIFIER_LIST](#type_qualifier_list) '*' ']' | <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;DIRECT_DECLARATOR '[' [TYPE_QUALIFIER_LIST](#type_qualifier_list) static [ASSIGNMENT_EXPRESSION](#assignment_expression) ']' | <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;DIRECT_DECLARATOR '[' [TYPE_QUALIFIER_LIST](#type_qualifier_list) [ASSIGNMENT_EXPRESSION](#assignment_expression) ']' | <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;DIRECT_DECLARATOR '[' [TYPE_QUALIFIER_LIST](#type_qualifier_list) ']' | <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;DIRECT_DECLARATOR '[' [ASSIGNMENT_EXPRESSION](#assignment_expression) ']' | <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;DIRECT_DECLARATOR '(' [PARAMETER_LIST](#parameter_list) ')' | <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;DIRECT_DECLARATOR '(' ')' | <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;DIRECT_DECLARATOR '(' [IDENTIFIER_LIST](#identifier_list) ')'**
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (  [DECLARATOR](#declarator)  )  | <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;DIRECT_DECLARATOR  [   ]  | <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;DIRECT_DECLARATOR  [   *   ]  | <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;DIRECT_DECLARATOR  [  static [TYPE_QUALIFIER_LIST](#type_qualifier_list) [ASSIGNMENT_EXPRESSION](#assignment_expression)  ]  | <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;DIRECT_DECLARATOR  [  static [ASSIGNMENT_EXPRESSION](#assignment_expression)  ]  | <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;DIRECT_DECLARATOR  [  [TYPE_QUALIFIER_LIST](#type_qualifier_list)  *   ]  | <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;DIRECT_DECLARATOR  [  [TYPE_QUALIFIER_LIST](#type_qualifier_list) static [ASSIGNMENT_EXPRESSION](#assignment_expression)  ]  | <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;DIRECT_DECLARATOR  [  [TYPE_QUALIFIER_LIST](#type_qualifier_list) [ASSIGNMENT_EXPRESSION](#assignment_expression)  ]  | <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;DIRECT_DECLARATOR  [  [TYPE_QUALIFIER_LIST](#type_qualifier_list)  ]  | <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;DIRECT_DECLARATOR  [  [ASSIGNMENT_EXPRESSION](#assignment_expression)  ]  | <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;DIRECT_DECLARATOR  (  [PARAMETER_LIST](#parameter_list)  )  | <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;DIRECT_DECLARATOR  (   )  | <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;DIRECT_DECLARATOR  (  [IDENTIFIER_LIST](#identifier_list)  )**
 
 This is for all extra information that a declarator may have on a structure (parameter lists, assignment lists, etc)
 Note: some invalid structures will be caught at semantic level, example: int func[]{}
 
 <a id="pointer"></a>
 **POINTER → <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'*' [TYPE_QUALIFIER_LIST](#type_qualifier_list) POINTER | <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'*' [TYPE_QUALIFIER_LIST](#type_qualifier_list) | <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'*' POINTER | <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'*'**
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; *  [TYPE_QUALIFIER_LIST](#type_qualifier_list) POINTER | <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; *  [TYPE_QUALIFIER_LIST](#type_qualifier_list) | <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; *  POINTER | <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;***
 
 For identifying pointers. 
 
 <a id="parameter_list"></a>
 **PARAMETER_LIST → <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[PARAMETER_DECLARATION](#parameter_declaration) | <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;PARAMETER_LIST ',' [PARAMETER_DECLARATION](#parameter_declaration)**
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;PARAMETER_LIST  ,  [PARAMETER_DECLARATION](#parameter_declaration)**
 
 ```c
 int x, float c, char b
@@ -423,7 +423,7 @@ int x
 <a id="identifier_list"></a>
 **IDENTIFIER_LIST → <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;IDENTIFIER | <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;IDENTIFIER_LIST ',' IDENTIFIER**
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;IDENTIFIER_LIST  ,  IDENTIFIER**
 
 ```c
 one, two, apple, orange
@@ -431,8 +431,8 @@ one, two, apple, orange
 
 <a id="initializer"></a>
 **INITIALIZER → <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'{' [INITIALIZER_LIST](#initializer_list) '}' | <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'{' [INITIALIZER_LIST](#initializer_list) ',' '}' | <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {  [INITIALIZER_LIST](#initializer_list)  }  | <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {  [INITIALIZER_LIST](#initializer_list)  ,   }  | <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[ASSIGNMENT_EXPRESSION](#assignment_expression)**
 
 For initializing variables
@@ -446,7 +446,7 @@ int x = 5; // 5 is an initializer
 <a id="initializer_list"></a>
 **INITIALIZER_LIST → <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[INITIALIZER](#initializer) | <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;INITIALIZER_LIST ',' [INITIALIZER](#initializer)**
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;INITIALIZER_LIST  ,  [INITIALIZER](#initializer)**
 
 <a id="statement"></a>
 **STATEMENT → <br>
@@ -461,9 +461,9 @@ This are the supported statements in this language
 
 <a id="labeled_statement"></a>
 **LABELED_STATEMENT → <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;IDENTIFIER ':' [STATEMENT](#statement) | <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;case [CONDITIONAL_EXPRESSION](#conditional_expression) ':' [STATEMENT](#statement) | <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;default ':' [STATEMENT](#statement)**
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;IDENTIFIER  :  [STATEMENT](#statement) | <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;case [CONDITIONAL_EXPRESSION](#conditional_expression)  :  [STATEMENT](#statement) | <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;default  :  [STATEMENT](#statement)**
 
 This will be used in switch cases, example: 
 ```c
@@ -479,8 +479,8 @@ In c a constant expresion can be a conditional expression if this expresion can 
 
 <a id="BLOCK"></a>
 **BLOCK → <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'{' '}' | <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'{' [BLOCK_ITEM_LIST](#block_item_list) '}'**
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {   }  | <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {  [BLOCK_ITEM_LIST](#block_item_list)  }**
 
 A block can have a series of declarations and statements inside it.
 
@@ -500,8 +500,8 @@ A list of block items
 
 <a id="expression_statement"></a>
 **EXPRESSION_STATEMENT → <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';' | <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[EXPRESSION](#expression) ';'**
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ;  | <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[EXPRESSION](#expression)  ;**
 
 This is used to execute an expression, example:
 ```c
@@ -513,7 +513,7 @@ x = 10; // This is an expression statement, assignment
 <a id="expression"></a>
 **EXPRESSION → <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[ASSIGNMENT_EXPRESSION](#assignment_expression) | <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;EXPRESSION ',' [ASSIGNMENT_EXPRESSION](#assignment_expression)**
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;EXPRESSION  ,  [ASSIGNMENT_EXPRESSION](#assignment_expression)**
 
 Example:
 ```c
@@ -536,9 +536,9 @@ x += a; // Compound assignment
 
 <a id="selection_statement"></a>
 **SELECTION_STATEMENT → <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if '(' [EXPRESSION](#expression) ')' [STATEMENT](#statement) else [STATEMENT](#statement) | <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if '(' [EXPRESSION](#expression) ')' [STATEMENT](#statement) | <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;switch '(' [EXPRESSION](#expression) ')' [STATEMENT](#statement)**
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if  (  [EXPRESSION](#expression)  )  [STATEMENT](#statement) else [STATEMENT](#statement) | <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if  (  [EXPRESSION](#expression)  )  [STATEMENT](#statement) | <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;switch  (  [EXPRESSION](#expression)  )  [STATEMENT](#statement)**
 
 `else if` is supported because following an `else` we have a statement that can be another `if` statement
 ```c
@@ -553,47 +553,47 @@ if (expression) {
 
 <a id="iteration_statement"></a>
 **ITERATION_STATEMENT → <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;while '(' [EXPRESSION](#expression) ')' [STATEMENT](#statement) | <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;do [STATEMENT](#statement) while '(' [EXPRESSION](#expression) ')' ';' | <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;for '(' [EXPRESSION_STATEMENT](#expression_statement) [EXPRESSION_STATEMENT](#expression_statement) ')' [STATEMENT](#statement) | <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;for '(' [EXPRESSION_STATEMENT](#expression_statement) [EXPRESSION_STATEMENT](#expression_statement) [EXPRESSION](#expression) ')' [STATEMENT](#statement) | <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;for '(' [DECLARATION](#declaration) [EXPRESSION_STATEMENT](#expression_statement) ')' [STATEMENT](#statement) | <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;for '(' [DECLARATION](#declaration) [EXPRESSION_STATEMENT](#expression_statement) [EXPRESSION](#expression) ')' [STATEMENT](#statement)**
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;while  (  [EXPRESSION](#expression)  )  [STATEMENT](#statement) | <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;do [STATEMENT](#statement) while  (  [EXPRESSION](#expression)  )   ;  | <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;for  (  [EXPRESSION_STATEMENT](#expression_statement) [EXPRESSION_STATEMENT](#expression_statement)  )  [STATEMENT](#statement) | <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;for  (  [EXPRESSION_STATEMENT](#expression_statement) [EXPRESSION_STATEMENT](#expression_statement) [EXPRESSION](#expression)  )  [STATEMENT](#statement) | <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;for  (  [DECLARATION](#declaration) [EXPRESSION_STATEMENT](#expression_statement)  )  [STATEMENT](#statement) | <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;for  (  [DECLARATION](#declaration) [EXPRESSION_STATEMENT](#expression_statement) [EXPRESSION](#expression)  )  [STATEMENT](#statement)**
 
 <a id="jump_statement"></a>
 **JUMP_STATEMENT → <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;continue ';' | <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;break ';' | <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return ';' | <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return [EXPRESSION](#expression) ';'**
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;continue  ;  | <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;break  ;  | <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return  ;  | <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return [EXPRESSION](#expression)  ;**
 
 <a id="assignment_operator"></a>
-**ASSIGNMENT_OPERATOR → <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'=' | <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'*=' | <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'/=' | <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'%=' | <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'+=' | <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'-=' | <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'<<=' | <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'>>=' | <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'&=' | <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'^=' | <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'|='**
+**ASSIGNMENT_OPERATOR → <br>**
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; =  | <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; *=  | <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; /=  | <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; %=  | <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; +=  | <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -=  | <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <<=  | <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; >>=  | <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &=  | <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ^=  | <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |=
 
 These are identified by our lexer as single tokens, meaning `<<=` is a single token.
 
 <a id="conditional_expression"></a>
 **CONDITIONAL_EXPRESSION → <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[LOGICAL_OR_EXPRESSION](#logical_or_expression) | <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[LOGICAL_OR_EXPRESSION](#logical_or_expression) '?' [EXPRESSION](#expression) ':' [CONDITIONAL_EXPRESSION](#conditional_expression)**
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[LOGICAL_OR_EXPRESSION](#logical_or_expression)  ?  [EXPRESSION](#expression)  :  [CONDITIONAL_EXPRESSION](#conditional_expression)**
 
 The ternary operator is supported
 
 <a id="logical_or_expression"></a>
 **LOGICAL_OR_EXPRESSION → <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[LOGICAL_AND_EXPRESSION](#logical_and_expression) | <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;LOGICAL_OR_EXPRESSION '||' [LOGICAL_AND_EXPRESSION](#logical_and_expression)**
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;LOGICAL_OR_EXPRESSION  ||  [LOGICAL_AND_EXPRESSION](#logical_and_expression)**
 
 Involves logical operators like `&&`, `||`. This rule is for nested logical OR/AND expressions. The AND operation has higher priority than the OR operation. Example:
 ```c
@@ -607,48 +607,48 @@ is equivalent to
 <a id="logical_and_expression"></a>
 **LOGICAL_AND_EXPRESSION → <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[INCLUSIVE_OR_EXPRESSION](#inclusive_or_expression) | <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;LOGICAL_AND_EXPRESSION '&&' [INCLUSIVE_OR_EXPRESSION](#inclusive_or_expression)**
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;LOGICAL_AND_EXPRESSION  &&  [INCLUSIVE_OR_EXPRESSION](#inclusive_or_expression)**
 
 <a id="inclusive_or_expression"></a>
 **INCLUSIVE_OR_EXPRESSION → <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[EXCLUSIVE_OR_EXPRESSION](#exclusive_or_expression) | <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;INCLUSIVE_OR_EXPRESSION '|' [EXCLUSIVE_OR_EXPRESSION](#exclusive_or_expression)**
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;INCLUSIVE_OR_EXPRESSION  |  [EXCLUSIVE_OR_EXPRESSION](#exclusive_or_expression)**
 
 <a id="exclusive_or_expression"></a>
 **EXCLUSIVE_OR_EXPRESSION → <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[AND_EXPRESSION](#and_expression) | <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;EXCLUSIVE_OR_EXPRESSION '^' [AND_EXPRESSION](#and_expression)**
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;EXCLUSIVE_OR_EXPRESSION  ^  [AND_EXPRESSION](#and_expression)**
 
 Exclusive and inclusive OR are bitwise operators.
 
 <a id="and_expression"></a>
 **AND_EXPRESSION → <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[EQUALITY_EXPRESSION](#equality_expression) | <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;AND_EXPRESSION '&' [EQUALITY_EXPRESSION](#equality_expression)**
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;AND_EXPRESSION  &  [EQUALITY_EXPRESSION](#equality_expression)**
 
 <a id="equality_expression"></a>
 **EQUALITY_EXPRESSION → <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[RELATIONAL_EXPRESSION](#relational_expression) | <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;EQUALITY_EXPRESSION '==' [RELATIONAL_EXPRESSION](#relational_expression) | <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;EQUALITY_EXPRESSION '!=' [RELATIONAL_EXPRESSION](#relational_expression)**
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;EQUALITY_EXPRESSION  ==  [RELATIONAL_EXPRESSION](#relational_expression) | <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;EQUALITY_EXPRESSION  !=  [RELATIONAL_EXPRESSION](#relational_expression)**
 
 Assesses equality of two expressions.
 
 <a id="relational_expression"></a>
 **RELATIONAL_EXPRESSION → <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[SHIFT_EXPRESSION](#shift_expression) | <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;RELATIONAL_EXPRESSION '<' [SHIFT_EXPRESSION](#shift_expression) | <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;RELATIONAL_EXPRESSION '>' [SHIFT_EXPRESSION](#shift_expression) | <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;RELATIONAL_EXPRESSION '<=' [SHIFT_EXPRESSION](#shift_expression) | <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;RELATIONAL_EXPRESSION '>=' [SHIFT_EXPRESSION](#shift_expression)**
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;RELATIONAL_EXPRESSION  <  [SHIFT_EXPRESSION](#shift_expression) | <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;RELATIONAL_EXPRESSION  >  [SHIFT_EXPRESSION](#shift_expression) | <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;RELATIONAL_EXPRESSION  <=  [SHIFT_EXPRESSION](#shift_expression) | <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;RELATIONAL_EXPRESSION  >=  [SHIFT_EXPRESSION](#shift_expression)**
 
 Relational operators compare two expressions based on their value.
 
 <a id="shift_expression"></a>
 **SHIFT_EXPRESSION → <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[ADDITIVE_EXPRESSION](#additive_expression) | <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SHIFT_EXPRESSION '<<' [ADDITIVE_EXPRESSION](#additive_expression) | <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SHIFT_EXPRESSION '>>' [ADDITIVE_EXPRESSION](#additive_expression)**
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SHIFT_EXPRESSION  <<  [ADDITIVE_EXPRESSION](#additive_expression) | <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SHIFT_EXPRESSION  >>  [ADDITIVE_EXPRESSION](#additive_expression)**
 
 Shift operators are used to shift the bits of an expression to the left or right.
 
@@ -660,17 +660,17 @@ int b = a << 1; // This will shift the bits of a to the left by 1, so b will be 
 <a id="additive_expression"></a>
 **ADDITIVE_EXPRESSION → <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[MULTIPLICATIVE_EXPRESSION](#multiplicative_expression) | <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ADDITIVE_EXPRESSION '+' [MULTIPLICATIVE_EXPRESSION](#multiplicative_expression) | <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ADDITIVE_EXPRESSION '-' [MULTIPLICATIVE_EXPRESSION](#multiplicative_expression)**
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ADDITIVE_EXPRESSION  +  [MULTIPLICATIVE_EXPRESSION](#multiplicative_expression) | <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ADDITIVE_EXPRESSION  -  [MULTIPLICATIVE_EXPRESSION](#multiplicative_expression)**
 
 Additive operators are used to add or subtract two expressions.
 
 <a id="multiplicative_expression"></a>
 **MULTIPLICATIVE_EXPRESSION → <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[UNARY_EXPRESSION](#unary_expression) | <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MULTIPLICATIVE_EXPRESSION '*' [UNARY_EXPRESSION](#unary_expression) | <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MULTIPLICATIVE_EXPRESSION '/' [UNARY_EXPRESSION](#unary_expression) | <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MULTIPLICATIVE_EXPRESSION '%' [UNARY_EXPRESSION](#unary_expression)**
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MULTIPLICATIVE_EXPRESSION  *  [UNARY_EXPRESSION](#unary_expression) | <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MULTIPLICATIVE_EXPRESSION  /  [UNARY_EXPRESSION](#unary_expression) | <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MULTIPLICATIVE_EXPRESSION  %  [UNARY_EXPRESSION](#unary_expression)**
 
 Multiplicative operators are used to multiply or divide two expressions.
 
@@ -684,22 +684,22 @@ int result = a * -b;
 <a id="unary_expression"></a>
 **UNARY_EXPRESSION → <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[POSTFIX_EXPRESSION](#postfix_expression) | <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'++' UNARY_EXPRESSION | <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'--' UNARY_EXPRESSION | <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'sizeof' UNARY_EXPRESSION**
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ++  UNARY_EXPRESSION | <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; --  UNARY_EXPRESSION | <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; sizeof  UNARY_EXPRESSION**
 
 A unary expression is an expression that has only one operand.
 
 <a id="postfix_expression"></a>
 **POSTFIX_EXPRESSION → <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[PRIMARY_EXPRESSION](#primary_expression) | <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;POSTFIX_EXPRESSION '[' [EXPRESSION](#expression) ']' | <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;POSTFIX_EXPRESSION '(' ')' | <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;POSTFIX_EXPRESSION '(' [ARGUMENT_EXPRESSION_LIST](#argument_expression_list) ')' | <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;POSTFIX_EXPRESSION '.' IDENTIFIER | <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;POSTFIX_EXPRESSION '->' IDENTIFIER | <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;POSTFIX_EXPRESSION '++' | <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;POSTFIX_EXPRESSION '--'**
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;POSTFIX_EXPRESSION  [  [EXPRESSION](#expression)  ]  | <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;POSTFIX_EXPRESSION  (   )  | <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;POSTFIX_EXPRESSION  (  [ARGUMENT_EXPRESSION_LIST](#argument_expression_list)  )  | <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;POSTFIX_EXPRESSION  .  IDENTIFIER | <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;POSTFIX_EXPRESSION  ->  IDENTIFIER | <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;POSTFIX_EXPRESSION  ++  | <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;POSTFIX_EXPRESSION  --**
 
 `a[5]` is a postfix expression because it has a primary expression and an expression between brackets. The `. IDENTIFIER` and `-> IDENTIFIER` are used for structs.
 
@@ -712,7 +712,7 @@ int c = a--;
 <a id="argument_expression_list"></a>
 **ARGUMENT_EXPRESSION_LIST → <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[ASSIGNMENT_EXPRESSION](#assignment_expression) | <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ARGUMENT_EXPRESSION_LIST ',' [ASSIGNMENT_EXPRESSION](#assignment_expression)**
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ARGUMENT_EXPRESSION_LIST  ,  [ASSIGNMENT_EXPRESSION](#assignment_expression)**
 
 This is used for function calls with a list of arguments.
 
@@ -725,7 +725,7 @@ int result = func(a, b, 1+2);
 **PRIMARY_EXPRESSION → <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;IDENTIFIER | <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[CONSTANT](#constant) | <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'(' [EXPRESSION](#expression) ')'**
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (  [EXPRESSION](#expression)  )**
 
 <a id="constant"></a>
 **CONSTANT → <br>
