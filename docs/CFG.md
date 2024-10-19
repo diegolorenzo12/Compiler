@@ -177,10 +177,10 @@ _Description:_
 This represents the entire process of defining a variable, function, or type.
 A declaration introduces new identifiers and specifies their types.
 
-`c
+```c
 int x;                      // Simple declaration
 float y = 3.14f, z = 0.0f;  // Declaration with initializers
-`
+```
 
 <a id="declaration_specifiers"></a>
 **DECLARATION_SPECIFIERS → <br>
@@ -202,11 +202,11 @@ This is for all declaration specifiers
 
 Used to declare one or more variables, optionally specifying the initial value
 
-`c
+```c
 x = 10
 x, y
 x = 1, y = 2 // Used for declaration with initializers
-`
+```
 
 <a id="init_declarator"></a>
 **INIT_DECLARATOR → <br>
@@ -215,10 +215,10 @@ x = 1, y = 2 // Used for declaration with initializers
 
 For initializing variables
 
-`c
+```c
 x = 10
 a
-`
+```
 
 <a id="storage_class_specifier"></a>
 **STORAGE_SPECIFIER → <br>
@@ -274,13 +274,13 @@ A declaration of a function follows a declaration specifier (the function type),
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;struct IDENTIFIER**
 
 For parsing structs specifiers
-`c
+```c
 struct Point
 {    
      int x;    
      int y;
 };
-`
+```
 
 <a id="struct_declaration_list"></a>
 **STRUCT_DECLARATION_LIST → <br>
@@ -288,14 +288,14 @@ struct Point
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;STRUCT_DECLARATION_LIST [STRUCT_DECLARATION](#struct_declaration)**
 
 Declarations work different inside a struct, hence a `STRUCT_DECLARATION` is needed. 
-`c
+```c
 struct str {
     int i = 10; // This is not allowed in C
 };
 struct str {
     int i; // Allowed in C
 };
-`
+```
 
 <a id="struct_declaration"></a>
 **STRUCT_DECLARATION → <br>
@@ -310,12 +310,12 @@ struct str {
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[TYPE_QUALIFIER](#type_qualifier)**
 
 This is for types lists
-`c
+```c
 int
 const
 unsigned long
 volatile const int
-`
+```
 
 <a id="struct_declarator_list"></a>
 **STRUCT_DECLARATOR_LIST → <br>
@@ -334,29 +334,29 @@ List of declarations in a struct
 
 For declaring enums
 
-`c
+```c
 enum week{Mon, Tue, Wed, Thur, Fri, Sat, Sun};
 enum week{Mon, Tue, Wed, Thur, Fri, Sat, Sun , }; //also valid in c
-`
+```
 
 <a id="enumerator_list"></a>
 **ENUMERATOR_LIST → <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[ENUMERATOR](#enumerator) | <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ENUMERATOR_LIST ',' [ENUMERATOR](#enumerator)**
 
-`c
+```c
 Mon = 1, Tue, Wed, Thur, Fri, Sat, Sun
-`
+```
 
 <a id="enumerator"></a>
 **ENUMERATOR → <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;IDENTIFIER '=' IDENTIFIER | <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;IDENTIFIER**
 
-`c
+```c
 Mon = 1
 Sun
-`
+```
 
 <a id="declarator"></a>
 **DECLARATOR → <br>
@@ -365,12 +365,12 @@ Sun
 
 Specifies the name of a variable, function, or pointer along with any additional information about its structure.
 
-`c
+```c
 x
 *ptr
 arr[10]
 func_name(int a, float b)
-`
+```
 
 <a id="direct_declarator"></a>
 **DIRECT_DECLARATOR → <br>
@@ -406,9 +406,9 @@ For identifying pointers.
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[PARAMETER_DECLARATION](#parameter_declaration) | <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;PARAMETER_LIST ',' [PARAMETER_DECLARATION](#parameter_declaration)**
 
-`c
+```c
 int x, float c, char b
-`
+```
 
 <a id="parameter_declaration"></a>
 **PARAMETER_DECLARATION → <br>
@@ -416,18 +416,18 @@ int x, float c, char b
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[DECLARATION_SPECIFIERS](#declaration_specifiers) ABSTRACT_DECLARATOR | <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[DECLARATION_SPECIFIERS](#declaration_specifiers)**
 
-`c
+```c
 int x
-`
+```
 
 <a id="identifier_list"></a>
 **IDENTIFIER_LIST → <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;IDENTIFIER | <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;IDENTIFIER_LIST ',' IDENTIFIER**
 
-`c
+```c
 one, two, apple, orange
-`
+```
 
 <a id="initializer"></a>
 **INITIALIZER → <br>
@@ -437,11 +437,11 @@ one, two, apple, orange
 
 For initializing variables
 
-`c
+```c
 int x = 5; // 5 is an initializer
 {1, 2, 3} // This is an initializer for an array
 {1, 2, 3 ,} // This is also valid in C
-`
+```
 
 <a id="initializer_list"></a>
 **INITIALIZER_LIST → <br>
@@ -465,8 +465,8 @@ This are the supported statements in this language
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;case [CONDITIONAL_EXPRESSION](#conditional_expression) ':' [STATEMENT](#statement) | <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;default ':' [STATEMENT](#statement)**
 
-This will be used in switch cases, example:
-`c
+This will be used in switch cases, example: 
+```c
 switch (expression) {
     case constant1: // case label
         // statements
@@ -474,7 +474,8 @@ switch (expression) {
     default: //default label
         // statements
 }
-`
+```
+In c a constant expresion can be a conditional expression if this expresion can be evaluated at compile time, hence conditional expressions are in case labels.
 
 <a id="BLOCK"></a>
 **BLOCK → <br>
@@ -503,11 +504,11 @@ A list of block items
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[EXPRESSION](#expression) ';'**
 
 This is used to execute an expression, example:
-`c
+```c
 int x = 5;
 x = 10; // This is an expression statement, assignment 
 ; // This is an empty statement, valid in C
-`
+```
 
 <a id="expression"></a>
 **EXPRESSION → <br>
@@ -515,10 +516,10 @@ x = 10; // This is an expression statement, assignment
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;EXPRESSION ',' [ASSIGNMENT_EXPRESSION](#assignment_expression)**
 
 Example:
-`c
+```c
 int a = 1, b = 2, c;
 c = (a = 5, b = a + 3); // this is useful in for loops
-`
+```
 
 <a id="assignment_expression"></a>
 **ASSIGNMENT_EXPRESSION → <br>
@@ -526,12 +527,12 @@ c = (a = 5, b = a + 3); // this is useful in for loops
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[UNARY_EXPRESSION](#unary_expression) [ASSIGNMENT_OPERATOR](#assignment_operator) [ASSIGNMENT_EXPRESSION](#assignment_expression)**
 
 Example:
-`c
+``` c
 int a = 5;
 x = y = 10;  // multiple assignments
 x = func(1); 
 x += a; // Compound assignment
-`
+```
 
 <a id="selection_statement"></a>
 **SELECTION_STATEMENT → <br>
@@ -540,7 +541,7 @@ x += a; // Compound assignment
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;switch '(' [EXPRESSION](#expression) ')' [STATEMENT](#statement)**
 
 `else if` is supported because following an `else` we have a statement that can be another `if` statement
-`c
+```c
 if (expression) {
     // statements
 } else if (expression) {
@@ -548,7 +549,7 @@ if (expression) {
 } else {
     // statements
 }
-`
+```
 
 <a id="iteration_statement"></a>
 **ITERATION_STATEMENT → <br>
@@ -595,12 +596,13 @@ The ternary operator is supported
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;LOGICAL_OR_EXPRESSION '||' [LOGICAL_AND_EXPRESSION](#logical_and_expression)**
 
 Involves logical operators like `&&`, `||`. This rule is for nested logical OR/AND expressions. The AND operation has higher priority than the OR operation. Example:
-`c
+```c
 a && b || c && d 
-`
+```
 is equivalent to
-`c
+```c
 (a && b) || (c && d)
+```
 
 <a id="logical_and_expression"></a>
 **LOGICAL_AND_EXPRESSION → <br>
@@ -650,10 +652,10 @@ Relational operators compare two expressions based on their value.
 
 Shift operators are used to shift the bits of an expression to the left or right.
 
-`c
+```c
 int a = 10; // 10 in binary is 1010
 int b = a << 1; // This will shift the bits of a to the left by 1, so b will be 20 (10100 in binary)
-`
+```
 
 <a id="additive_expression"></a>
 **ADDITIVE_EXPRESSION → <br>
@@ -674,10 +676,10 @@ Multiplicative operators are used to multiply or divide two expressions.
 
 To multiplicative expression follows a unary expression because something like the following is valid:
 
-`c
+```c
 int a = 5, b = 3;
 int result = a * -b;
-`
+```
 
 <a id="unary_expression"></a>
 **UNARY_EXPRESSION → <br>
@@ -701,11 +703,11 @@ A unary expression is an expression that has only one operand.
 
 `a[5]` is a postfix expression because it has a primary expression and an expression between brackets. The `. IDENTIFIER` and `-> IDENTIFIER` are used for structs.
 
-`c
+``` c
 int a = 5;
 int b = a++; 
 int c = a--; 
-`
+```
 
 <a id="argument_expression_list"></a>
 **ARGUMENT_EXPRESSION_LIST → <br>
@@ -714,10 +716,10 @@ int c = a--;
 
 This is used for function calls with a list of arguments.
 
-`c
+```c
 int a = 5, b = 3;
 int result = func(a, b, 1+2);
-`
+```
 
 <a id="primary_expression"></a>
 **PRIMARY_EXPRESSION → <br>
