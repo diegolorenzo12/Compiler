@@ -160,8 +160,6 @@ This document extends the [CFG](CFG.md) file by removing the left recursion from
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[POINTER](#POINTER) [DIRECT_DECLARATOR](#DIRECT_DECLARATOR) |<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[DIRECT_DECLARATOR](#DIRECT_DECLARATOR)**
 
-`Note: This rule above need left factoring.`
-
 <a id="DIRECT_DECLARATOR"></a>
 **DIRECT_DECLARATOR → <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;IDENTIFIER DIRECT_DECLARATOR_PRIME |<br>
