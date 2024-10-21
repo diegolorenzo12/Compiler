@@ -1,8 +1,8 @@
-# CFG Without Left Recursion
+# CFG Without Left Recursion and with left factoring
 
-This document extends the [CFG](CFG.md) file by removing the left recursion from the grammar rules.
+This document extends the [CFG-LR](CFG-LR.md) file by removing the left recursion and left factoring from the grammar rules.
 
-## Grammar Rules without left recursion
+
 <a id="PROGRAM"></a>
 **PROGRAM → <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[GLOBAL_DECLARATIONS](#GLOBAL_DECLARATIONS) [PROGRAM_PRIME](#PROGRAM_PRIME)**
@@ -28,10 +28,12 @@ This document extends the [CFG](CFG.md) file by removing the left recursion from
 
 <a id="DECLARATION"></a>
 **DECLARATION → <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[DECLARATION_SPECIFIERS](#DECLARATION_SPECIFIERS) ; |<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[DECLARATION_SPECIFIERS](#DECLARATION_SPECIFIERS) [INIT_DECLARATOR_LIST](#INIT_DECLARATOR_LIST) ;**
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[DECLARATION_SPECIFIERS](#DECLARATION_SPECIFIERS) [DECLARATION_PRIME](#DECLARATION_PRIME)**
 
-`Note: This rule above need left factoring.`
+<a id="DECLARATION_PRIME"></a>
+**DECLARATION_PRIME → <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;; |<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[INIT_DECLARATOR_LIST](#INIT_DECLARATOR_LIST) ;**
 
 <a id="DECLARATION_SPECIFIERS"></a>
 **DECLARATION_SPECIFIERS → <br>
@@ -56,11 +58,12 @@ This document extends the [CFG](CFG.md) file by removing the left recursion from
 
 <a id="INIT_DECLARATOR"></a>
 **INIT_DECLARATOR → <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[DECLARATOR](#DECLARATOR) = [INITIALIZER](#INITIALIZER) |<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[DECLARATOR](#DECLARATOR)**
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[DECLARATOR](#DECLARATOR) [INIT_DECLARATOR_PRIME](#INIT_DECLARATOR_PRIME)**
 
-`Note: This rule above need left factoring.`
-
+<a id="INIT_DECLARATOR_PRIME"></a>
+**INIT_DECLARATOR_PRIME → <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;= [INITIALIZER](#INITIALIZER) |<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ε**
 
 <a id="STORAGE_SPECIFIER"></a>
 **STORAGE_SPECIFIER → <br>
@@ -101,23 +104,24 @@ This document extends the [CFG](CFG.md) file by removing the left recursion from
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bool |<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[STRUCT_SPECIFIER](#STRUCT_SPECIFIER)**
 
-
 <a id="FUNCTION_DEFINITION"></a>
 **FUNCTION_DEFINITION → <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[DECLARATION_SPECIFIERS](#DECLARATION_SPECIFIERS) [DECLARATOR](#DECLARATOR) [DECLARATION_LIST](#DECLARATION_LIST) [BLOCK](#BLOCK) |<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[DECLARATION_SPECIFIERS](#DECLARATION_SPECIFIERS) [DECLARATOR](#DECLARATOR) [BLOCK](#BLOCK)**
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[DECLARATION_SPECIFIERS](#DECLARATION_SPECIFIERS) [DECLARATOR](#DECLARATOR) [FUNCTION_DEFINITION_PRIME](#FUNCTION_DEFINITION_PRIME)**
 
-`Note: This rule above need left factoring.`
-
+<a id="FUNCTION_DEFINITION_PRIME"></a>
+**FUNCTION_DEFINITION_PRIME → <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[DECLARATION_LIST](#DECLARATION_LIST) [BLOCK](#BLOCK) |<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[BLOCK](#BLOCK)**
 
 <a id="STRUCT_SPECIFIER"></a>
 **STRUCT_SPECIFIER → <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;struct { [STRUCT_DECLARATION_LIST](#STRUCT_DECLARATION_LIST) } |<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;struct IDENTIFIER { [STRUCT_DECLARATION_LIST](#STRUCT_DECLARATION_LIST) } |<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;struct IDENTIFIER**
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;struct [STRUCT_SPECIFIER_PRIME](#STRUCT_SPECIFIER_PRIME)**
 
-`Note: This rule above need left factoring.`
-
+<a id="STRUCT_SPECIFIER_PRIME"></a>
+**STRUCT_SPECIFIER_PRIME → <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{ [STRUCT_DECLARATION_LIST](#STRUCT_DECLARATION_LIST) } |<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;IDENTIFIER { [STRUCT_DECLARATION_LIST](#STRUCT_DECLARATION_LIST) } |<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;IDENTIFIER**
 
 <a id="STRUCT_DECLARATION_LIST"></a>
 **STRUCT_DECLARATION_LIST → <br>
@@ -130,11 +134,12 @@ This document extends the [CFG](CFG.md) file by removing the left recursion from
 
 <a id="STRUCT_DECLARATION"></a>
 **STRUCT_DECLARATION → <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[SPECIFIER_QUALIFIER_LIST](#SPECIFIER_QUALIFIER_LIST) ; |<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[SPECIFIER_QUALIFIER_LIST](#SPECIFIER_QUALIFIER_LIST) [STRUCT_DECLARATOR_LIST](#STRUCT_DECLARATOR_LIST) ;**
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[SPECIFIER_QUALIFIER_LIST](#SPECIFIER_QUALIFIER_LIST) [STRUCT_DECLARATION_PRIME](#STRUCT_DECLARATION_PRIME)**
 
-`Note: This rule above need left factoring.`
-
+<a id="STRUCT_DECLARATION_PRIME"></a>
+**STRUCT_DECLARATION_PRIME → <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;; |<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[STRUCT_DECLARATOR_LIST](#STRUCT_DECLARATOR_LIST) ;**
 
 <a id="SPECIFIER_QUALIFIER_LIST"></a>
 **SPECIFIER_QUALIFIER_LIST → <br>
@@ -160,45 +165,36 @@ This document extends the [CFG](CFG.md) file by removing the left recursion from
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[POINTER](#POINTER) [DIRECT_DECLARATOR](#DIRECT_DECLARATOR) |<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[DIRECT_DECLARATOR](#DIRECT_DECLARATOR)**
 
-`Note: This rule above need left factoring.`
-
 <a id="DIRECT_DECLARATOR"></a>
 **DIRECT_DECLARATOR → <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;IDENTIFIER DIRECT_DECLARATOR_PRIME |<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;( [DECLARATOR](#DECLARATOR) ) [DIRECT_DECLARATOR_PRIME](#DIRECT_DECLARATOR_PRIME)**
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;IDENTIFIER |<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;( [DECLARATOR](#DECLARATOR) ) |<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[DIRECT_DECLARATOR](#DIRECT_DECLARATOR) [DIRECT_DECLARATOR_PRIME](#DIRECT_DECLARATOR_PRIME)**
 
 <a id="DIRECT_DECLARATOR_PRIME"></a>
 **DIRECT_DECLARATOR_PRIME → <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[ ] [DIRECT_DECLARATOR_PRIME](#DIRECT_DECLARATOR_PRIME) |<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[ * ] [DIRECT_DECLARATOR_PRIME](#DIRECT_DECLARATOR_PRIME) |<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[ static [TYPE_QUALIFIER_LIST](#TYPE_QUALIFIER_LIST) [ASSIGNMENT_EXPRESSION](#ASSIGNMENT_EXPRESSION) ] [DIRECT_DECLARATOR_PRIME](#DIRECT_DECLARATOR_PRIME) |<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[ static [ASSIGNMENT_EXPRESSION](#ASSIGNMENT_EXPRESSION) ] [DIRECT_DECLARATOR_PRIME](#DIRECT_DECLARATOR_PRIME) |<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[ TYPE_QUALIFIER_LIST * ] [DIRECT_DECLARATOR_PRIME](#DIRECT_DECLARATOR_PRIME) |<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[ TYPE_QUALIFIER_LIST static [ASSIGNMENT_EXPRESSION](#ASSIGNMENT_EXPRESSION) ] [DIRECT_DECLARATOR_PRIME](#DIRECT_DECLARATOR_PRIME) |<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[ TYPE_QUALIFIER_LIST ASSIGNMENT_EXPRESSION ] [DIRECT_DECLARATOR_PRIME](#DIRECT_DECLARATOR_PRIME) |<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[ TYPE_QUALIFIER_LIST ] [DIRECT_DECLARATOR_PRIME](#DIRECT_DECLARATOR_PRIME) |<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[ ASSIGNMENT_EXPRESSION ] [DIRECT_DECLARATOR_PRIME](#DIRECT_DECLARATOR_PRIME) |<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;( [PARAMETER_LIST](#PARAMETER_LIST) ) [DIRECT_DECLARATOR_PRIME](#DIRECT_DECLARATOR_PRIME) |<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;( ) [DIRECT_DECLARATOR_PRIME](#DIRECT_DECLARATOR_PRIME) |<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;( [IDENTIFIER_LIST](#IDENTIFIER_LIST) ) [DIRECT_DECLARATOR_PRIME](#DIRECT_DECLARATOR_PRIME) |<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ε**
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[DIRECT_DECLARATOR_LIST](#DIRECT_DECLARATOR_LIST) |<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;( [PARAMETER_LIST_DIRECT](#PARAMETER_LIST_DIRECT) )**
 
-`Note: This rule above need left factoring.`
-
+<a id="DIRECT_DECLARATOR_LIST"></a>
+**DIRECT_DECLARATOR_LIST → <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;] |<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* ] |<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;static [TYPE_QUALIFIER_LIST](#TYPE_QUALIFIER_LIST) [ASSIGNMENT_EXPRESSION](#ASSIGNMENT_EXPRESSION) ] |<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;static [ASSIGNMENT_EXPRESSION](#ASSIGNMENT_EXPRESSION) ] |<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[TYPE_QUALIFIER_LIST](#TYPE_QUALIFIER_LIST) * ] |<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[TYPE_QUALIFIER_LIST](#TYPE_QUALIFIER_LIST) static [ASSIGNMENT_EXPRESSION](#ASSIGNMENT_EXPRESSION) ] |<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[TYPE_QUALIFIER_LIST](#TYPE_QUALIFIER_LIST) [ASSIGNMENT_EXPRESSION](#ASSIGNMENT_EXPRESSION) ] |<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[TYPE_QUALIFIER_LIST](#TYPE_QUALIFIER_LIST) ] |<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[ASSIGNMENT_EXPRESSION](#ASSIGNMENT_EXPRESSION) ]**
 
 <a id="POINTER"></a>
 **POINTER → <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[POINTER_SEQUENCE](#POINTER_SEQUENCE) |<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[TYPE_QUALIFIER_LIST](#TYPE_QUALIFIER_LIST) [POINTER](#POINTER) |<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[TYPE_QUALIFIER_LIST](#TYPE_QUALIFIER_LIST) |<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* [POINTER](#POINTER) |<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* |<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ε**
-
-
-
-
-<a id="POINTER_SEQUENCE"></a>
-****POINTER_SEQUENCE → <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*[TYPE_QUALIFIER_LIST](#TYPE_QUALIFIER_LIST) POINTER_SEQUENCE |<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;****
-
 
 <a id="PARAMETER_LIST"></a>
 **PARAMETER_LIST → <br>
@@ -214,8 +210,6 @@ This document extends the [CFG](CFG.md) file by removing the left recursion from
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[DECLARATION_SPECIFIERS](#DECLARATION_SPECIFIERS) [DECLARATOR](#DECLARATOR) |<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[DECLARATION_SPECIFIERS](#DECLARATION_SPECIFIERS)**
 
-`Note: This rule above need left factoring.`
-
 <a id="IDENTIFIER_LIST"></a>
 **IDENTIFIER_LIST → <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;IDENTIFIER [IDENTIFIER_LIST_PRIME](#IDENTIFIER_LIST_PRIME)**
@@ -230,9 +224,6 @@ This document extends the [CFG](CFG.md) file by removing the left recursion from
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{ [INITIALIZER_LIST](#INITIALIZER_LIST) } |<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{ [INITIALIZER_LIST](#INITIALIZER_LIST) , } |<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[ASSIGNMENT_EXPRESSION](#ASSIGNMENT_EXPRESSION)**
-
-`Note: This rule above need left factoring.`
-
 
 <a id="INITIALIZER_LIST"></a>
 **INITIALIZER_LIST → <br>
@@ -262,8 +253,6 @@ This document extends the [CFG](CFG.md) file by removing the left recursion from
 **BLOCK → <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{ [BLOCK_ITEM_LIST](#BLOCK_ITEM_LIST) } |<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{ }**
-
-`Note: This rule above need left factoring.`
 
 <a id="BLOCK_ITEM"></a>
 **BLOCK_ITEM → <br>
@@ -304,9 +293,6 @@ This document extends the [CFG](CFG.md) file by removing the left recursion from
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if ( [EXPRESSION](#EXPRESSION) ) [STATEMENT](#STATEMENT) |<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;switch ( [EXPRESSION](#EXPRESSION) ) [STATEMENT](#STATEMENT)**
 
-`Note: This rule above need left factoring.`
-
-
 <a id="ITERATION_STATEMENT"></a>
 **ITERATION_STATEMENT → <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;while ( [EXPRESSION](#EXPRESSION) ) [STATEMENT](#STATEMENT) |<br>
@@ -315,9 +301,6 @@ This document extends the [CFG](CFG.md) file by removing the left recursion from
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;for ( [EXPRESSION_STATEMENT](#EXPRESSION_STATEMENT) [EXPRESSION_STATEMENT](#EXPRESSION_STATEMENT) [EXPRESSION](#EXPRESSION) ) [STATEMENT](#STATEMENT) |<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;for ( [DECLARATION](#DECLARATION) [EXPRESSION_STATEMENT](#EXPRESSION_STATEMENT) ) [STATEMENT](#STATEMENT) |<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;for ( [DECLARATION](#DECLARATION) [EXPRESSION_STATEMENT](#EXPRESSION_STATEMENT) [EXPRESSION](#EXPRESSION) ) [STATEMENT](#STATEMENT)**
-
-`Note: This rule above need left factoring.`
-
 
 <a id="JUMP_STATEMENT"></a>
 **JUMP_STATEMENT → <br>
@@ -336,7 +319,7 @@ This document extends the [CFG](CFG.md) file by removing the left recursion from
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-= |<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;&lt;= |<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&gt;&gt;= |<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&&amp;= |<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&amp;&amp;= |<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;^= |<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|=**
 
@@ -441,13 +424,11 @@ This document extends the [CFG](CFG.md) file by removing the left recursion from
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[UNARY_EXPRESSION](#UNARY_EXPRESSION) [MULTIPLICATIVE_EXPRESSION_PRIME](#MULTIPLICATIVE_EXPRESSION_PRIME)**
 
 <a id="MULTIPLICATIVE_EXPRESSION_PRIME"></a>
-*****MULTIPLICATIVE_EXPRESSION_PRIME → <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*[UNARY_EXPRESSION](#UNARY_EXPRESSION) [MULTIPLICATIVE_EXPRESSION_PRIME](#MULTIPLICATIVE_EXPRESSION_PRIME) |<br>
+**MULTIPLICATIVE_EXPRESSION_PRIME → <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* [UNARY_EXPRESSION](#UNARY_EXPRESSION) [MULTIPLICATIVE_EXPRESSION_PRIME](#MULTIPLICATIVE_EXPRESSION_PRIME) |<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/ [UNARY_EXPRESSION](#UNARY_EXPRESSION) [MULTIPLICATIVE_EXPRESSION_PRIME](#MULTIPLICATIVE_EXPRESSION_PRIME) |<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;% [UNARY_EXPRESSION](#UNARY_EXPRESSION) [MULTIPLICATIVE_EXPRESSION_PRIME](#MULTIPLICATIVE_EXPRESSION_PRIME) |<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ε*****
-
-
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ε**
 
 <a id="UNARY_EXPRESSION"></a>
 **UNARY_EXPRESSION → <br>
@@ -471,8 +452,6 @@ This document extends the [CFG](CFG.md) file by removing the left recursion from
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-- |<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ε**
 
-`Note: This rule above need left factoring.`
-
 <a id="ARGUMENT_EXPRESSION_LIST"></a>
 **ARGUMENT_EXPRESSION_LIST → <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[ASSIGNMENT_EXPRESSION](#ASSIGNMENT_EXPRESSION) [ARGUMENT_EXPRESSION_LIST_PRIME](#ARGUMENT_EXPRESSION_LIST_PRIME)**
@@ -493,4 +472,3 @@ This document extends the [CFG](CFG.md) file by removing the left recursion from
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;INTEGER_CONSTANT |<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;FLOAT_CONSTANT |<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;STRING_LITERAL**
-
