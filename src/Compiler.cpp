@@ -38,16 +38,20 @@ int Compiler::compile() {
         return 1;
     }
 
-    yyFlexLexer lexer; // Create an instance of the Flex lexer
+    yyFlexLexer lexer;                                                 // Create an instance of the Flex lexer
     lexer.switch_streams(sourceCodeStream.get(), outCodeStream.get()); // Switch input and output streams
 
-    // Start lexing
-    while (lexer.yylex() != 0) {
-        // Continue lexing until EOF
-    }
+    TokenTable tokenTable;
 
-    // Retrieve the token table from the lexer
-    TokenTable tokenTable = getTokenTable(); // Call the function to get the token table
+    // Start lexing and store tokens in the TokenTable
+    int tokenType;
+    while ((tokenType = lexer.yylex()) != 0)
+    {
+        std::string tokenValue = lexer.YYText();
+        Token token(tokenValue, static_cast<TokenType>(tokenType), 1);
+        //Token token(lexer.YYText(), static_cast<TokenType>(tokenType), 1);
+        tokenTable.push_back(token);
+    }
 
     // Optionally, print the tokens for debugging
     tokenTable.printTokens();

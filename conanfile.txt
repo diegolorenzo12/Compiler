@@ -1,7 +1,0 @@
-[requires]
-gtest/1.13.0
-flex/2.6.4
-
-[generators]
-CMakeToolchain
-CMakeDeps
