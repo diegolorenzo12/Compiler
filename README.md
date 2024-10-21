@@ -216,3 +216,5 @@ cmake --build . --target run
 ## References
 
 - Cooper, K., & Torczon, L. (2011). Engineering a compiler (2nd ed.). Morgan Kaufmann.
+
+- Kernighan, B. W., & Ritchie, D. M. (1988). The C programming language (2nd ed.). Prentice Hall.

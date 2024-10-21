@@ -3,10 +3,10 @@
 This document provides the Context-Free Grammar (CFG) for the language used in the compiler. This only shows the CFG with left recursion. To see the CFG with left recursion removed, refer to the [CFG-LR](CFG-LR.md) file.
 ## Terminals
 
-1. **`IDENTIFIER`**
-2. **`INTEGER_CONSTANT`**
-3. **`FLOAT_CONSTANT`**
-4. **`STRING_LITERAL`**
+1. **`identifier`**
+2. **`integer_constant`**
+3. **`float_constant`**
+4. **`string_literal`**
 5. **`;`**
 6. **`,`**
 7. **`:`**
@@ -51,37 +51,36 @@ This document provides the Context-Free Grammar (CFG) for the language used in t
 46. **`|=`**
 47. **`++`**
 48. **`--`**
-49. **`typedef`**
-50. **`static`**
-51. **`auto`**
-52. **`register`**
-53. **`const`**
-54. **`restrict`**
-55. **`volatile`**
-56. **`inline`**
-57. **`int`**
-58. **`void`**
-59. **`char`**
-60. **`short`**
-61. **`long`**
-62. **`float`**
-63. **`double`**
-64. **`signed`**
-65. **`unsigned`**
-66. **`bool`**
-67. **`struct`**
-68. **`if`**
-69. **`else`**
-70. **`switch`**
-71. **`case`**
-72. **`default`**
-73. **`while`**
-74. **`do`**
-75. **`for`**
-76. **`continue`**
-77. **`break`**
-78. **`return`**
-79. **`sizeof`**
+49. **`static`**
+50. **`auto`**
+51. **`register`**
+52. **`const`**
+53. **`restrict`**
+54. **`volatile`**
+55. **`inline`**
+56. **`int`**
+57. **`void`**
+58. **`char`**
+59. **`short`**
+60. **`long`**
+61. **`float`**
+62. **`double`**
+63. **`signed`**
+64. **`unsigned`**
+65. **`bool`**
+66. **`struct`**
+67. **`if`**
+68. **`else`**
+69. **`switch`**
+70. **`case`**
+71. **`default`**
+72. **`while`**
+73. **`do`**
+74. **`for`**
+75. **`continue`**
+76. **`break`**
+77. **`return`**
+78. **`sizeof`**
 
 ## Non-Terminals
 
@@ -190,7 +189,11 @@ float y = 3.14f, z = 0.0f;  // Declaration with initializers
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[STORAGE_SPECIFIER](#storage_class_specifier) [DECLARATION_SPECIFIERS](#declaration_specifiers) | <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[STORAGE_SPECIFIER](#storage_class_specifier)**
 
-This is for all declaration specifiers
+This is for all declaration specifiers.
+
+A type specifier determines the basic type of a variable or function. It specifies what kind of data the variable can hold or the function can return.
+
+A type qualifier modifies the behavior or properties of a type specifier. It adds additional information about how the type should be treated by the compiler, without changing the basic type itself.
 
 <a id="init_declarator_list"></a>
 **INIT_DECLARATOR_LIST → <br>
@@ -219,7 +222,6 @@ a
 
 <a id="storage_class_specifier"></a>
 **STORAGE_SPECIFIER → <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;typedef | <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;static | <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;auto | <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;register**
@@ -295,7 +297,7 @@ struct str {
 <a id="struct_declaration"></a>
 **STRUCT_DECLARATION → <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[SPECIFIER_QUALIFIER_LIST](#specifier_qualifier_list)  ;  | <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[SPECIFIER_QUALIFIER_LIST](#specifier_qualifier_list) [STRUCT_DECLARATOR_LIST](#struct_declarator_list)  ; **
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[SPECIFIER_QUALIFIER_LIST](#specifier_qualifier_list) [STRUCT_DECLARATOR_LIST](#struct_declarator_list)  ;**
 
 <a id="specifier_qualifier_list"></a>
 **SPECIFIER_QUALIFIER_LIST → <br>
