@@ -235,10 +235,14 @@ This document extends the [CFG-LR](CFG-LR.md) file by removing the left recursio
 
 <a id="PARAMETER_DECLARATION"></a>
 **PARAMETER_DECLARATION → <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[DECLARATION_SPECIFIERS](#DECLARATION_SPECIFIERS) [DECLARATOR](#DECLARATOR) |<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[DECLARATION_SPECIFIERS](#DECLARATION_SPECIFIERS)**
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[DECLARATION_SPECIFIERS](#DECLARATION_SPECIFIERS) [PARAM_DECL_FAC](#PARAM_DECL_FAC)**
 
-`Note: This rule above need left factoring.`
+<a id="PARAM_DECL_FAC"></a>
+**PARAM_DECL_FAC → <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[DECLARATOR](#DECLARATOR) |<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ε**
+
+`Note: This rule above was left factored.`
 
 <a id="IDENTIFIER_LIST"></a>
 **IDENTIFIER_LIST → <br>
@@ -251,11 +255,19 @@ This document extends the [CFG-LR](CFG-LR.md) file by removing the left recursio
 
 <a id="INITIALIZER"></a>
 **INITIALIZER → <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{ [INITIALIZER_LIST](#INITIALIZER_LIST) } |<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{ [INITIALIZER_LIST](#INITIALIZER_LIST) , } |<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[INITIALIZER_BRACE_FAC](#INITIALIZER_BRACE_FAC) |<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[ASSIGNMENT_EXPRESSION](#ASSIGNMENT_EXPRESSION)**
 
-`Note: This rule above need left factoring.`
+<a id="INITIALIZER_BRACE_FAC"></a>
+**INITIALIZER_BRACE_FAC → <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{ [INITIALIZER_LIST](#INITIALIZER_LIST) [INITIALIZER_BRACE_FAC2](#INITIALIZER_BRACE_FAC2) }**
+
+<a id="INITIALIZER_BRACE_FAC2"></a>
+**INITIALIZER_BRACE_FAC2 → <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ε |<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;,**
+
+`Note: This rules above were left factored.`
 
 
 <a id="INITIALIZER_LIST"></a>
@@ -284,10 +296,14 @@ This document extends the [CFG-LR](CFG-LR.md) file by removing the left recursio
 
 <a id="BLOCK"></a>
 **BLOCK → <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{ [BLOCK_ITEM_LIST](#BLOCK_ITEM_LIST) } |<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{ }**
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{ [BLOCK_CONTENT](#BLOCK_CONTENT) }**
 
-`Note: This rule above need left factoring.`
+<a id="BLOCK_CONTENT"></a>
+**BLOCK_CONTENT → <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[BLOCK_ITEM_LIST](#BLOCK_ITEM_LIST) |<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ε**
+
+`Note: This rule above was left factored.`
 
 <a id="BLOCK_ITEM"></a>
 **BLOCK_ITEM → <br>
@@ -322,11 +338,18 @@ This document extends the [CFG-LR](CFG-LR.md) file by removing the left recursio
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[CONDITIONAL_EXPRESSION](#CONDITIONAL_EXPRESSION) |<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[UNARY_EXPRESSION](#UNARY_EXPRESSION) [ASSIGNMENT_OPERATOR](#ASSIGNMENT_OPERATOR) [ASSIGNMENT_EXPRESSION](#ASSIGNMENT_EXPRESSION)**
 
+
+
 <a id="SELECTION_STATEMENT"></a>
 **SELECTION_STATEMENT → <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if ( [EXPRESSION](#EXPRESSION) ) [STATEMENT](#STATEMENT) else [STATEMENT](#STATEMENT) |<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if ( [EXPRESSION](#EXPRESSION) ) [STATEMENT](#STATEMENT) |<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if ( [EXPRESSION](#EXPRESSION) ) [STATEMENT](#STATEMENT) [ELSE_FAC](#ELSE_FAC) |<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;switch ( [EXPRESSION](#EXPRESSION) ) [STATEMENT](#STATEMENT)**
+
+<a id="ELSE_FAC"></a>
+**ELSE_FAC → <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;else [STATEMENT](#STATEMENT) |<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ε**
+
 
 `Note: This rule above need left factoring.`
 
@@ -335,12 +358,19 @@ This document extends the [CFG-LR](CFG-LR.md) file by removing the left recursio
 **ITERATION_STATEMENT → <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;while ( [EXPRESSION](#EXPRESSION) ) [STATEMENT](#STATEMENT) |<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;do [STATEMENT](#STATEMENT) while ( [EXPRESSION](#EXPRESSION) ) ; |<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;for ( [EXPRESSION_STATEMENT](#EXPRESSION_STATEMENT) [EXPRESSION_STATEMENT](#EXPRESSION_STATEMENT) ) [STATEMENT](#STATEMENT) |<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;for ( [EXPRESSION_STATEMENT](#EXPRESSION_STATEMENT) [EXPRESSION_STATEMENT](#EXPRESSION_STATEMENT) [EXPRESSION](#EXPRESSION) ) [STATEMENT](#STATEMENT) |<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;for ( [DECLARATION](#DECLARATION) [EXPRESSION_STATEMENT](#EXPRESSION_STATEMENT) ) [STATEMENT](#STATEMENT) |<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;for ( [DECLARATION](#DECLARATION) [EXPRESSION_STATEMENT](#EXPRESSION_STATEMENT) [EXPRESSION](#EXPRESSION) ) [STATEMENT](#STATEMENT)**
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;for ( [FOR_INIT_STATEMENT](#FOR_INIT_STATEMENT) ) [STATEMENT](#STATEMENT)**
 
-`Note: This rule above need left factoring.`
+<a id="FOR_INIT_STATEMENT"></a>
+**FOR_INIT_STATEMENT → <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[EXPRESSION_STATEMENT](#EXPRESSION_STATEMENT) [EXPRESSION_STATEMENT](#EXPRESSION_STATEMENT) [FOR_OPTIONAL_EXPRESSION](#FOR_OPTIONAL_EXPRESSION) |<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[DECLARATION](#DECLARATION) [EXPRESSION_STATEMENT](#EXPRESSION_STATEMENT) [FOR_OPTIONAL_EXPRESSION](#FOR_OPTIONAL_EXPRESSION)**
+
+<a id="FOR_OPTIONAL_EXPRESSION"></a>
+**FOR_OPTIONAL_EXPRESSION → <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[EXPRESSION](#EXPRESSION) |<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ε**
+
+`Note: This rules above were left factored.`
 
 
 <a id="JUMP_STATEMENT"></a>
@@ -487,15 +517,20 @@ This document extends the [CFG-LR](CFG-LR.md) file by removing the left recursio
 <a id="POSTFIX_EXPRESSION_PRIME"></a>
 **POSTFIX_EXPRESSION_PRIME → <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[EXPRESSION](#EXPRESSION) ] |<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;( ) |<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;( [ARGUMENT_EXPRESSION_LIST](#ARGUMENT_EXPRESSION_LIST) ) |<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;( [POSTFIX_ARGUMENTS](#POSTFIX_ARGUMENTS) ) |<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;. IDENTIFIER |<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-> IDENTIFIER |<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ |<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-- |<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ε**
 
-`Note: This rule above need left factoring.`
+
+<a id="POSTFIX_ARGUMENTS"></a>
+**POSTFIX_ARGUMENTS → <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[ARGUMENT_EXPRESSION_LIST](#ARGUMENT_EXPRESSION_LIST) |<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ε**
+
+`Note: This rule above was left factored.`
 
 <a id="ARGUMENT_EXPRESSION_LIST"></a>
 **ARGUMENT_EXPRESSION_LIST → <br>
