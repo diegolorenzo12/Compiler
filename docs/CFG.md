@@ -70,19 +70,18 @@ This document provides the Context-Free Grammar (CFG) for the language used in t
 65. **`unsigned`**
 66. **`bool`**
 67. **`struct`**
-68. **`enum`**
-69. **`if`**
-70. **`else`**
-71. **`switch`**
-72. **`case`**
-73. **`default`**
-74. **`while`**
-75. **`do`**
-76. **`for`**
-77. **`continue`**
-78. **`break`**
-79. **`return`**
-80. **`sizeof`**
+68. **`if`**
+69. **`else`**
+70. **`switch`**
+71. **`case`**
+72. **`default`**
+73. **`while`**
+74. **`do`**
+75. **`for`**
+76. **`continue`**
+77. **`break`**
+78. **`return`**
+79. **`sizeof`**
 
 ## Non-Terminals
 
@@ -104,9 +103,6 @@ This document provides the Context-Free Grammar (CFG) for the language used in t
 - [STRUCT_DECLARATION](#struct_declaration)
 - [SPECIFIER_QUALIFIER_LIST](#specifier_qualifier_list)
 - [STRUCT_DECLARATOR_LIST](#struct_declarator_list)
-- [ENUM_SPECIFIER](#enum_specifier)
-- [ENUMERATOR_LIST](#enumerator_list)
-- [ENUMERATOR](#enumerator)
 - [DECLARATOR](#declarator)
 - [DIRECT_DECLARATOR](#direct_declarator)
 - [POINTER](#pointer)
@@ -149,7 +145,8 @@ This document provides the Context-Free Grammar (CFG) for the language used in t
 
 <a id="PROGRAM"></a>
 **PROGRAM → <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[GLOBAL_DECLARATIONS](#GLOBAL_DECLARATIONS)**
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[GLOBAL_DECLARATIONS](#GLOBAL_DECLARATIONS) | <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;PROGRAM [GLOBAL_DECLARATIONS](#GLOBAL_DECLARATIONS)**
 
 _Description:_  
 The Program rule represents the starting point of the grammar.
@@ -256,9 +253,7 @@ For lists of type qualifiers
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;signed | <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;unsigned | <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bool | <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[STRUCT_SPECIFIER](#struct_or_union_specifier) | <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[ENUM_SPECIFIER](#enum_specifier) | <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;TYPEDEF_NAME**
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[STRUCT_SPECIFIER](#struct_or_union_specifier)**
 
 <a id="function_definition"></a>
 **FUNCTION_DEFINITION → <br>
@@ -324,39 +319,6 @@ volatile const int
 
 List of declarations in a struct
 
-<a id="enum_specifier"></a>
-**ENUM_SPECIFIER → <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;enum  {  [ENUMERATOR_LIST](#enumerator_list)  }  | <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;enum  {  [ENUMERATOR_LIST](#enumerator_list)  ,   }  | <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;enum IDENTIFIER  {  [ENUMERATOR_LIST](#enumerator_list)  }  | <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;enum IDENTIFIER  {  [ENUMERATOR_LIST](#enumerator_list)  ,   }  | <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;enum IDENTIFIER**
-
-For declaring enums
-
-```c
-enum week{Mon, Tue, Wed, Thur, Fri, Sat, Sun};
-enum week{Mon, Tue, Wed, Thur, Fri, Sat, Sun , }; //also valid in c
-```
-
-<a id="enumerator_list"></a>
-**ENUMERATOR_LIST → <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[ENUMERATOR](#enumerator) | <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ENUMERATOR_LIST  ,  [ENUMERATOR](#enumerator)**
-
-```c
-Mon = 1, Tue, Wed, Thur, Fri, Sat, Sun
-```
-
-<a id="enumerator"></a>
-**ENUMERATOR → <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;IDENTIFIER  =  IDENTIFIER | <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;IDENTIFIER**
-
-```c
-Mon = 1
-Sun
-```
 
 <a id="declarator"></a>
 **DECLARATOR → <br>
@@ -413,7 +375,6 @@ int x, float c, char b
 <a id="parameter_declaration"></a>
 **PARAMETER_DECLARATION → <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[DECLARATION_SPECIFIERS](#declaration_specifiers) [DECLARATOR](#declarator) | <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[DECLARATION_SPECIFIERS](#declaration_specifiers) ABSTRACT_DECLARATOR | <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[DECLARATION_SPECIFIERS](#declaration_specifiers)**
 
 ```c
@@ -731,8 +692,7 @@ int result = func(a, b, 1+2);
 **CONSTANT → <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;INTEGER_CONSTANT | <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;FLOAT_CONSTANT | <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;STRING_LITERAL | <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;IDENTIFIER**
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;STRING_LITERAL**
 
-Enumerator constants are identifiers; this should be verified at semantic analysis, the same with type checking. Integer, float, and string literal constants are passed by the lexer.
+Integer, float, and string literal constants are passed by the lexer.
 
