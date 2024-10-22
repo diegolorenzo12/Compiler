@@ -354,6 +354,33 @@ func_name(int a, float b)
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;DIRECT_DECLARATOR  (  [IDENTIFIER_LIST](#identifier_list)  )**
 
 This is for all extra information that a declarator may have on a structure (parameter lists, assignment lists, etc)
+
+```c
+int a[]; //DIRECT_DECLARATOR [ ]
+
+//DIRECT_DECLARATOR [ * ] 
+void processArray(int a[*]) //For declaring variables with unknown size Variable-Length Arrays (VLAs)
+
+//DIRECT_DECLARATOR [ TYPE_QUALIFIER_LIST * ] 
+void processArray(const int a[*]) //For declaring variables with unknown size Variable-Length Arrays (VLAs)
+
+//DIRECT_DECLARATOR [ TYPE_QUALIFIER_LIST static ASSIGNMENT_EXPRESSION ] 
+void display_elements(const int data[static size]); // Indicates that data must have at least size elements.
+
+//DIRECT_DECLARATOR ( PARAMETER_LIST )
+int add(int a, int b);
+
+//DIRECT_DECLARATOR ( IDENTIFIER_LIST )
+int add(a, b)
+int a;
+int b;
+{
+    return a + b;
+}
+//For K&R style functions
+
+```
+
 Note: some invalid structures will be caught at semantic level, example: int func[]{}
 
 <a id="pointer"></a>
