@@ -191,23 +191,37 @@ This document extends the [CFG-LR](CFG-LR.md) file by removing the left recursio
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;IDENTIFIER DIRECT_DECLARATOR_PRIME |<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;( [DECLARATOR](#DECLARATOR) ) [DIRECT_DECLARATOR_PRIME](#DIRECT_DECLARATOR_PRIME)**
 
+
 <a id="DIRECT_DECLARATOR_PRIME"></a>
 **DIRECT_DECLARATOR_PRIME → <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[ ] [DIRECT_DECLARATOR_PRIME](#DIRECT_DECLARATOR_PRIME) |<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[ * ] [DIRECT_DECLARATOR_PRIME](#DIRECT_DECLARATOR_PRIME) |<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[ static [TYPE_QUALIFIER_LIST](#TYPE_QUALIFIER_LIST) [ASSIGNMENT_EXPRESSION](#ASSIGNMENT_EXPRESSION) ] [DIRECT_DECLARATOR_PRIME](#DIRECT_DECLARATOR_PRIME) |<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[ static [ASSIGNMENT_EXPRESSION](#ASSIGNMENT_EXPRESSION) ] [DIRECT_DECLARATOR_PRIME](#DIRECT_DECLARATOR_PRIME) |<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[ TYPE_QUALIFIER_LIST * ] [DIRECT_DECLARATOR_PRIME](#DIRECT_DECLARATOR_PRIME) |<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[ TYPE_QUALIFIER_LIST static [ASSIGNMENT_EXPRESSION](#ASSIGNMENT_EXPRESSION) ] [DIRECT_DECLARATOR_PRIME](#DIRECT_DECLARATOR_PRIME) |<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[ TYPE_QUALIFIER_LIST ASSIGNMENT_EXPRESSION ] [DIRECT_DECLARATOR_PRIME](#DIRECT_DECLARATOR_PRIME) |<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[ TYPE_QUALIFIER_LIST ] [DIRECT_DECLARATOR_PRIME](#DIRECT_DECLARATOR_PRIME) |<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[ ASSIGNMENT_EXPRESSION ] [DIRECT_DECLARATOR_PRIME](#DIRECT_DECLARATOR_PRIME) |<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;( [PARAMETER_LIST](#PARAMETER_LIST) ) [DIRECT_DECLARATOR_PRIME](#DIRECT_DECLARATOR_PRIME) |<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;( ) [DIRECT_DECLARATOR_PRIME](#DIRECT_DECLARATOR_PRIME) |<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;( [IDENTIFIER_LIST](#IDENTIFIER_LIST) ) [DIRECT_DECLARATOR_PRIME](#DIRECT_DECLARATOR_PRIME) |<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [ [STATIC_OPT_FAC](#STATIC_OPT_FAC) [TYPE_QUALIFIER_LIST_OPT](#TYPE_QUALIFIER_LIST_OPT) [ASSIGNMENT_EXPRESSION_OPT_FAC](#ASSIGNMENT_EXPRESSION_OPT_FAC) ] [DIRECT_DECLARATOR_PRIME](#DIRECT_DECLARATOR_PRIME) | <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ( [PARAMETER_LIST_OPT_FAC](#PARAMETER_LIST_OPT_FAC) ) [DIRECT_DECLARATOR_PRIME](#DIRECT_DECLARATOR_PRIME) | <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ε**
 
-`Note: This rule above need left factoring.`
+<a id="STATIC_OPT_FAC"></a>
+**STATIC_OPT_FAC → <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;static | <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ε** <br>
+
+<a id="TYPE_QUALIFIER_LIST_OPT_FAC"></a>
+**TYPE_QUALIFIER_LIST_OPT_FAC → <br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[TYPE_QUALIFIER_LIST](#TYPE_QUALIFIER_LIST) | <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ε**
+
+<a id="ASSIGNMENT_EXPRESSION_OPT_FAC"></a>
+****ASSIGNMENT_EXPRESSION_OPT_FAC → <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[ASSIGNMENT_EXPRESSION](#ASSIGNMENT_EXPRESSION) | <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* | <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ε****
+
+<a id="PARAMETER_LIST_OPT_FAC"></a>
+**PARAMETER_LIST_OPT_FAC → <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[PARAMETER_LIST](#PARAMETER_LIST) | <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[IDENTIFIER_LIST](#IDENTIFIER_LIST) | <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ε**
+
+
+`Note: This rules above were left factoring. (DIRECT_DECLARATOR_PRIME, STATIC_OPT_FAC, TYPE_QUALIFIER_LIST_OPT_FAC, ASSIGNMENT_EXPRESSION_OPT_FAC, PARAMETER_LIST_OPT_FAC)`
 
 
 <a id="POINTER"></a>
