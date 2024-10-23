@@ -133,9 +133,9 @@ A table-driven lexer provides several advantages over a directly coded lexer:
 
 - **Syntax analysis:**
 
-  - Use of grammars and syntax trees.
+  - For this parser a context-free grammar (CFG) was created with all the rules of the language. The CFG is documented in the [CFG](docs/CFG.md) file. Then we eliminated the left recursion from the grammar rules. The resulting grammar is documented in the [CFG-LR](docs/CFG-LR.md) file.
 
-- **Examples:**
+
 
 ## Semantic Analysis
 
@@ -216,3 +216,5 @@ cmake --build . --target run
 ## References
 
 - Cooper, K., & Torczon, L. (2011). Engineering a compiler (2nd ed.). Morgan Kaufmann.
+
+- Kernighan, B. W., & Ritchie, D. M. (1988). The C programming language (2nd ed.). Prentice Hall.
