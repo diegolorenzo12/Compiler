@@ -13,14 +13,8 @@ This document extends the [CFG-LR](CFG-LR.md) file by removing the left recursio
 
 <a id="GLOBAL_DECLARATIONS"></a>
 **GLOBAL_DECLARATIONS → <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[DECLARATION_SPECIFIERS](#DECLARATION_SPECIFIERS) [DECLARATION_OR_FUNCTION_BODY](#DECLARATION_OR_FUNCTION_BODY)**
-
-<a id="DECLARATION_OR_FUNCTION_BODY"></a>
-**DECLARATION_OR_FUNCTION_BODY →  <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[DECLARATION_FAC](#DECLARATION_FAC) | <br> 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[DECLARATOR](#DECLARATOR) [FUNCTION_DEF_FAC](#FUNCTION_DEF_FAC)**
-
-`Note: GLOBAL_DECLARATIONS was factorized becuase both DECLARATION and FUNCTION_DEFINITION started with DECLARATION_SPECIFIERS so DECLARATION_SPECIFIERS was passed to GLOBAL_DECLARATIONS and deleted from DECLARATION  and FUNCTION_DEFINITION.`
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[DECLARATION](#DECLARATION) |<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[FUNCTION_DEFINITION](#FUNCTION_DEFINITION)**
 
 
 <a id="DECLARATION_LIST"></a>
@@ -120,8 +114,7 @@ This document extends the [CFG-LR](CFG-LR.md) file by removing the left recursio
 **FUNCTION_DEFINITION → <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;func [DECLARATION_SPECIFIERS](#DECLARATION_SPECIFIERS) [DECLARATOR](#DECLARATOR) [FUNCTION_DEF_FAC](#FUNCTION_DEF_FAC)**
 
-`Note: This func is not part of c programming language, but will be added to use LL(1) parser`
-
+`Note: func was added here to use LL(1)`
 
 <a id="FUNCTION_DEF_FAC"></a>
 **FUNCTION_DEF_FAC → <br>
