@@ -394,8 +394,7 @@ This document extends the [CFG-LR](CFG-LR.md) file by removing the left recursio
 **JUMP_STATEMENT → <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;continue ; |<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;break ; |<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return ; |<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return [EXPRESSION](#EXPRESSION) ;**
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return [EXPRESSION_STATEMENT](#EXPRESSION_STATEMENT)**
 
 <a id="ASSIGNMENT_OPERATOR"></a>
 **ASSIGNMENT_OPERATOR → <br>
