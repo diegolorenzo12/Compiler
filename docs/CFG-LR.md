@@ -460,13 +460,13 @@ This document extends the [CFG](CFG.md) file by removing the left recursion from
 
 <a id="POSTFIX_EXPRESSION_PRIME"></a>
 **POSTFIX_EXPRESSION_PRIME → <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[EXPRESSION](#EXPRESSION) ] |<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;( ) |<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;( [ARGUMENT_EXPRESSION_LIST](#ARGUMENT_EXPRESSION_LIST) ) |<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;. IDENTIFIER |<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-> IDENTIFIER |<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ |<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-- |<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[ [EXPRESSION](#EXPRESSION) ] POSTFIX_EXPRESSION_PRIME |<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;( ) POSTFIX_EXPRESSION_PRIME |<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;( [ARGUMENT_EXPRESSION_LIST](#ARGUMENT_EXPRESSION_LIST) ) POSTFIX_EXPRESSION_PRIME |<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;. IDENTIFIER POSTFIX_EXPRESSION_PRIME |<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-> IDENTIFIER POSTFIX_EXPRESSION_PRIME |<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ POSTFIX_EXPRESSION_PRIME |<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-- POSTFIX_EXPRESSION_PRIME |<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ε**
 
 `Note: This rule above need left factoring.`

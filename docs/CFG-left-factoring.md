@@ -533,12 +533,12 @@ This document extends the [CFG-LR](CFG-LR.md) file by removing the left recursio
 
 <a id="POSTFIX_EXPRESSION_PRIME"></a>
 **POSTFIX_EXPRESSION_PRIME → <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[EXPRESSION](#EXPRESSION) ] |<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;( [POSTFIX_ARGUMENTS](#POSTFIX_ARGUMENTS) ) |<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;. IDENTIFIER |<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-> IDENTIFIER |<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ |<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-- |<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[ [EXPRESSION](#EXPRESSION) ] POSTFIX_EXPRESSION_PRIME |<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;( [POSTFIX_ARGUMENTS](#POSTFIX_ARGUMENTS) ) POSTFIX_EXPRESSION_PRIME |<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;. IDENTIFIER POSTFIX_EXPRESSION_PRIME |<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-> IDENTIFIER POSTFIX_EXPRESSION_PRIME |<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ POSTFIX_EXPRESSION_PRIME |<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-- POSTFIX_EXPRESSION_PRIME |<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ε**
 
 
