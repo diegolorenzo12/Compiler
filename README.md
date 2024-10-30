@@ -135,7 +135,7 @@ A table-driven lexer provides several advantages over a directly coded lexer:
 
   - For this parser a context-free grammar (CFG) was created with all the rules of the language. The CFG is documented in the [CFG](docs/CFG.md) file. Then we eliminated the left recursion from the grammar rules. The resulting grammar is documented in the [CFG-LR](docs/CFG-LR.md) file.
 
-
+You can see the diagram of the CFG [here](https://htmlpreview.github.io/?https://github.com/diegolorenzo12/Compiler/blob/0f19faf2cd49f8ebea099f548f1f6bea33e9ee84/docs/Syntactic-diagram.html)
 
 ## Semantic Analysis
 
@@ -156,7 +156,7 @@ pip install conan
 conan profile detect
 ```
 
-### Install Conan packages (gtest)
+### Install Conan packages
 
 From the root of the project directory, run the following command to install Conan packages:
 

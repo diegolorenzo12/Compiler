@@ -212,10 +212,9 @@ This document extends the [CFG-LR](CFG-LR.md) file by removing the left recursio
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ε**
 
 <a id="ASSIGNMENT_EXPRESSION_OPT_FAC"></a>
-****ASSIGNMENT_EXPRESSION_OPT_FAC → <br>
+**ASSIGNMENT_EXPRESSION_OPT_FAC → <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[ASSIGNMENT_EXPRESSION](#ASSIGNMENT_EXPRESSION) | <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* | <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ε****
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ε**
 
 <a id="PARAMETER_LIST_OPT_FAC"></a>
 **PARAMETER_LIST_OPT_FAC → <br>
@@ -430,6 +429,8 @@ This document extends the [CFG-LR](CFG-LR.md) file by removing the left recursio
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|| [LOGICAL_AND_EXPRESSION](#LOGICAL_AND_EXPRESSION) [LOGICAL_OR_EXPRESSION_PRIME](#LOGICAL_OR_EXPRESSION_PRIME) |<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ε**
 
+`Note: the first production above starts with ||, don't get confused with the or | at the end of each production.`
+
 <a id="LOGICAL_AND_EXPRESSION"></a>
 **LOGICAL_AND_EXPRESSION → <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[INCLUSIVE_OR_EXPRESSION](#INCLUSIVE_OR_EXPRESSION) [LOGICAL_AND_EXPRESSION_PRIME](#LOGICAL_AND_EXPRESSION_PRIME)**
@@ -447,6 +448,8 @@ This document extends the [CFG-LR](CFG-LR.md) file by removing the left recursio
 **INCLUSIVE_OR_EXPRESSION_PRIME → <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| [EXCLUSIVE_OR_EXPRESSION](#EXCLUSIVE_OR_EXPRESSION) [INCLUSIVE_OR_EXPRESSION_PRIME](#INCLUSIVE_OR_EXPRESSION_PRIME) |<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ε**
+
+`Note: the first production above starts with |, don't get confused with the or | at the end of each production.`
 
 <a id="EXCLUSIVE_OR_EXPRESSION"></a>
 **EXCLUSIVE_OR_EXPRESSION → <br>
