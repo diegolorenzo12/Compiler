@@ -225,19 +225,12 @@ This document extends the [CFG-LR](CFG-LR.md) file by removing the left recursio
 
 `Note: This rules above were left factoring. (DIRECT_DECLARATOR_PRIME, STATIC_OPT_FAC, TYPE_QUALIFIER_LIST_OPT_FAC, ASSIGNMENT_EXPRESSION_OPT_FAC, PARAMETER_LIST_OPT_FAC)`
 
-
 <a id="POINTER"></a>
-**POINTER → <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[POINTER_SEQUENCE](#POINTER_SEQUENCE) |<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ε**
-
-
-
-
-<a id="POINTER_SEQUENCE"></a>
-****POINTER_SEQUENCE → <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*[TYPE_QUALIFIER_LIST](#TYPE_QUALIFIER_LIST) POINTER_SEQUENCE |<br>
+****POINTER → <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*[TYPE_QUALIFIER_LIST](#TYPE_QUALIFIER_LIST) POINTER |<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;****
+
+`Note: Elimiated pointer sequence, and nullable pointer since it caused problems with PARAM_DECL_FAC also being nullable.`
 
 
 <a id="PARAMETER_LIST"></a>
