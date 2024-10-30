@@ -451,7 +451,6 @@ This are the supported statements in this language
 
 <a id="labeled_statement"></a>
 **LABELED_STATEMENT → <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;IDENTIFIER  :  [STATEMENT](#statement) | <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;case [CONDITIONAL_EXPRESSION](#conditional_expression)  :  [STATEMENT](#statement) | <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;default  :  [STATEMENT](#statement)**
 

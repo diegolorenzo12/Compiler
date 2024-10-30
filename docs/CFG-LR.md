@@ -252,7 +252,6 @@ This document extends the [CFG](CFG.md) file by removing the left recursion from
 
 <a id="LABELED_STATEMENT"></a>
 **LABELED_STATEMENT → <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;IDENTIFIER : [STATEMENT](#STATEMENT) |<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;case [CONDITIONAL_EXPRESSION](#CONDITIONAL_EXPRESSION) : [STATEMENT](#STATEMENT) |<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;default : [STATEMENT](#STATEMENT)**
 

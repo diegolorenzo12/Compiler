@@ -1,6 +1,111 @@
-# CFG Without Left Recursion and with left factoring
+# CFG First Analysis. 
 
-This document extends the [CFG-LR](CFG-LR.md) file by removing the left recursion and left factoring from the grammar rules.
+<a id="CONSTANT"></a>
+**FIRST(CONSTANT)** = { `INTEGER_CONSTANT`, `FLOAT_CONSTANT`, `STRING_LITERAL` }
+
+<a id="PRIMARY_EXPRESSION"></a>
+**FIRST(PRIMARY_EXPRESSION) = {`IDENTIFIER`, `(`,  `INTEGER_CONSTANT`, `FLOAT_CONSTANT`, `STRING_LITERAL`}**
+
+<a id="POSTFIX_EXPRESSION"></a>
+**FIRST(POSTFIX_EXPRESSION) = {`IDENTIFIER`, `(`,  `INTEGER_CONSTANT`, `FLOAT_CONSTANT`, `STRING_LITERAL`}**
+
+<a id="UNARY_EXPRESSION"></a>
+**FIRST(UNARY_EXPRESSION) = {`++` , `--`, `IDENTIFIER`, `(`,  `INTEGER_CONSTANT`, `FLOAT_CONSTANT`, `STRING_LITERAL` }**
+
+
+<a id="MULTIPLICATIVE_EXPRESSION_PRIME"></a>
+**FIRST(MULTIPLICATIVE_EXPRESSION_PRIME) = {`*`, `/`, `%`, `ε`}**
+
+
+<a id="MULTIPLICATIVE_EXPRESSION"></a>
+**FIRST(MULTIPLICATIVE_EXPRESSION) = {`++` , `--`, `IDENTIFIER`, `(`,  `INTEGER_CONSTANT`, `FLOAT_CONSTANT`, `STRING_LITERAL` }**
+
+
+<a id="POSTFIX_EXPRESSION_PRIME"></a>
+**FIRST(POSTFIX_EXPRESSION_PRIME) ={`[`, `(`, `.` , `->`, `++`, `--`, `ε`}**
+
+<a id="ARGUMENT_EXPRESSION_LIST_PRIME"></a>
+**FIRST(ARGUMENT_EXPRESSION_LIST_PRIME) = { `,` , `ε`}**
+
+<a id="ADDITIVE_EXPRESSION_PRIME"></a>
+**ADDITIVE_EXPRESSION_PRIME = {`+`, `-`, `ε`}**
+
+<a id="ADDITIVE_EXPRESSION"></a>
+**ADDITIVE_EXPRESSION = {`++` , `--`, `IDENTIFIER`, `(`,  `INTEGER_CONSTANT`, `FLOAT_CONSTANT`, `STRING_LITERAL` }**
+
+<a id="SHIFT_EXPRESSION_PRIME"></a>
+**SHIFT_EXPRESSION_PRIME → {`<<`, `>>`, `ε`}**
+
+<a id="SHIFT_EXPRESSION"></a>
+**SHIFT_EXPRESSION = {`++` , `--`, `IDENTIFIER`, `(`,  `INTEGER_CONSTANT`, `FLOAT_CONSTANT`, `STRING_LITERAL`}**
+
+<a id="RELATIONAL_EXPRESSION_PRIME"></a>
+**RELATIONAL_EXPRESSION_PRIME ={`<`,`>`, `<=`, `>=`, `ε`}**
+
+<a id="RELATIONAL_EXPRESSION"></a>
+**RELATIONAL_EXPRESSION = {`++` , `--`, `IDENTIFIER`, `(`,  `INTEGER_CONSTANT`, `FLOAT_CONSTANT`, `STRING_LITERAL`}**
+
+<a id="EQUALITY_EXPRESSION_PRIME"></a>
+**EQUALITY_EXPRESSION_PRIME = {`==`, `!=`, `ε`}**
+
+<a id="EQUALITY_EXPRESSION"></a>
+**EQUALITY_EXPRESSION = {`++` , `--`, `IDENTIFIER`, `(`,  `INTEGER_CONSTANT`, `FLOAT_CONSTANT`, `STRING_LITERAL`}**
+
+<a id="AND_EXPRESSION_PRIME"></a>
+**AND_EXPRESSION_PRIME = {`&`, `ε`}**
+
+<a id="AND_EXPRESSION"></a>
+**AND_EXPRESSION = {`++` , `--`, `IDENTIFIER`, `(`,  `INTEGER_CONSTANT`, `FLOAT_CONSTANT`, `STRING_LITERAL`}**
+
+<a id="EXCLUSIVE_OR_EXPRESSION_PRIME"></a>
+**EXCLUSIVE_OR_EXPRESSION_PRIME = {`^`, `ε`}**
+
+<a id="EXCLUSIVE_OR_EXPRESSION"></a>
+**EXCLUSIVE_OR_EXPRESSION = {`++` , `--`, `IDENTIFIER`, `(`,  `INTEGER_CONSTANT`, `FLOAT_CONSTANT`, `STRING_LITERAL`}**
+
+<a id="INCLUSIVE_OR_EXPRESSION_PRIME"></a>
+**INCLUSIVE_OR_EXPRESSION_PRIME = {`|`, `ε`}**
+
+<a id="INCLUSIVE_OR_EXPRESSION"></a>
+**INCLUSIVE_OR_EXPRESSION = {`++` , `--`, `IDENTIFIER`, `(`,  `INTEGER_CONSTANT`, `FLOAT_CONSTANT`, `STRING_LITERAL`}**
+
+<a id="LOGICAL_AND_EXPRESSION_PRIME"></a>
+**LOGICAL_AND_EXPRESSION_PRIME = {`&&`, `ε`}**
+
+<a id="LOGICAL_AND_EXPRESSION"></a>
+**LOGICAL_AND_EXPRESSION = {`++` , `--`, `IDENTIFIER`, `(`,  `INTEGER_CONSTANT`, `FLOAT_CONSTANT`, `STRING_LITERAL`}**
+
+<a id="LOGICAL_OR_EXPRESSION_PRIME"></a>
+**LOGICAL_OR_EXPRESSION_PRIME = {`||`, `ε`}**
+
+<a id="LOGICAL_OR_EXPRESSION"></a>
+**LOGICAL_OR_EXPRESSION = {`++` , `--`, `IDENTIFIER`, `(`,  `INTEGER_CONSTANT`, `FLOAT_CONSTANT`, `STRING_LITERAL`}**
+
+<a id="CONDITIONAL_EXPRESSION_PRIME"></a>
+**CONDITIONAL_EXPRESSION_PRIME = {`?`, `ε`}**
+
+<a id="CONDITIONAL_EXPRESSION"></a>
+**CONDITIONAL_EXPRESSION = {`++` , `--`, `IDENTIFIER`, `(`,  `INTEGER_CONSTANT`, `FLOAT_CONSTANT`, `STRING_LITERAL`}**
+
+<a id="ASSIGNMENT_EXPRESSION"></a>
+**ASSIGNMENT_EXPRESSION = {`++` , `--`, `IDENTIFIER`, `(`,  `INTEGER_CONSTANT`, `FLOAT_CONSTANT`, `STRING_LITERAL`}**
+
+<a id="ASSIGNMENT_OPERATOR"></a>
+**ASSIGNMENT_OPERATOR = {`=`, `*=`, `/=`, `&=`, `+=`, `-=`, `<<=`, `>>=`, `&&=`, `^=`, `|=`}**
+
+<a id="ASSIGNMENT_EXPRESSION_FAC"></a>
+**ASSIGNMENT_EXPRESSION_FAC = {`=`, `*=`, `/=`, `&=`, `+=`, `-=`, `<<=`, `>>=`, `&&=`, `^=`, `|=`, `ε`}**
+
+<a id="ARGUMENT_EXPRESSION_LIST"></a>
+**ARGUMENT_EXPRESSION_LIST = {`++` , `--`, `IDENTIFIER`, `(`,  `INTEGER_CONSTANT`, `FLOAT_CONSTANT`, `STRING_LITERAL`}**
+
+
+<a id="POSTFIX_ARGUMENTS"></a>
+**POSTFIX_ARGUMENTS = {`++` , `--`, `IDENTIFIER`, `(`,  `INTEGER_CONSTANT`, `FLOAT_CONSTANT`, `STRING_LITERAL`, `ε`}**
+
+
+
+
 
 <a id="PROGRAM"></a>
 **PROGRAM → <br>
@@ -306,6 +411,7 @@ This document extends the [CFG-LR](CFG-LR.md) file by removing the left recursio
 
 <a id="LABELED_STATEMENT"></a>
 **LABELED_STATEMENT → <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;IDENTIFIER : [STATEMENT](#STATEMENT) |<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;case [CONDITIONAL_EXPRESSION](#CONDITIONAL_EXPRESSION) : [STATEMENT](#STATEMENT) |<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;default : [STATEMENT](#STATEMENT)**
 
@@ -348,14 +454,6 @@ This document extends the [CFG-LR](CFG-LR.md) file by removing the left recursio
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;, [ASSIGNMENT_EXPRESSION](#ASSIGNMENT_EXPRESSION) [EXPRESSION_PRIME](#EXPRESSION_PRIME) |<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ε**
 
-<a id="ASSIGNMENT_EXPRESSION"></a>
-**ASSIGNMENT_EXPRESSION → <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[CONDITIONAL_EXPRESSION](#CONDITIONAL_EXPRESSION) [ASSIGNMENT_EXPRESSION_FAC](#ASSIGNMENT_EXPRESSION_FAC)**
-
-<a id="ASSIGNMENT_EXPRESSION_FAC"></a>
-**ASSIGNMENT_EXPRESSION_FAC → <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[ASSIGNMENT_OPERATOR](#ASSIGNMENT_OPERATOR) [ASSIGNMENT_EXPRESSION](#ASSIGNMENT_EXPRESSION) | <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;e**
 
 <a id="SELECTION_STATEMENT"></a>
 **SELECTION_STATEMENT → <br>
@@ -395,181 +493,4 @@ This document extends the [CFG-LR](CFG-LR.md) file by removing the left recursio
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;continue ; |<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;break ; |<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return [EXPRESSION_STATEMENT](#EXPRESSION_STATEMENT)**
-
-<a id="ASSIGNMENT_OPERATOR"></a>
-**ASSIGNMENT_OPERATOR → <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;= |<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*= |<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/= |<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;%= |<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+= |<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-= |<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;&lt;= |<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&gt;&gt;= |<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&&amp;= |<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;^= |<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|=**
-
-<a id="CONDITIONAL_EXPRESSION"></a>
-**CONDITIONAL_EXPRESSION → <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[LOGICAL_OR_EXPRESSION](#LOGICAL_OR_EXPRESSION) [CONDITIONAL_EXPRESSION_PRIME](#CONDITIONAL_EXPRESSION_PRIME)**
-
-<a id="CONDITIONAL_EXPRESSION_PRIME"></a>
-**CONDITIONAL_EXPRESSION_PRIME → <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;? [EXPRESSION](#EXPRESSION) : [CONDITIONAL_EXPRESSION](#CONDITIONAL_EXPRESSION) |<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ε**
-
-<a id="LOGICAL_OR_EXPRESSION"></a>
-**LOGICAL_OR_EXPRESSION → <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[LOGICAL_AND_EXPRESSION](#LOGICAL_AND_EXPRESSION) [LOGICAL_OR_EXPRESSION_PRIME](#LOGICAL_OR_EXPRESSION_PRIME)**
-
-<a id="LOGICAL_OR_EXPRESSION_PRIME"></a>
-**LOGICAL_OR_EXPRESSION_PRIME → <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|| [LOGICAL_AND_EXPRESSION](#LOGICAL_AND_EXPRESSION) [LOGICAL_OR_EXPRESSION_PRIME](#LOGICAL_OR_EXPRESSION_PRIME) |<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ε**
-
-`Note: the first production above starts with ||, don't get confused with the or | at the end of each production.`
-
-<a id="LOGICAL_AND_EXPRESSION"></a>
-**LOGICAL_AND_EXPRESSION → <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[INCLUSIVE_OR_EXPRESSION](#INCLUSIVE_OR_EXPRESSION) [LOGICAL_AND_EXPRESSION_PRIME](#LOGICAL_AND_EXPRESSION_PRIME)**
-
-<a id="LOGICAL_AND_EXPRESSION_PRIME"></a>
-**LOGICAL_AND_EXPRESSION_PRIME → <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&amp;&amp; [INCLUSIVE_OR_EXPRESSION](#INCLUSIVE_OR_EXPRESSION) [LOGICAL_AND_EXPRESSION_PRIME](#LOGICAL_AND_EXPRESSION_PRIME) |<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ε**
-
-<a id="INCLUSIVE_OR_EXPRESSION"></a>
-**INCLUSIVE_OR_EXPRESSION → <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[EXCLUSIVE_OR_EXPRESSION](#EXCLUSIVE_OR_EXPRESSION) [INCLUSIVE_OR_EXPRESSION_PRIME](#INCLUSIVE_OR_EXPRESSION_PRIME)**
-
-<a id="INCLUSIVE_OR_EXPRESSION_PRIME"></a>
-**INCLUSIVE_OR_EXPRESSION_PRIME → <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| [EXCLUSIVE_OR_EXPRESSION](#EXCLUSIVE_OR_EXPRESSION) [INCLUSIVE_OR_EXPRESSION_PRIME](#INCLUSIVE_OR_EXPRESSION_PRIME) |<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ε**
-
-`Note: the first production above starts with |, don't get confused with the or | at the end of each production.`
-
-<a id="EXCLUSIVE_OR_EXPRESSION"></a>
-**EXCLUSIVE_OR_EXPRESSION → <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[AND_EXPRESSION](#AND_EXPRESSION) [EXCLUSIVE_OR_EXPRESSION_PRIME](#EXCLUSIVE_OR_EXPRESSION_PRIME)**
-
-<a id="EXCLUSIVE_OR_EXPRESSION_PRIME"></a>
-**EXCLUSIVE_OR_EXPRESSION_PRIME → <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;^ [AND_EXPRESSION](#AND_EXPRESSION) [EXCLUSIVE_OR_EXPRESSION_PRIME](#EXCLUSIVE_OR_EXPRESSION_PRIME) |<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ε**
-
-<a id="AND_EXPRESSION"></a>
-**AND_EXPRESSION → <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[EQUALITY_EXPRESSION](#EQUALITY_EXPRESSION) [AND_EXPRESSION_PRIME](#AND_EXPRESSION_PRIME)**
-
-<a id="AND_EXPRESSION_PRIME"></a>
-**AND_EXPRESSION_PRIME → <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&amp; [EQUALITY_EXPRESSION](#EQUALITY_EXPRESSION) [AND_EXPRESSION_PRIME](#AND_EXPRESSION_PRIME) |<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ε**
-
-<a id="EQUALITY_EXPRESSION"></a>
-**EQUALITY_EXPRESSION → <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[RELATIONAL_EXPRESSION](#RELATIONAL_EXPRESSION) [EQUALITY_EXPRESSION_PRIME](#EQUALITY_EXPRESSION_PRIME)**
-
-<a id="EQUALITY_EXPRESSION_PRIME"></a>
-**EQUALITY_EXPRESSION_PRIME → <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;== [RELATIONAL_EXPRESSION](#RELATIONAL_EXPRESSION) [EQUALITY_EXPRESSION_PRIME](#EQUALITY_EXPRESSION_PRIME) |<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;!= [RELATIONAL_EXPRESSION](#RELATIONAL_EXPRESSION) [EQUALITY_EXPRESSION_PRIME](#EQUALITY_EXPRESSION_PRIME) |<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ε**
-
-<a id="RELATIONAL_EXPRESSION"></a>
-**RELATIONAL_EXPRESSION → <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[SHIFT_EXPRESSION](#SHIFT_EXPRESSION) [RELATIONAL_EXPRESSION_PRIME](#RELATIONAL_EXPRESSION_PRIME)**
-
-<a id="RELATIONAL_EXPRESSION_PRIME"></a>
-**RELATIONAL_EXPRESSION_PRIME → <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt; [SHIFT_EXPRESSION](#SHIFT_EXPRESSION) [RELATIONAL_EXPRESSION_PRIME](#RELATIONAL_EXPRESSION_PRIME) |<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&gt; [SHIFT_EXPRESSION](#SHIFT_EXPRESSION) [RELATIONAL_EXPRESSION_PRIME](#RELATIONAL_EXPRESSION_PRIME) |<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;= [SHIFT_EXPRESSION](#SHIFT_EXPRESSION) [RELATIONAL_EXPRESSION_PRIME](#RELATIONAL_EXPRESSION_PRIME) |<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&gt;= [SHIFT_EXPRESSION](#SHIFT_EXPRESSION) [RELATIONAL_EXPRESSION_PRIME](#RELATIONAL_EXPRESSION_PRIME) |<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ε**
-
-<a id="SHIFT_EXPRESSION"></a>
-**SHIFT_EXPRESSION → <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[ADDITIVE_EXPRESSION](#ADDITIVE_EXPRESSION) [SHIFT_EXPRESSION_PRIME](#SHIFT_EXPRESSION_PRIME)**
-
-<a id="SHIFT_EXPRESSION_PRIME"></a>
-**SHIFT_EXPRESSION_PRIME → <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;&lt; [ADDITIVE_EXPRESSION](#ADDITIVE_EXPRESSION) [SHIFT_EXPRESSION_PRIME](#SHIFT_EXPRESSION_PRIME) |<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&gt;&gt; [ADDITIVE_EXPRESSION](#ADDITIVE_EXPRESSION) [SHIFT_EXPRESSION_PRIME](#SHIFT_EXPRESSION_PRIME) |<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ε**
-
-<a id="ADDITIVE_EXPRESSION"></a>
-**ADDITIVE_EXPRESSION → <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[MULTIPLICATIVE_EXPRESSION](#MULTIPLICATIVE_EXPRESSION) [ADDITIVE_EXPRESSION_PRIME](#ADDITIVE_EXPRESSION_PRIME)**
-
-<a id="ADDITIVE_EXPRESSION_PRIME"></a>
-**ADDITIVE_EXPRESSION_PRIME → <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ [MULTIPLICATIVE_EXPRESSION](#MULTIPLICATIVE_EXPRESSION) [ADDITIVE_EXPRESSION_PRIME](#ADDITIVE_EXPRESSION_PRIME) |<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- [MULTIPLICATIVE_EXPRESSION](#MULTIPLICATIVE_EXPRESSION) [ADDITIVE_EXPRESSION_PRIME](#ADDITIVE_EXPRESSION_PRIME) |<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ε**
-
-<a id="MULTIPLICATIVE_EXPRESSION"></a>
-**MULTIPLICATIVE_EXPRESSION → <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[UNARY_EXPRESSION](#UNARY_EXPRESSION) [MULTIPLICATIVE_EXPRESSION_PRIME](#MULTIPLICATIVE_EXPRESSION_PRIME)**
-
-<a id="MULTIPLICATIVE_EXPRESSION_PRIME"></a>
-*****MULTIPLICATIVE_EXPRESSION_PRIME → <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*[UNARY_EXPRESSION](#UNARY_EXPRESSION) [MULTIPLICATIVE_EXPRESSION_PRIME](#MULTIPLICATIVE_EXPRESSION_PRIME) |<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/ [UNARY_EXPRESSION](#UNARY_EXPRESSION) [MULTIPLICATIVE_EXPRESSION_PRIME](#MULTIPLICATIVE_EXPRESSION_PRIME) |<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;% [UNARY_EXPRESSION](#UNARY_EXPRESSION) [MULTIPLICATIVE_EXPRESSION_PRIME](#MULTIPLICATIVE_EXPRESSION_PRIME) |<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ε*****
-
-
-
-<a id="UNARY_EXPRESSION"></a>
-**UNARY_EXPRESSION → <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[POSTFIX_EXPRESSION](#POSTFIX_EXPRESSION) |<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ [UNARY_EXPRESSION](#UNARY_EXPRESSION) |<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-- [UNARY_EXPRESSION](#UNARY_EXPRESSION) |<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sizeof [UNARY_EXPRESSION](#UNARY_EXPRESSION)**
-
-<a id="POSTFIX_EXPRESSION"></a>
-**POSTFIX_EXPRESSION → <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[PRIMARY_EXPRESSION](#PRIMARY_EXPRESSION) [POSTFIX_EXPRESSION_PRIME](#POSTFIX_EXPRESSION_PRIME)**
-
-<a id="POSTFIX_EXPRESSION_PRIME"></a>
-**POSTFIX_EXPRESSION_PRIME → <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[ [EXPRESSION](#EXPRESSION) ] POSTFIX_EXPRESSION_PRIME |<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;( [POSTFIX_ARGUMENTS](#POSTFIX_ARGUMENTS) ) POSTFIX_EXPRESSION_PRIME |<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;. IDENTIFIER POSTFIX_EXPRESSION_PRIME |<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-> IDENTIFIER POSTFIX_EXPRESSION_PRIME |<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ POSTFIX_EXPRESSION_PRIME |<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-- POSTFIX_EXPRESSION_PRIME |<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ε**
-
-
-<a id="POSTFIX_ARGUMENTS"></a>
-**POSTFIX_ARGUMENTS → <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[ARGUMENT_EXPRESSION_LIST](#ARGUMENT_EXPRESSION_LIST) |<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ε**
-
-`Note: This rule above was left factored.`
-
-<a id="ARGUMENT_EXPRESSION_LIST"></a>
-**ARGUMENT_EXPRESSION_LIST → <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[ASSIGNMENT_EXPRESSION](#ASSIGNMENT_EXPRESSION) [ARGUMENT_EXPRESSION_LIST_PRIME](#ARGUMENT_EXPRESSION_LIST_PRIME)**
-
-<a id="ARGUMENT_EXPRESSION_LIST_PRIME"></a>
-**ARGUMENT_EXPRESSION_LIST_PRIME → <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;, [ASSIGNMENT_EXPRESSION](#ASSIGNMENT_EXPRESSION) [ARGUMENT_EXPRESSION_LIST_PRIME](#ARGUMENT_EXPRESSION_LIST_PRIME) |<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ε**
-
-<a id="PRIMARY_EXPRESSION"></a>
-**PRIMARY_EXPRESSION → <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;IDENTIFIER |<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[CONSTANT](#CONSTANT) |<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;( [EXPRESSION](#EXPRESSION) )**
-
-<a id="CONSTANT"></a>
-**CONSTANT → <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;INTEGER_CONSTANT |<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;FLOAT_CONSTANT |<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;STRING_LITERAL**
 
