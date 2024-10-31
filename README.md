@@ -156,7 +156,7 @@ pip install conan
 conan profile detect
 ```
 
-### Install Conan packages (gtest)
+### Install Conan packages
 
 From the root of the project directory, run the following command to install Conan packages:
 
@@ -173,6 +173,9 @@ cd build/
 cmake ..
 cmake --build .
 ```
+
+> [!NOTE]  
+> If error in Flex is not found when running cmake, try setting the LEX enviroment variable by running the generated .bat, .sh or manually setting it from the path conan created. 
 
 ### Build and Run the Project
 

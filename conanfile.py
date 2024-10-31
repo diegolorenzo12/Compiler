@@ -1,5 +1,7 @@
 from conan import ConanFile
 from conan.tools.cmake import CMakeToolchain, CMakeDeps
+from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
+
 
 class MyProjectConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
@@ -17,3 +19,9 @@ class MyProjectConan(ConanFile):
         
         deps = CMakeDeps(self)
         deps.generate()
+
+        build_env = VirtualBuildEnv(self)
+        build_env.generate()
+
+        run_env = VirtualRunEnv(self)
+        run_env.generate()

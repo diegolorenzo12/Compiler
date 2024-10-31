@@ -1,7 +1,7 @@
 #include "Compiler.h"
-#include "FlexLexer.h" // Include the generated Flex header
+#include "FlexLexer.h"
 #include "TokenTable.h"
-#include "Token.h" // Include your Token class header
+#include "Token.h" 
 
 
 std::shared_ptr<std::fstream> Compiler::openFilePointerUnique(const std::string& filename, std::ios::openmode mode) {
@@ -15,10 +15,9 @@ std::shared_ptr<std::fstream> Compiler::openFilePointerUnique(const std::string&
 
 
 
-Compiler::Compiler(const std::string& filename, const std::string& out_filename, int flags) 
-    : filename(filename), out_filename(out_filename) {
+Compiler::Compiler(const std::string& filename, int flags) 
+    : filename(filename) {
     this->sourceCodeStream = openFilePointerUnique(filename, std::ios::in);
-    this->outCodeStream = openFilePointerUnique(out_filename, std::ios::out);
 }
 
 
@@ -27,29 +26,25 @@ Compiler::~Compiler()
     if (sourceCodeStream && sourceCodeStream->is_open()) {
         sourceCodeStream->close();
     }
-
-    if (outCodeStream && outCodeStream->is_open()) {
-        outCodeStream->close();
-    }
 }
 
 int Compiler::compile() {
-    if (this->sourceCodeStream == nullptr || this->outCodeStream == nullptr) {
+    if (this->sourceCodeStream == nullptr) {
         return 1;
     }
 
     yyFlexLexer lexer;                                                 // Create an instance of the Flex lexer
-    lexer.switch_streams(sourceCodeStream.get(), outCodeStream.get()); // Switch input and output streams
+    lexer.switch_streams(sourceCodeStream.get()); // Switch input and output streams
 
     TokenTable tokenTable;
 
     // Start lexing and store tokens in the TokenTable
     int tokenType;
+    std::cout<<lexer.yylex()<<": token"<<std::endl;
     while ((tokenType = lexer.yylex()) != 0)
     {
         std::string tokenValue = lexer.YYText();
         Token token(tokenValue, static_cast<TokenType>(tokenType), 1);
-        //Token token(lexer.YYText(), static_cast<TokenType>(tokenType), 1);
         tokenTable.push_back(token);
     }
 
