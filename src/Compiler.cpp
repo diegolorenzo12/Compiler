@@ -2,6 +2,7 @@
 #include "FlexLexer.h"
 #include "TokenTable.h"
 #include "Token.h" 
+#include "Lexer.h"
 
 
 std::shared_ptr<std::fstream> Compiler::openFilePointerUnique(const std::string& filename, std::ios::openmode mode) {
@@ -33,23 +34,12 @@ int Compiler::compile() {
         return 1;
     }
 
-    yyFlexLexer lexer;                                                 // Create an instance of the Flex lexer
-    lexer.switch_streams(sourceCodeStream.get()); // Switch input and output streams
-
-    TokenTable tokenTable;
-
-    // Start lexing and store tokens in the TokenTable
-    int tokenType;
-    std::cout<<lexer.yylex()<<": token"<<std::endl;
-    while ((tokenType = lexer.yylex()) != 0)
-    {
-        std::string tokenValue = lexer.YYText();
-        Token token(tokenValue, static_cast<TokenType>(tokenType), 1);
-        tokenTable.push_back(token);
-    }
-
-    // Optionally, print the tokens for debugging
+    Lexer lex(sourceCodeStream);
+    lex.tokenize();
+    TokenTable tokenTable = lex.getTokens();
     tokenTable.printTokens();
+
+    //pass the token table to the parser
 
     return 0;
 }

@@ -23,8 +23,6 @@ comp_op        (==|!=|<=|>=|<|>|&&|\|\|)
 increment_op    (\+\+|\-\-)
 assign_op      (=|\+=|\-=|\*=|\/=|%=|<<=|>>=|&=|\^=|\|=)
 
-KEYWORD (if|else|while|for|return|int|float|void|main)
-
 
 %%
 
@@ -88,7 +86,7 @@ KEYWORD (if|else|while|for|return|int|float|void|main)
 
 "int"       { return (int)TokenType::KEYWORD; }
 
-"func"       {  std::cout << "func"; return (int)TokenType::KEYWORD; }
+"func"       { return (int)TokenType::KEYWORD; }
 
 
 {string}        { return (int)TokenType::STRING_LITERAL; }
