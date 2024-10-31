@@ -1,6 +1,8 @@
 #include "Compiler.h"
-#include "TableDrivenLexer.h"
+#include "FlexLexer.h"
 #include "TokenTable.h"
+#include "Token.h" 
+#include "Lexer.h"
 
 
 std::shared_ptr<std::fstream> Compiler::openFilePointerUnique(const std::string& filename, std::ios::openmode mode) {
@@ -14,10 +16,9 @@ std::shared_ptr<std::fstream> Compiler::openFilePointerUnique(const std::string&
 
 
 
-Compiler::Compiler(const std::string& filename, const std::string& out_filename, int flags) : filename(filename), out_filename(out_filename)
-{
+Compiler::Compiler(const std::string& filename, int flags) 
+    : filename(filename) {
     this->sourceCodeStream = openFilePointerUnique(filename, std::ios::in);
-    this->outCodeStream = openFilePointerUnique(out_filename,  std::ios::out);
 }
 
 
@@ -26,26 +27,19 @@ Compiler::~Compiler()
     if (sourceCodeStream && sourceCodeStream->is_open()) {
         sourceCodeStream->close();
     }
-
-    if (outCodeStream && outCodeStream->is_open()) {
-        outCodeStream->close();
-    }
 }
 
 int Compiler::compile() {
-    if(this->sourceCodeStream == nullptr || this->outCodeStream == nullptr){
+    if (this->sourceCodeStream == nullptr) {
         return 1;
     }
 
-    //output to console the file to make sure it works
+    Lexer lex(sourceCodeStream);
+    lex.tokenize();
+    TokenTable& tokenTable = lex.getTokens();
+    tokenTable.printTokens();
 
-    TableDrivenLexer lexer(this->sourceCodeStream);
-    lexer.tokenize();
-    TokenTable tokens = lexer.getTokens();
-    
-    tokens.printTokens();
-    //const std::vector<Token> &tokens = lexer.getTokens();
-
+    //pass the token table to the parser
 
     return 0;
 }

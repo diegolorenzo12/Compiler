@@ -174,6 +174,9 @@ cmake ..
 cmake --build .
 ```
 
+> [!NOTE]  
+> If error in Flex is not found when running cmake, try setting the LEX enviroment variable by running the generated .bat, .sh or manually setting it from the path conan created. 
+
 ### Build and Run the Project
 
 To build and run the project, execute:

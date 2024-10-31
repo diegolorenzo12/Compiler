@@ -3,14 +3,19 @@
 
 enum class TokenType
 {
-    KEYWORD,
+    UNKNOWN,
     IDENTIFIER,
+    KEYWORD,
     PUNCTUATION,
-    CONSTANT,
+    INTEGER_CONSTANT,
+    FLOAT_CONSTANT,
     OPERATOR,
     STRING_LITERAL,
-    COMMENT,
-    UNKNOWN
+    ARITHMETIC_OPERATOR, 
+    LOGICAL_OPERATOR,    
+    COMPARISON_OPERATOR, 
+    ASSIGNMENT_OPERATOR, 
+    INCREMENT_OPERATOR 
 };
 
 class Token {
@@ -27,6 +32,5 @@ public:
 private:
     std::string value;
     TokenType type;
-    //int lineNumber;
     int lineNumber;
 };

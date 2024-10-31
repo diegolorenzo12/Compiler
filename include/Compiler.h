@@ -8,15 +8,13 @@
 class Compiler
 {
 public:
-    Compiler(const std::string& filename, const std::string& out_filename, int flags);
+    Compiler(const std::string& filename, int flags);
     ~Compiler();
     int compile();
 
 private:
     std::shared_ptr<std::fstream> sourceCodeStream;
-    std::shared_ptr<std::fstream> outCodeStream;
     const std::string filename;
-    const std::string out_filename;
     std::string preprocessCode;
 
 

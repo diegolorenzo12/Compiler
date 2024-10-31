@@ -1,87 +1,44 @@
-int main()
-{
-int std::string = " kgfmskjfdn                 s gkdas dsjf a "
-	
-for (int i = 1; i <= 10; i++) 
-  {
-    if (i == 2) 
-    {
-      continue;
-    }
-    if (i == 6) 
-    {
-      break;
-    }
-    printf("%d ", i);
-  }
-  return 0;
-
-
-    return 0; //comment         here ansfdkj
+func int add(int a, int b) {
+    int result =0
+    result += a+b;
+    return result;  // Adds two integers
 }
-/*
 
-THIS IS A BLOCK COMMENT
+func float divide(int numerator, int denominator) {
+    if (denominator == 0) {
+        printf("Error: Division by zero.\n");
+        return 0;  // Return 0 for division by zero
+    }
+    return numerator / denominator;  // Perform division
+}
 
-*/
+func int main() {
+    int x = 10;
+    int y = 20;
+    float result;
 
-//testing keywords
-auto
+    // Add two numbers
+    result = add(x, y);
+    printf("Sum: %f\n", result);
 
-break
+    // Divide two numbers
+    result = divide(x, y);
+    printf("Quotient: %f\n", result);
 
-case
+    // Test division by zero
+    result = divide(x, 0);
+    
+    // Example of a loop
+    for (int i = 0; i < 5; i++) {
+        printf("Iteration: %d\n", i);
+    }
 
-const
+    // Conditional statement
+    if (result > 0) {
+        printf("Result is positive.\n");
+    } else {
+        printf("Result is non-positive.\n");
+    }
 
-continue
-
-default
-
-do
-
-double
-
-else
-
-extern
-
-float
-
-for
-
-goto
-
-if
-
-int
-
-long
-
-register
-
-return
-
-short
-
-signed
-
-sizeof
-
-static
-
-struct
-
-switch
-
-typedef
-
-union
-
-unsigned
-
-void
-
-volatile
-
-while
+    return 0;
+}
