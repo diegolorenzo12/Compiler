@@ -18,7 +18,32 @@ protected:
     std::string nodeName;
 };
 
-class ProgramNode : public ASTNode
+class ListNode : public ASTNode
+{
+public:
+    std::vector<std::unique_ptr<ASTNode>> nodes;
+
+    // Method to add a declaration if it is not null
+    void push_back_node(std::unique_ptr<ASTNode> node)
+    {
+        if (node)
+        {
+            nodes.push_back(std::move(node)); // Only add non-null declarations
+        }
+    }
+
+    // Override the print method to print all declarations
+    void print() const override
+    {
+        ASTNode::print(); // Call print on base class
+        for (const auto &node : nodes)
+        {
+            node->print(); // Print each declaration
+        }
+    }
+};
+
+class ProgramNode : public ListNode
 {
 public:
     ProgramNode()
@@ -27,16 +52,6 @@ public:
     }
 
     std::vector<std::unique_ptr<ASTNode>> declarations;
-
-    void print() const override
-    {
-        ASTNode::print();
-
-        for (const auto &decl : declarations)
-        {
-            decl->print();
-        }
-    }
 };
 
 // EXPRESIONS

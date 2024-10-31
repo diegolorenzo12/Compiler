@@ -16,12 +16,14 @@ public:
     std::unique_ptr<ASTNode> parseProgram();
 
 private:
-    TokenTable &tokens; // Reference to the TokenTable
+    TokenTable &tokens;
     Token currentToken;
 
-    void consume(TokenType expectedType);
-    void advance();
+    void consume();
     void expect(TokenType expected); // consume el token si es del tipo que queremos
+
+    std::unique_ptr<ASTNode> parseGlobalDeclarations();
+    std::unique_ptr<ASTNode> parseProgramPrime();
 
     std::unique_ptr<ASTNode> parseStatement();
     std::unique_ptr<ASTNode> parseExpression();
