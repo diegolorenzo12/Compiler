@@ -10,6 +10,9 @@ void TokenTable::pop_front(){
 }
 
 Token TokenTable::front(){
+    if(isEmpty()){
+        Token("", TokenType::END_OF_FILE, 0);
+    }
     return tokens.front();
 }
 

@@ -4,11 +4,13 @@
 #include <iostream>
 #include <iostream>
 #include <string>
+#include "AST.h"
+#include "Parser.h"
 
 class Compiler
 {
 public:
-    Compiler(const std::string& filename, int flags);
+    Compiler(const std::string &filename, int flags);
     ~Compiler();
     int compile();
 
@@ -17,6 +19,5 @@ private:
     const std::string filename;
     std::string preprocessCode;
 
-
-    std::shared_ptr<std::fstream> openFilePointerUnique(const std::string& filename, std::ios::openmode mode);
+    std::shared_ptr<std::fstream> openFilePointerUnique(const std::string &filename, std::ios::openmode mode);
 };

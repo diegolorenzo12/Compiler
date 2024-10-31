@@ -3,14 +3,15 @@
 #include <memory>
 #include "FlexLexer.h"
 #include "TokenTable.h"
-#include "Token.h" 
+#include "Token.h"
 
-class Lexer{
+class Lexer
+{
 
 public:
     Lexer(std::shared_ptr<std::fstream> sourceCodeStream);
     void tokenize();
-    TokenTable& getTokens();
+    TokenTable &getTokens();
 
 private:
     TokenTable tokenTable;
