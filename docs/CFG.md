@@ -81,6 +81,7 @@ This document provides the Context-Free Grammar (CFG) for the language used in t
 76. **`break`**
 77. **`return`**
 78. **`sizeof`**
+79. **`func`**
 
 ## Non-Terminals
 
