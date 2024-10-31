@@ -55,6 +55,7 @@ set(SOURCES
     src/Compiler.cpp
     src/Token.cpp
     src/TokenTable.cpp
+    src/Lexer.cpp
     ${FLEX_OUTPUT}
 )
 
