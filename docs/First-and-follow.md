@@ -2,6 +2,8 @@
 
 This document contains the first and follow from the grammer in [CFG-left-factorizing](./CFG-left-factoring.md)
 
+## First
+
 <a id="PROGRAM"></a>
 **FIRST(PROGRAM)** = [FIRST(GLOBAL_DECLARATIONS)](#GLOBAL_DECLARATIONS) = {`int`, `void`, `char`, `short`, `long`, `float`, `double`, `signed`, `unsigned`, `bool`, `struct`, `func`}
 
@@ -301,3 +303,308 @@ This document contains the first and follow from the grammer in [CFG-left-factor
 
 <a id="CONSTANT"></a>
 **FIRST(CONSTANT)** = {`integer_constant`, `float_constant`, `string_literal`}
+
+## Follow
+
+In this follow analysis `$` denotes end of line
+
+**FOLLOW(ADDITIVE_EXPRESSION)**= {`!=` `%=` `&` `&&` `&&=` `)` `*=` `+=` `,` `-=` `/=` `:` `;` `<` `<<` `<<=` `<=` `=` `==` `>` `>=` `>>` `>>=` `?` `]` `^` `^=` `|=` `}` `|` `||`}
+
+
+**FOLLOW(ADDITIVE_EXPRESSION_PRIME)**= {`!=` `%=` `&` `&&` `&&=` `)` `*=` `+=` `,` `-=` `/=` `:` `;` `<` `<<` `<<=` `<=` `=` `==` `>` `>=` `>>` `>>=` `?` `]` `^` `^=` `|=` `}` `|` `||`}
+
+
+**FOLLOW(AND_EXPRESSION)**= {`%=` `&&` `&&=` `)` `*=` `+=` `,` `-=` `/=` `:` `;` `<<=` `=` `>>=` `?` `]` `^` `^=` `|=` `}` `|` `||`}
+
+
+**FOLLOW(AND_EXPRESSION_PRIME)**= {`%=` `&&` `&&=` `)` `*=` `+=` `,` `-=` `/=` `:` `;` `<<=` `=` `>>=` `?` `]` `^` `^=` `|=` `}` `|` `||`}
+
+
+**FOLLOW(ARGUMENT_EXPRESSION_LIST)**= {`)`}
+
+
+**FOLLOW(ARGUMENT_EXPRESSION_LIST_PRIME)**= {`)`}
+
+
+**FOLLOW(ASSIGNMENT_EXPRESSION)**= {`)` `,` `:` `;` `]` `}`}
+
+
+**FOLLOW(ASSIGNMENT_EXPRESSION_FAC)**= {`)` `,` `:` `;` `]` `}`}
+
+
+**FOLLOW(ASSIGNMENT_EXPRESSION_OPT_FAC)**= {`]`}
+
+
+**FOLLOW(ASSIGNMENT_OPERATOR)**= {`(` `++` `--` `FLOAT_CONSTANT` `IDENTIFIER` `INTEGER_CONSTANT` `STRING_LITERAL` `sizeof`}
+
+
+**FOLLOW(BLOCK)**= {`$` `(` `++` `--` `;` `FLOAT_CONSTANT` `IDENTIFIER` `INTEGER_CONSTANT` `STRING_LITERAL` `bool` `break` `case` `char` `continue` `default` `do` `double` `else` `float` `for` `func` `if` `int` `long` `return` `short` `signed` `sizeof` `struct` `switch` `unsigned` `void` `while` `{` `}`}
+
+
+**FOLLOW(BLOCK_CONTENT)**= {`}`}
+
+
+**FOLLOW(BLOCK_ITEM)**= {`(` `++` `--` `;` `FLOAT_CONSTANT` `IDENTIFIER` `INTEGER_CONSTANT` `STRING_LITERAL` `bool` `break` `case` `char` `continue` `default` `do` `double` `float` `for` `if` `int` `long` `return` `short` `signed` `sizeof` `struct` `switch` `unsigned` `void` `while` `{` `}`}
+
+
+**FOLLOW(BLOCK_ITEM_LIST)**= {`}`}
+
+
+**FOLLOW(BLOCK_ITEM_LIST_PRIME)**= {`}`}
+
+
+**FOLLOW(CONDITIONAL_EXPRESSION)**= {`%=` `&&=` `)` `*=` `+=` `,` `-=` `/=` `:` `;` `<<=` `=` `>>=` `]` `^=` `|=` `}`}
+
+
+**FOLLOW(CONDITIONAL_EXPRESSION_PRIME)**= {`%=` `&&=` `)` `*=` `+=` `,` `-=` `/=` `:` `;` `<<=` `=` `>>=` `]` `^=` `|=` `}`}
+
+
+**FOLLOW(CONSTANT)**= {`!=` `%` `%=` `&` `&&` `&&=` `(` `)` `*` `*=` `+` `++` `+=` `,` `-` `--` `-=` `.` `/` `/=` `:` `;` `<` `<<` `<<=` `<=` `=` `==` `>` `>=` `>>` `>>=` `?` `[` `]` `^` `^=` `|=` `}` `|` `->` `||`}
+
+
+**FOLLOW(DECLARATION)**= {`$` `(` `++` `--` `;` `FLOAT_CONSTANT` `IDENTIFIER` `INTEGER_CONSTANT` `STRING_LITERAL` `bool` `break` `case` `char` `continue` `default` `do` `double` `float` `for` `func` `if` `int` `long` `return` `short` `signed` `sizeof` `struct` `switch` `unsigned` `void` `while` `{` `}`}
+
+
+**FOLLOW(DECLARATION_FAC)**= {`$` `(` `++` `--` `;` `FLOAT_CONSTANT` `IDENTIFIER` `INTEGER_CONSTANT` `STRING_LITERAL` `bool` `break` `case` `char` `continue` `default` `do` `double` `float` `for` `func` `if` `int` `long` `return` `short` `signed` `sizeof` `struct` `switch` `unsigned` `void` `while` `{` `}`}
+
+
+**FOLLOW(DECLARATION_LIST)**= {`{`}
+
+
+**FOLLOW(DECLARATION_LIST_PRIME)**= {`{`}
+
+
+**FOLLOW(DECLARATION_SPECIFIERS)**= {`(` `)` `*` `,` `;` `IDENTIFIER` `const` `restrict` `volatile`}
+
+
+**FOLLOW(DECLARATION_SPECIFIERS_PRIME)**= {`(` `)` `*` `,` `;` `IDENTIFIER` `const` `restrict` `volatile`}
+
+
+**FOLLOW(DECLARATOR)**= {`)` `,` `;` `=` `bool` `char` `double` `float` `int` `long` `short` `signed` `struct` `unsigned` `void` `{`}
+
+
+**FOLLOW(DIRECT_DECLARATOR)**= {`)` `,` `;` `=` `bool` `char` `double` `float` `int` `long` `short` `signed` `struct` `unsigned` `void` `{`}
+
+
+**FOLLOW(DIRECT_DECLARATOR_PRIME)**= {`)` `,` `;` `=` `bool` `char` `double` `float` `int` `long` `short` `signed` `struct` `unsigned` `void` `{`}
+
+
+**FOLLOW(ELSE_FAC)**= {`(` `++` `--` `;` `FLOAT_CONSTANT` `IDENTIFIER` `INTEGER_CONSTANT` `STRING_LITERAL` `bool` `break` `case` `char` `continue` `default` `do` `double` `else` `float` `for` `if` `int` `long` `return` `short` `signed` `sizeof` `struct` `switch` `unsigned` `void` `while` `{` `}`}
+
+
+**FOLLOW(EQUALITY_EXPRESSION)**= {`%=` `&` `&&` `&&=` `)` `*=` `+=` `,` `-=` `/=` `:` `;` `<<=` `=` `>>=` `?` `]` `^` `^=` `|=` `}` `|` `||`}
+
+
+**FOLLOW(EQUALITY_EXPRESSION_PRIME)**= {`%=` `&` `&&` `&&=` `)` `*=` `+=` `,` `-=` `/=` `:` `;` `<<=` `=` `>>=` `?` `]` `^` `^=` `|=` `}` `|` `||`}
+
+
+**FOLLOW(EXCLUSIVE_OR_EXPRESSION)**= {`%=` `&&` `&&=` `)` `*=` `+=` `,` `-=` `/=` `:` `;` `<<=` `=` `>>=` `?` `]` `^=` `|=` `}` `|` `||`}
+
+
+**FOLLOW(EXCLUSIVE_OR_EXPRESSION_PRIME)**= {`%=` `&&` `&&=` `)` `*=` `+=` `,` `-=` `/=` `:` `;` `<<=` `=` `>>=` `?` `]` `^=` `|=` `}` `|` `||`}
+
+
+**FOLLOW(EXPRESSION)**= {`)` `:` `;` `]`}
+
+
+**FOLLOW(EXPRESSION_PRIME)**= {`)` `:` `;` `]`}
+
+
+**FOLLOW(EXPRESSION_STATEMENT)**= {`(` `)` `++` `--` `;` `FLOAT_CONSTANT` `IDENTIFIER` `INTEGER_CONSTANT` `STRING_LITERAL` `bool` `break` `case` `char` `continue` `default` `do` `double` `else` `float` `for` `if` `int` `long` `return` `short` `signed` `sizeof` `struct` `switch` `unsigned` `void` `while` `{` `}`}
+
+
+**FOLLOW(FOR_INIT_STATEMENT)**= {`)`}
+
+
+**FOLLOW(FOR_OPTIONAL_EXPRESSION)**= {`)`}
+
+
+**FOLLOW(FUNCTION_DEFINITION)**= {`$` `bool` `char` `double` `float` `func` `int` `long` `short` `signed` `struct` `unsigned` `void`}
+
+
+**FOLLOW(FUNCTION_DEF_FAC)**= {`$` `bool` `char` `double` `float` `func` `int` `long` `short` `signed` `struct` `unsigned` `void`}
+
+
+**FOLLOW(FUNCTION_SPECIFIER)**= {`(` `)` `*` `,` `;` `IDENTIFIER` `auto` `bool` `char` `const` `double` `float` `inline` `int` `long` `register` `restrict` `short` `signed` `static` `struct` `unsigned` `void` `volatile`}
+
+
+**FOLLOW(GLOBAL_DECLARATIONS)**= {`$` `bool` `char` `double` `float` `func` `int` `long` `short` `signed` `struct` `unsigned` `void`}
+
+
+**FOLLOW(IDENTIFIER_LIST)**= {`)`}
+
+
+**FOLLOW(IDENTIFIER_LIST_PRIME)**= {`)`}
+
+
+**FOLLOW(INCLUSIVE_OR_EXPRESSION)**= {`%=` `&&` `&&=` `)` `*=` `+=` `,` `-=` `/=` `:` `;` `<<=` `=` `>>=` `?` `]` `^=` `|=` `}` `||`}
+
+
+**FOLLOW(INCLUSIVE_OR_EXPRESSION_PRIME)**= {`%=` `&&` `&&=` `)` `*=` `+=` `,` `-=` `/=` `:` `;` `<<=` `=` `>>=` `?` `]` `^=` `|=` `}` `||`}
+
+
+**FOLLOW(INITIALIZER)**= {`,` `;` `}`}
+
+
+**FOLLOW(INITIALIZER_BRACE_FAC)**= {`,` `;` `}`}
+
+
+**FOLLOW(INITIALIZER_BRACE_FAC2)**= {`}`}
+
+
+**FOLLOW(INITIALIZER_LIST)**= {`,` `}`}
+
+
+**FOLLOW(INITIALIZER_LIST_PRIME)**= {`,` `}`}
+
+
+**FOLLOW(INIT_DECLARATOR)**= {`,` `;`}
+
+
+**FOLLOW(INIT_DECLARATOR_FAC)**= {`,` `;`}
+
+
+**FOLLOW(INIT_DECLARATOR_LIST)**= {`;`}
+
+
+**FOLLOW(INIT_DECLARATOR_LIST_PRIME)**= {`;`}
+
+
+**FOLLOW(ITERATION_STATEMENT)**= {`(` `++` `--` `;` `FLOAT_CONSTANT` `IDENTIFIER` `INTEGER_CONSTANT` `STRING_LITERAL` `bool` `break` `case` `char` `continue` `default` `do` `double` `else` `float` `for` `if` `int` `long` `return` `short` `signed` `sizeof` `struct` `switch` `unsigned` `void` `while` `{` `}`}
+
+
+**FOLLOW(JUMP_STATEMENT)**= {`(` `++` `--` `;` `FLOAT_CONSTANT` `IDENTIFIER` `INTEGER_CONSTANT` `STRING_LITERAL` `bool` `break` `case` `char` `continue` `default` `do` `double` 
+`else` `float` `for` `if` `int` `long` `return` `short` `signed` `sizeof` `struct` `switch` `unsigned` `void` `while` `{` `}`}
+
+
+**FOLLOW(LABELED_STATEMENT)**= {`(` `++` `--` `;` `FLOAT_CONSTANT` `IDENTIFIER` `INTEGER_CONSTANT` `STRING_LITERAL` `bool` `break` `case` `char` `continue` `default` `do` `double` `else` `float` `for` `if` `int` `long` `return` `short` `signed` `sizeof` `struct` `switch` `unsigned` `void` `while` `{` `}`}
+
+
+**FOLLOW(LOGICAL_AND_EXPRESSION)**= {`%=` `&&=` `)` `*=` `+=` `,` `-=` `/=` `:` `;` `<<=` `=` `>>=` `?` `]` `^=` `|=` `}` `||`}
+
+
+**FOLLOW(LOGICAL_AND_EXPRESSION_PRIME)**= {`%=` `&&=` `)` `*=` `+=` `,` `-=` `/=` `:` `;` `<<=` `=` `>>=` `?` `]` `^=` `|=` `}` `||`}
+
+
+**FOLLOW(LOGICAL_OR_EXPRESSION)**= {`%=` `&&=` `)` `*=` `+=` `,` `-=` `/=` `:` `;` `<<=` `=` `>>=` `?` `]` `^=` `|=` `}`}
+
+
+**FOLLOW(LOGICAL_OR_EXPRESSION_PRIME)**= {`%=` `&&=` `)` `*=` `+=` `,` `-=` `/=` `:` `;` `<<=` `=` `>>=` `?` `]` `^=` `|=` `}`}
+
+
+**FOLLOW(MULTIPLICATIVE_EXPRESSION)**= {`!=` `%=` `&` `&&` `&&=` `)` `*=` `+` `+=` `,` `-` `-=` `/=` `:` `;` `<` `<<` `<<=` `<=` `=` `==` `>` `>=` `>>` `>>=` `?` `]` `^` `^=` `|=` `}` `|` `||`}
+
+
+**FOLLOW(MULTIPLICATIVE_EXPRESSION_PRIME)**= {`!=` `%=` `&` `&&` `&&=` `)` `*=` `+` `+=` `,` `-` `-=` `/=` `:` `;` `<` `<<` `<<=` `<=` `=` `==` `>` `>=` `>>` `>>=` `?` `]` `^` `^=` `|=` `}` `|` `||`}
+
+
+**FOLLOW(PARAMETER_DECLARATION)**= {`)` `,`}
+
+
+**FOLLOW(PARAMETER_LIST)**= {`)`}
+
+
+**FOLLOW(PARAMETER_LIST_OPT_FAC)**= {`)`}
+
+
+**FOLLOW(PARAMETER_LIST_PRIME)**= {`)`}
+
+
+**FOLLOW(PARAM_DECL_FAC)**= {`)` `,`}
+
+
+**FOLLOW(POINTER)**= {`(` `IDENTIFIER`}
+
+
+**FOLLOW(POSTFIX_ARGUMENTS)**= {`)`}
+
+
+**FOLLOW(POSTFIX_EXPRESSION)**= {`!=` `%` `%=` `&` `&&` `&&=` `)` `*` `*=` `+` `+=` `,` `-` `-=` `/` `/=` `:` `;` `<` `<<` `<<=` `<=` `=` `==` `>` `>=` `>>` `>>=` `?` `]` `^` `^=` `|=` `}` `|` `||`}
+
+
+**FOLLOW(POSTFIX_EXPRESSION_PRIME)**= {`!=` `%` `%=` `&` `&&` `&&=` `)` `*` `*=` `+` `+=` `,` `-` `-=` `/` `/=` `:` `;` `<` `<<` `<<=` `<=` `=` `==` `>` `>=` `>>` `>>=` `?` `]` 
+`^` `^=` `|=` `}` `|` `||`}
+
+
+**FOLLOW(PRIMARY_EXPRESSION)**= {`!=` `%` `%=` `&` `&&` `&&=` `(` `)` `*` `*=` `+` `++` `+=` `,` `-` `--` `-=` `.` `/` `/=` `:` `;` `<` `<<` `<<=` `<=` `=` `==` `>` `>=` `>>` `>>=` `?` `[` `]` `^` `^=` `|=` `}` `|` `->` `||`}
+
+
+**FOLLOW(PROGRAM)**= {`$`}
+
+
+**FOLLOW(PROGRAM_PRIME)**= {`$`}
+
+
+**FOLLOW(RELATIONAL_EXPRESSION)**= {`!=` `%=` `&` `&&` `&&=` `)` `*=` `+=` `,` `-=` `/=` `:` `;` `<<=` `=` `==` `>>=` `?` `]` `^` `^=` `|=` `}` `|` `||`}
+
+
+**FOLLOW(RELATIONAL_EXPRESSION_PRIME)**= {`!=` `%=` `&` `&&` `&&=` `)` `*=` `+=` `,` `-=` `/=` `:` `;` `<<=` `=` `==` `>>=` `?` `]` `^` `^=` `|=` `}` `|` `||`}
+
+
+**FOLLOW(SELECTION_STATEMENT)**= {`(` `++` `--` `;` `FLOAT_CONSTANT` `IDENTIFIER` `INTEGER_CONSTANT` `STRING_LITERAL` `bool` `break` `case` `char` `continue` `default` `do` `double` `else` `float` `for` `if` `int` `long` `return` `short` `signed` `sizeof` `struct` `switch` `unsigned` `void` `while` `{` `}`}
+
+
+**FOLLOW(SHIFT_EXPRESSION)**= {`!=` `%=` `&` `&&` `&&=` `)` `*=` `+=` `,` `-=` `/=` `:` `;` `<` `<<=` `<=` `=` `==` `>` `>=` `>>=` `?` `]` `^` `^=` `|=` `}` `|` `||`}
+
+
+**FOLLOW(SHIFT_EXPRESSION_PRIME)**= {`!=` `%=` `&` `&&` `&&=` `)` `*=` `+=` `,` `-=` `/=` `:` `;` `<` `<<=` `<=` `=` `==` `>` `>=` `>>=` `?` `]` `^` `^=` `|=` `}` `|` `||`}     
+
+
+**FOLLOW(SPECIFIER_QUALIFIER_LIST)**= {`(` `*` `;` `IDENTIFIER` `const` `restrict` `volatile`}
+
+
+**FOLLOW(SPECIFIER_QUALIFIER_LIST_PRIME)**= {`(` `*` `;` `IDENTIFIER` `const` `restrict` `volatile`}
+
+
+**FOLLOW(STATEMENT)**= {`(` `++` `--` `;` `FLOAT_CONSTANT` `IDENTIFIER` `INTEGER_CONSTANT` `STRING_LITERAL` `bool` `break` `case` `char` `continue` `default` `do` `double` `else` `float` `for` `if` `int` `long` `return` `short` `signed` `sizeof` `struct` `switch` `unsigned` `void` `while` `{` `}`}
+
+
+**FOLLOW(STATIC_OPT_FAC)**= {`(` `++` `--` `FLOAT_CONSTANT` `IDENTIFIER` `INTEGER_CONSTANT` `STRING_LITERAL` `]` `const` `restrict` `sizeof` `volatile`}
+
+
+**FOLLOW(STORAGE_SPECIFIER)**= {`(` `)` `*` `,` `;` `IDENTIFIER` `auto` `bool` `char` `const` `double` `float` `inline` `int` `long` `register` `restrict` `short` `signed` `static` `struct` `unsigned` `void` `volatile`}
+
+
+**FOLLOW(STRUCT_DECLARATION)**= {`bool` `char` `double` `float` `int` `long` `short` `signed` `struct` `unsigned` `void` `}`}
+
+
+**FOLLOW(STRUCT_DECLARATION_LIST)**= {`}`}
+
+
+**FOLLOW(STRUCT_DECLARATION_LIST_PRIME)**= {`}`}
+
+
+**FOLLOW(STRUCT_DECLARATOR_LIST)**= {`;`}
+
+
+**FOLLOW(STRUCT_DECLARATOR_LIST_PRIME)**= {`;`}
+
+
+**FOLLOW(STRUCT_DECL_FAC)**= {`bool` `char` `double` `float` `int` `long` `short` `signed` `struct` `unsigned` `void` `}`}
+
+
+**FOLLOW(STRUCT_SPECIFIER)**= {`(` `)` `*` `,` `;` `IDENTIFIER` `auto` `bool` `char` `const` `double` `float` `inline` `int` `long` `register` `restrict` `short` `signed` `static` `struct` `unsigned` `void` `volatile`}
+
+
+**FOLLOW(STRUCT_SPEC_FAC)**= {`(` `)` `*` `,` `;` `IDENTIFIER` `auto` `bool` `char` `const` `double` `float` `inline` `int` `long` `register` `restrict` `short` `signed` `static` `struct` `unsigned` `void` `volatile`}
+
+
+**FOLLOW(STRUCT_SPEC_FAC2)**= {`(` `)` `*` `,` `;` `IDENTIFIER` `auto` `bool` `char` `const` `double` `float` `inline` `int` `long` `register` `restrict` `short` `signed` `static` `struct` `unsigned` `void` `volatile`}
+
+
+**FOLLOW(TYPE_QUALIFIER)**= {`(` `)` `*` `++` `,` `--` `;` `FLOAT_CONSTANT` `IDENTIFIER` `INTEGER_CONSTANT` `STRING_LITERAL` `]` `auto` `bool` `char` `const` `double` `float` `inline` `int` `long` `register` `restrict` `short` `signed` `sizeof` `static` `struct` `unsigned` `void` `volatile`}
+
+
+**FOLLOW(TYPE_QUALIFIER_LIST)**= {`(` `*` `++` `--` `FLOAT_CONSTANT` `IDENTIFIER` `INTEGER_CONSTANT` `STRING_LITERAL` `]` `const` `restrict` `sizeof` `volatile`}
+
+
+**FOLLOW(TYPE_QUALIFIER_LIST_OPT_FAC)**= {`(` `++` `--` `FLOAT_CONSTANT` `IDENTIFIER` `INTEGER_CONSTANT` `STRING_LITERAL` `]` `sizeof`}
+
+
+**FOLLOW(TYPE_QUALIFIER_LIST_PRIME)**= {`(` `*` `++` `--` `FLOAT_CONSTANT` `IDENTIFIER` `INTEGER_CONSTANT` `STRING_LITERAL` `]` `const` `restrict` `sizeof` `volatile`}
+
+
+**FOLLOW(TYPE_SPECIFIER)**= {`(` `)` `*` `,` `;` `IDENTIFIER` `auto` `bool` `char` `const` `double` `float` `inline` `int` `long` `register` `restrict` `short` `signed` `static` `struct` `unsigned` `void` `volatile`}
+
+
+**FOLLOW(UNARY_EXPRESSION)**= {`!=` `%` `%=` `&` `&&` `&&=` `)` `*` `*=` `+` `+=` `,` `-` `-=` `/` `/=` `:` `;` `<` `<<` `<<=` `<=` `=` `==` `>` `>=` `>>` `>>=` `?` `]` `^` `^=` `|=` `}` `|` `||`}
