@@ -23,9 +23,14 @@ private:
     void expect(TokenType expected); // consume el token si es del tipo que queremos
 
     std::unique_ptr<ASTNode> parseGlobalDeclarations();
-    std::unique_ptr<ASTNode> parseProgramPrime();
+    std::unique_ptr<ListNode> parseProgramPrime();
+
+    std::unique_ptr<ASTNode> parseFunctionDefinition();
+    std::unique_ptr<ASTNode> parseDeclaration();
 
     std::unique_ptr<ASTNode> parseStatement();
     std::unique_ptr<ASTNode> parseExpression();
-    std::unique_ptr<ASTNode> parseFuncDef();
+
+    bool isFirstTokenForProgramPrime();
+    bool isBasicType();
 };

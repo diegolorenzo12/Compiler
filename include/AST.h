@@ -32,6 +32,16 @@ public:
         }
     }
 
+    void push_back_vec(std::unique_ptr<ListNode> nodeList)
+    {
+        if (nodeList)
+        {
+            for (auto &node : nodeList->nodes)
+            {
+                nodes.push_back(std::move(node));
+            }
+        }
+    }
     // Override the print method to print all declarations
     void print() const override
     {
@@ -54,21 +64,36 @@ public:
     std::vector<std::unique_ptr<ASTNode>> declarations;
 };
 
-// EXPRESIONS
+// DECLARATIONS
 
-class GlobalDeclarationNode : public ASTNode
+class GlobalDeclarationsNode : public ListNode
 {
-    GlobalDeclarationNode()
+public:
+    GlobalDeclarationsNode()
     {
-        nodeName = "GlobalDeclarationNode";
-    }
-    std::vector<std::unique_ptr<ASTNode>> globalDecls;
-    void addDeclaration(std::unique_ptr<ASTNode> decl)
-    {
-        globalDecls.push_back(std::move(decl));
+        nodeName = "GlobalDeclarationsNode";
     }
 };
 
+class DeclarationNode : public ASTNode
+{
+public:
+    DeclarationNode()
+    {
+        nodeName = "DeclarationNode";
+    }
+    std::unique_ptr<ASTNode> declaration;
+
+    void setDeclaration(std::unique_ptr<ASTNode> decl)
+    {
+        if (decl)
+        {
+            declaration = std::move(decl); // Set the declaration if valid
+        }
+    }
+};
+
+// EXPRESIONS
 class BinaryOpNode : public ASTNode
 {
 public:
