@@ -10,7 +10,7 @@ class Lexer{
 public:
     Lexer(std::shared_ptr<std::fstream> sourceCodeStream);
     void tokenize();
-    TokenTable getTokens();
+    TokenTable& getTokens();
 
 private:
     TokenTable tokenTable;

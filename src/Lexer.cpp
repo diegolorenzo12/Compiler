@@ -22,6 +22,6 @@ void Lexer::tokenize(){
 }
 
 
-TokenTable Lexer::getTokens(){
-    return this->tokenTable;
+TokenTable& Lexer::getTokens() {
+    return tokenTable; // Return by reference
 }

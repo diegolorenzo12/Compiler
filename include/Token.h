@@ -32,6 +32,5 @@ public:
 private:
     std::string value;
     TokenType type;
-    //int lineNumber;
     int lineNumber;
 };
