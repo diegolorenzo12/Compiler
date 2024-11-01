@@ -18,10 +18,11 @@ identifier      [A-Za-z_][A-Za-z0-9_]*
 int_constant    [0-9]+ 
 float_constant  [0-9]+\.[0-9]+([eE][-+]?[0-9]+)? 
 string          \"[^\n"]*\"
-punctuation     [;,:.()->{}[\]]
+punctuation     [;,:.()->{}[\]?]
 comp_op        (==|!=|<=|>=|<|>|&&|\|\|)
 increment_op    (\+\+|\-\-)
 assign_op      (=|\+=|\-=|\*=|\/=|%=|<<=|>>=|&=|\^=|\|=)
+arithmetic_op  [-+*/%&|^]
 
 
 %%
@@ -97,13 +98,16 @@ assign_op      (=|\+=|\-=|\*=|\/=|%=|<<=|>>=|&=|\^=|\|=)
 
 {string}              { return (int)TokenType::STRING_LITERAL; }
 
+{assign_op}       { return (int)TokenType::ASSIGNMENT_OPERATOR; }
+
 {punctuation}   { return (int)TokenType::PUNCTUATION; }
 
 {comp_op}      { return (int)TokenType::COMPARISON_OPERATOR; }
 
 {increment_op}  { return (int)TokenType::INCREMENT_OPERATOR; }
 
-{assign_op}       { return (int)TokenType::ASSIGNMENT_OPERATOR; }
+
+{arithmetic_op}  { return (int)TokenType::ARITHMETIC_OPERATOR; }
 
 {identifier}    { return (int)TokenType::IDENTIFIER; }
 

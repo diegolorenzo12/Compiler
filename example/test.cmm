@@ -16,6 +16,7 @@ func int main() {
     int x = 10;
     int y = 20;
     float result;
+    int someOperation = 1 & 2;
 
     // Add two numbers
     result = add(x, y);

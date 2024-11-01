@@ -18,6 +18,10 @@ protected:
     std::string nodeName;
 };
 
+/*
+ABSTRACT CLASES
+*/
+
 class ListNode : public ASTNode
 {
 public:
@@ -53,6 +57,49 @@ public:
     }
 };
 
+class BinaryASTNode : public ASTNode
+{
+public:
+    BinaryASTNode(std::unique_ptr<ASTNode> left, std::unique_ptr<ASTNode> right)
+        : leftOperand(std::move(left)), rightOperand(std::move(right)) {}
+
+protected:
+    std::unique_ptr<ASTNode> leftOperand;
+    std::unique_ptr<ASTNode> rightOperand;
+
+    virtual void printOperator() const = 0;
+};
+
+class AndASTNode : public BinaryASTNode
+{
+public:
+    using BinaryASTNode::BinaryASTNode; // Inherit constructors
+
+    // Override the print method
+    void printOperator() const override
+    {
+        std::cout << " AND "; // Print the AND operator
+    }
+};
+
+class OrASTNode : public BinaryASTNode
+{
+public:
+    using BinaryASTNode::BinaryASTNode; // Inherit constructors
+
+    // Override the print method
+    void printOperator() const override
+    {
+        std::cout << " OR "; // Print the OR operator
+    }
+};
+
+// legacy system failure
+
+/*
+CONCRETE CLASSES FOR MY AST
+*/
+
 class ProgramNode : public ListNode
 {
 public:
@@ -66,7 +113,7 @@ public:
 
 // DECLARATIONS
 
-class GlobalDeclarationsNode : public ListNode
+class GlobalDeclarationsNode : public ASTNode
 {
 public:
     GlobalDeclarationsNode()
@@ -88,9 +135,11 @@ public:
     {
         if (decl)
         {
-            declaration = std::move(decl); // Set the declaration if valid
+            declaration = std::move(decl);
         }
     }
+
+    virtual ~DeclarationNode() = default;
 };
 
 // EXPRESIONS

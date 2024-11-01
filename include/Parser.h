@@ -22,6 +22,12 @@ private:
     void consume();
     void expect(TokenType expected); // consume el token si es del tipo que queremos
 
+    bool isExpressionFirst() const;
+    bool isDeclarationFirst() const;
+    bool isBasicType() const;
+    bool isBlockFirst() const;
+    bool isStatementFirst() const;
+
     std::unique_ptr<ASTNode> parseGlobalDeclarations();
 
     std::unique_ptr<ASTNode> parseADDITIVE_EXPRESSION();
@@ -95,7 +101,7 @@ private:
     std::unique_ptr<ASTNode> parsePOSTFIX_EXPRESSION();
     std::unique_ptr<ASTNode> parsePOSTFIX_EXPRESSION_PRIME();
     std::unique_ptr<ASTNode> parsePRIMARY_EXPRESSION();
-    std::unique_ptr<ListNode> parsePROGRAM_PRIME();
+    std::unique_ptr<ASTNode> parsePROGRAM_PRIME();
     std::unique_ptr<ASTNode> parseRELATIONAL_EXPRESSION();
     std::unique_ptr<ASTNode> parseRELATIONAL_EXPRESSION_PRIME();
     std::unique_ptr<ASTNode> parseSELECTION_STATEMENT();
@@ -118,9 +124,6 @@ private:
     std::unique_ptr<ASTNode> parseTYPE_QUALIFIER_LIST_OPT_FAC();
     std::unique_ptr<ASTNode> parseTYPE_SPECIFIER();
     std::unique_ptr<ASTNode> parseUNARY_EXPRESSION();
-
-    bool isFirstTokenForProgramPrime();
-    bool isBasicType();
 };
 
 /*
