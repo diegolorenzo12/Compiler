@@ -4,7 +4,8 @@
 #include "Token.h"
 #include <iostream>
 
-class TokenTable{
+class TokenTable
+{
 public:
     void push_back(Token t);
     void pop_front();
@@ -14,8 +15,6 @@ public:
     void clear();
     void printTokens() const;
 
-
 private:
     std::deque<Token> tokens;
 };
-
