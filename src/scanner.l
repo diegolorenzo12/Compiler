@@ -101,14 +101,18 @@ arithmetic_op  ([\-+*/%&]|<<|>>|\^)
 
 {assign_op}       { return (int)TokenType::ASSIGNMENT_OPERATOR; }
 
+"->"       { return (int)TokenType::PUNCTUATION; }
+
 {arithmetic_op}  { return (int)TokenType::ARITHMETIC_OPERATOR; }
-
-
-{punctuation}   { return (int)TokenType::PUNCTUATION; }
 
 {comp_op}      { return (int)TokenType::COMPARISON_OPERATOR; }
 
 {increment_op}  { return (int)TokenType::INCREMENT_OPERATOR; }
+
+
+{punctuation}   { return (int)TokenType::PUNCTUATION; }
+
+
 
 
 {identifier}    { return (int)TokenType::IDENTIFIER; }

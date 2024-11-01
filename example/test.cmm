@@ -20,6 +20,7 @@ struct Point {
 func int main() {
     int x = 10;
     int y = 20;
+    int arr[10] = {0, 1,2,3,4,5,6,7,8,9}
     float result;
     int someOperation = 12;
     struct Point p1;
@@ -48,7 +49,18 @@ func int main() {
     for(int i=0; n; i++){
         printf("Result is positive.\n");
     }
-    
+
 
     return 0;
 }
+
+/*
+    // For testing lexer
+    123 23424 1423
+    1.2432 342.543 13423.32453
+    ; . : ( ) -> { } [] ? 
+    ++ --
+    = += -= *= /= %=<<= >>= &= ^= |=
+    + - * / & << >> ^
+
+*/
