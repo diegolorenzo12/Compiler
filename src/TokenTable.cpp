@@ -1,30 +1,36 @@
 #include "TokenTable.h"
 
-
-void TokenTable::push_back(Token t){
+void TokenTable::push_back(Token t)
+{
     tokens.push_back(t);
 }
 
-void TokenTable::pop_front(){
+void TokenTable::pop_front()
+{
     tokens.pop_front();
 }
 
-Token TokenTable::front(){
-    if(isEmpty()){
-        Token("", TokenType::END_OF_FILE, 0);
+Token TokenTable::front()
+{
+    if (isEmpty())
+    {
+        return Token("", TokenType::END_OF_FILE, 0);
     }
     return tokens.front();
 }
 
-bool TokenTable::isEmpty(){
+bool TokenTable::isEmpty()
+{
     return tokens.empty();
 }
 
-int TokenTable::size(){
+int TokenTable::size()
+{
     return tokens.size();
 }
 
-void TokenTable::clear(){
+void TokenTable::clear()
+{
     tokens.clear();
 }
 

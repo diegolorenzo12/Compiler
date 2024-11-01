@@ -381,6 +381,11 @@ std::unique_ptr<ASTNode> Parser::parseDECLARATION_FAC()
         (currentToken.getType() == TokenType::PUNCTUATION && currentToken.getValue() == "(") || (currentToken.getType() == TokenType::ARITHMETIC_OPERATOR && currentToken.getValue() == "*") || (currentToken.getType() == TokenType::IDENTIFIER))
     {
         parseINIT_DECLARATOR_LIST();
+        if (currentToken.getType() != TokenType::PUNCTUATION || currentToken.getValue() != ";")
+        {
+            throw std::runtime_error("Syntax error: Expected ; at the end of declaration");
+        }
+        consume();
     }
     return nullptr;
 }
@@ -994,7 +999,7 @@ std::unique_ptr<ASTNode> Parser::parseLOGICAL_AND_EXPRESSION()
 // LOGICAL_AND_EXPRESSION_PRIME -> && INCLUSIVE_OR_EXPRESSION LOGICAL_AND_EXPRESSION_PRIME | ϵ
 std::unique_ptr<ASTNode> Parser::parseLOGICAL_AND_EXPRESSION_PRIME()
 {
-    if (currentToken.getType() == TokenType::LOGICAL_OPERATOR && currentToken.getValue() == "&&")
+    if (currentToken.getType() == TokenType::COMPARISON_OPERATOR && currentToken.getValue() == "&&")
     {
         consume();
         parseINCLUSIVE_OR_EXPRESSION();
@@ -1104,11 +1109,17 @@ std::unique_ptr<ASTNode> Parser::parsePARAM_DECL_FAC()
     return nullptr;
 }
 
-// PARAMETER_LIST -> PARAMETER_DECLARATION PARAMETER_LIST_PRIME
+// POINTER -> *
 std::unique_ptr<ASTNode> Parser::parsePOINTER()
 {
-    parsePARAMETER_DECLARATION();
-    parsePARAMETER_LIST_PRIME();
+    if (currentToken.getType() == TokenType::ARITHMETIC_OPERATOR && currentToken.getValue() == "*")
+    {
+        consume();
+    }
+    else
+    {
+        throw std::runtime_error("Syntax error: Expected * in pointer");
+    }
     return nullptr;
 }
 
