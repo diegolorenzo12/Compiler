@@ -1,5 +1,5 @@
 func int add(int a, int b) {
-    int result =0
+    int result =0;
     result += a+b;
     return result;  // Adds two integers
 }
@@ -37,8 +37,6 @@ func int main() {
     // Conditional statement
     if (result > 0) {
         printf("Result is positive.\n");
-    } else {
-        printf("Result is non-positive.\n");
     }
 
     return 0;
