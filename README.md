@@ -15,12 +15,10 @@ A compiler for a C-like programming language, with a reduced set of instructions
 - [Lexical Analysis](#lexical-analysis)
   - [Automata](#automata)
 - [Syntax Analysis](#syntax-analysis)
+  - [Parser](#parser)
 - [Semantic Analysis](#semantic-analysis)
 - [Installation and Running](#installation-and-running)
-- [Testing and Validation](#testing-and-validation)
 - [Tools and Development Environment](#tools-and-development-environment)
-- [Demonstration](#demonstration)
-- [Challenges and Solutions](#challenges-and-solutions)
 - [Conclusions and Future Work](#conclusions-and-future-work)
 - [References](#references)
 
@@ -131,13 +129,29 @@ A table-driven lexer provides several advantages over a directly coded lexer:
 
 ## Syntax Analysis
 
-- **Syntax analysis:**
+### Overview
+The syntax analysis phase ensures that the source code conforms to the grammatical structure of the language. This phase utilizes a context-free grammar (CFG) to parse the code and build a parse tree or an abstract syntax tree (AST).
 
-  - For this parser a context-free grammar (CFG) was created with all the rules of the language. The CFG is documented in the [CFG](docs/CFG.md) file. Then we eliminated the left recursion from the grammar rules. The resulting grammar is documented in the [CFG-LR](docs/CFG-LR.md) file.
+### CFG Analysis
+The structure of the language was analyzed, and the findings are documented in the [CFG Analysis](docs/CFG-Analysis.md). This document outlines the original grammar and explains the reasoning behind each rule.
 
-You can see the diagram of the CFG [here](https://htmlpreview.github.io/?https://github.com/diegolorenzo12/Compiler/blob/0f19faf2cd49f8ebea099f548f1f6bea33e9ee84/docs/Syntactic-diagram.html)
+### Grammar Development
+- **Original CFG**: The initial set of grammar rules, representing the core language structure, is available in the [CFG](docs/CFG.md) file. Each rule is accompanied by a brief explanation to provide insight into its design.
+- **Elimination of Left Recursion**: Left recursion was removed to align the grammar with the requirements for an LL(1) parser. The modified version is documented in the [CFG-LR](docs/CFG-LR.md) file.
+- **Left Factoring**: To handle ambiguity and create a deterministic parsing structure, left factoring was applied to the grammar rules. The final version of the grammar can be found in the [CFG-Left-Factoring](docs/CFG-left-factoring.md) file.
+
+### Visual Representation
+To aid comprehension, a syntactic diagram was created to illustrate the final version of the grammar. You can view this diagram [here](https://htmlpreview.github.io/?https://github.com/diegolorenzo12/Compiler/blob/0f19faf2cd49f8ebea099f548f1f6bea33e9ee84/docs/Syntactic-diagram.html).
+
+### Parser Implementation
+The parser was implemented as a **recursive descent parser**, designed to conform to the LL(1) parsing strategy. Some modifications were made to the original C syntax to enable compatibility with LL(1):
+- **Function Declarations**: Prefixed with `func` to simplify parsing.
+- **Type Qualifiers and Struct Pointers**: Certain features, such as multiple type qualifiers and struct pointers, were excluded to reduce complexity and ambiguity.
+
+These adjustments helped streamline the grammar, making it more suitable for top-down parsing while preserving essential language functionality. 
 
 ## Semantic Analysis
+### todo when project finish
 
 - **Semantic analysis:**
 
@@ -193,19 +207,10 @@ cmake --build . --target run
 
 For installation instructions, see the [Installation and Running](#installation-and-running) section.
 
-## Demonstration
-
-- **Source code example:**
-- **Compilation process:**
-- **Execution of compiled code:**
-
-## Challenges and Solutions
-
-- **Technical or design problems:**
-- **Strategies adopted to overcome challenges:**
-- **Lessons learned:**
 
 ## Conclusions and Future Work
+
+### todo when project finish
 
 - **Summary of objectives achieved:**
 - **Performance evaluation:**
