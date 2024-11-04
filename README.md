@@ -145,6 +145,7 @@ The structure of the language was analyzed, and the findings are documented in t
 - **Original CFG**: The initial set of grammar rules, representing the core language structure, is available in the [CFG](docs/CFG.md) file. Each rule is accompanied by a brief explanation to provide insight into its design.
 - **Elimination of Left Recursion**: Left recursion was removed to align the grammar with the requirements for an LL(1) parser. The modified version is documented in the [CFG-LR](docs/CFG-LR.md) file.
 - **Left Factoring**: To handle ambiguity and create a deterministic parsing structure, left factoring was applied to the grammar rules. The final version of the grammar can be found in the [CFG-Left-Factoring](docs/CFG-left-factoring.md) file.
+- **First and Follow Analysis**: We also performed first and follow analysis to ensure compatibility with the LL(1) parsing strategy. The details of this analysis are documented in the [First-and-Follow](docs/First-and-Follow.md) file.
 
 ### Visual Representation
 To aid comprehension, a syntactic diagram was created to illustrate the final version of the grammar. You can view this diagram [here](https://htmlpreview.github.io/?https://github.com/diegolorenzo12/Compiler/blob/0f19faf2cd49f8ebea099f548f1f6bea33e9ee84/docs/Syntactic-diagram.html).
