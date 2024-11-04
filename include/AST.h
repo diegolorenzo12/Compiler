@@ -1,223 +1,473 @@
 #pragma once
+#include <iostream>
 #include <memory>
 #include <string>
 #include <vector>
-#include <iostream>
 
+// Forward declarations for visitor pattern
+class Program;
+class BinaryExpr;
+class LiteralExpr;
+class VariableExpr;
+class FunctionDecl;
+class Declaration;
+class Type;
+class Specifier;
+class DeclarationSpecifiers;
+class Declarator;
+class DeclatatorList;
+class Initializer;
+class InitializerList;
+
+class ASTVisitor
+{
+public:
+    virtual ~ASTVisitor() = default;
+
+    // Visitor methods for each AST node type
+    virtual void visit(Program &node) = 0;
+    virtual void visit(BinaryExpr &node) = 0;
+    virtual void visit(LiteralExpr &node) = 0;
+    virtual void visit(VariableExpr &node) = 0;
+    virtual void visit(FunctionDecl &node) = 0;
+    virtual void visit(Declaration &node) = 0;
+    virtual void visit(Type &node) = 0;
+    virtual void visit(Specifier &node) = 0;
+    virtual void visit(DeclarationSpecifiers &node) = 0;
+    virtual void visit(Declarator &node) = 0;
+    virtual void visit(DeclatatorList &node) = 0;
+    virtual void visit(Initializer &node) = 0;
+    virtual void visit(InitializerList &node) = 0;
+};
+
+// ASTVisitor base class for the visitor pattern
+
+// Abstract base class for all AST nodes
 class ASTNode
 {
 public:
     virtual ~ASTNode() = default;
 
-    virtual void print() const
+    // Accept method for the visitor
+    virtual void accept(ASTVisitor &visitor) = 0;
+};
+
+// Program node as the root of the AST
+class Program : public ASTNode
+{
+public:
+    Program(std::vector<std::unique_ptr<ASTNode>> topLevelDeclarations)
+        : topLevelDeclarations_(std::move(topLevelDeclarations)) {}
+
+    void accept(ASTVisitor &visitor) override
     {
-        std::cout << "nodeName" << ":\n";
+        visitor.visit(*this);
     }
 
-protected:
-    std::string nodeName;
+    const std::vector<std::unique_ptr<ASTNode>> &getTopLevelDeclarations() const
+    {
+        return topLevelDeclarations_;
+    }
+
+private:
+    std::vector<std::unique_ptr<ASTNode>> topLevelDeclarations_;
+};
+
+// Expression node base class
+class Expr : public ASTNode
+{
+};
+
+// Statement node base class
+class Stmt : public ASTNode
+{
+};
+
+// Example: Binary Expression Node (e.g., "a + b")
+class BinaryExpr : public Expr
+{
+public:
+    BinaryExpr(std::unique_ptr<Expr> lhs, std::string op, std::unique_ptr<Expr> rhs)
+        : lhs_(std::move(lhs)), op_(op), rhs_(std::move(rhs)) {}
+
+    void accept(ASTVisitor &visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    // Getters for the sub-expressions
+    Expr *getLHS() const { return lhs_.get(); }
+    Expr *getRHS() const { return rhs_.get(); }
+    const std::string &getOp() const { return op_; }
+
+private:
+    std::unique_ptr<Expr> lhs_, rhs_;
+    std::string op_;
+};
+
+// Example: Literal Expression Node (e.g., "42")
+class LiteralExpr : public Expr
+{
+public:
+    explicit LiteralExpr(int value) : value_(value) {}
+
+    void accept(ASTVisitor &visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    int getValue() const { return value_; }
+
+private:
+    int value_;
+};
+
+// Example: Variable Expression Node (e.g., "x")
+class VariableExpr : public Expr
+{
+public:
+    explicit VariableExpr(const std::string &name) : name_(name) {}
+
+    void accept(ASTVisitor &visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    const std::string &getName() const { return name_; }
+
+private:
+    std::string name_;
+};
+
+// Function Declaration Node
+class FunctionDecl : public ASTNode
+{
+public:
+    FunctionDecl(const std::string &name, std::vector<std::unique_ptr<Stmt>> body)
+        : name_(name), body_(std::move(body)) {}
+
+    void accept(ASTVisitor &visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    const std::string &getName() const { return name_; }
+    const std::vector<std::unique_ptr<Stmt>> &getBody() const { return body_; }
+
+private:
+    std::string name_;
+    std::vector<std::unique_ptr<Stmt>> body_;
+};
+
+class Type : public ASTNode
+{
+public:
+    Type(std::string baseType, bool isPointer = false)
+        : baseType_(std::move(baseType)) {}
+
+    void accept(ASTVisitor &visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    const std::string &getBaseType() const { return baseType_; }
+
+private:
+    std::string baseType_;
+};
+
+class Specifier : public ASTNode
+{
+public:
+    explicit Specifier(std::string specifier, std::string specifierType) : specifier_(std::move(specifier)), specifierType_(std::move(specifierType_)) {}
+
+    void accept(ASTVisitor &visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    const std::string &getSpecifier() const { return specifier_; }
+    const std::string &getSpecifierType() const { return specifierType_; }
+
+private:
+    std::string specifier_;
+    std::string specifierType_;
+};
+
+class DeclarationSpecifiers : public ASTNode
+{
+public:
+    DeclarationSpecifiers(std::unique_ptr<Type> type, std::unique_ptr<Specifier> specifiers)
+        : type_(std::move(type)), specifier_(std::move(specifiers)) {}
+
+    void accept(ASTVisitor &visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    const std::unique_ptr<Type> &getType() const { return type_; }
+    const std::unique_ptr<Specifier> &getSpecifiers() const { return specifier_; }
+
+private:
+    std::unique_ptr<Type> type_;
+    std::unique_ptr<Specifier> specifier_;
+};
+
+struct arraySize // In direct declarator
+{
+    std::unique_ptr<ASTNode> expr;
+    bool isStatic;
+    std::string typeQualifier;
+};
+
+class Declarator : public ASTNode
+{
+public:
+    Declarator() {}
+
+    void accept(ASTVisitor &visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    const void setIdentifier(std::string identifier) { identifier_ = identifier; }
+    const void setPointer(bool isPointer) { isPointer_ = isPointer; }
+    const bool isPointer() const { return isPointer_; }
+    const std::string &getIdentifier() const { return identifier_; }
+    const std::unique_ptr<Initializer> &getInitializer() const { return initializer_; }
+    const bool hasInitializer() const { return initializer_ != nullptr; }
+
+    // from direct declarator
+    void addArraySize(arraySize arraySize) { arraySizes_.push_back(std::move(arraySize)); }
+    void setFunction(bool isFunction) { isFunction_ = isFunction; }
+    const bool isFunction() const { return isFunction_; }
+    void setIsArray(bool isArray) { isArray_ = isArray; }
+    const bool isArray() const { return isArray_; }
+    void setDeclarator(std::unique_ptr<Declarator> declarator) { declarator_ = std::move(declarator); }
+    void setInitializer(std::unique_ptr<Initializer> initializer) { initializer_ = std::move(initializer); }
+
+private:
+    std::string identifier_;
+    std::unique_ptr<Initializer> initializer_; // optional
+    std::unique_ptr<Declarator> declarator_;   // optional
+    bool isPointer_ = false;
+    bool isArray_ = false;
+    std::vector<arraySize> arraySizes_; // optional
+    bool isFunction_ = false;
+};
+
+class DeclatatorList : public ASTNode
+{
+public:
+    DeclatatorList(std::vector<std::unique_ptr<Declarator>> declarators)
+        : declarators_(std::move(declarators)) {}
+
+    void accept(ASTVisitor &visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    const std::vector<std::unique_ptr<Declarator>> &getDeclarators() const { return declarators_; }
+
+private:
+    std::vector<std::unique_ptr<Declarator>> declarators_;
+};
+
+class Declaration : public ASTNode
+{
+public:
+    Declaration(std::unique_ptr<DeclarationSpecifiers> declarationSpecifiers, std::unique_ptr<DeclatatorList> declaratorList)
+        : declarationSpecifiers_(std::move(declarationSpecifiers)), declaratorList_(std::move(declaratorList)) {}
+
+    void accept(ASTVisitor &visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    // DECLARATION_SPECIFIERS
+    const std::unique_ptr<DeclarationSpecifiers> &getDeclarationSpecifiers() const { return declarationSpecifiers_; }
+    const std::unique_ptr<DeclatatorList> &getDeclaratorList() const { return declaratorList_; }
+    // INIT_DECLARATOR_LIST
+
+private:
+    std::unique_ptr<DeclarationSpecifiers> declarationSpecifiers_;
+    std::unique_ptr<DeclatatorList> declaratorList_;
+};
+
+class Initializer : public ASTNode
+{
+public:
+    Initializer() {}
+
+    void accept(ASTVisitor &visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void setExpression(std::unique_ptr<Expr> expr) { expr_ = std::move(expr); }
+    bool isExpression() const { return expr_ != nullptr; }
+    Expr *getExpr() const { return expr_.get(); }
+    void setExpr(std::unique_ptr<Expr> expr) { expr_ = std::move(expr); }
+    void setInitializerList(std::unique_ptr<InitializerList> InitializerList) { InitializerList_ = std::move(InitializerList); }
+    bool isBraceInitializer() const { return InitializerList_ != nullptr; }
+
+private:
+    std::unique_ptr<Expr> expr_;
+    std::unique_ptr<InitializerList> InitializerList_;
+};
+
+class InitializerList : public ASTNode
+{
+public:
+    void accept(ASTVisitor &visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void addInitializer(std::unique_ptr<Initializer> initializer)
+    {
+        InitializerList_.push_back(std::move(initializer));
+    }
+
+private:
+    std::vector<std::unique_ptr<Initializer>> InitializerList_;
 };
 
 /*
-ABSTRACT CLASES
+PRINT ABSTRACT SYNTAX TREE
 */
 
-class ListNode : public ASTNode
+class PrintVisitor : public ASTVisitor
 {
 public:
-    std::vector<std::unique_ptr<ASTNode>> nodes;
-
-    // Method to add a declaration if it is not null
-    void push_back_node(std::unique_ptr<ASTNode> node)
+    void visit(Program &node) override
     {
-        if (node)
+        std::cout << "Program {\n";
+        for (const auto &decl : node.getTopLevelDeclarations())
         {
-            nodes.push_back(std::move(node)); // Only add non-null declarations
-        }
-    }
-
-    void push_back_vec(std::unique_ptr<ListNode> nodeList)
-    {
-        if (nodeList)
-        {
-            for (auto &node : nodeList->nodes)
+            if (decl != nullptr)
             {
-                nodes.push_back(std::move(node));
+                decl->accept(*this);
+                std::cout << "\n";
             }
         }
+        std::cout << "}\n";
     }
-    // Override the print method to print all declarations
-    void print() const override
+
+    void visit(BinaryExpr &node) override
     {
-        ASTNode::print(); // Call print on base class
-        for (const auto &node : nodes)
+        std::cout << "(";
+        node.getLHS()->accept(*this);
+        std::cout << " " << node.getOp() << " ";
+        node.getRHS()->accept(*this);
+        std::cout << ")";
+    }
+
+    void visit(LiteralExpr &node) override
+    {
+        std::cout << node.getValue();
+    }
+
+    void visit(VariableExpr &node) override
+    {
+        std::cout << node.getName();
+    }
+
+    void visit(FunctionDecl &node) override
+    {
+        std::cout << "Function " << node.getName() << " {\n";
+        for (const auto &stmt : node.getBody())
         {
-            node->print(); // Print each declaration
+            stmt->accept(*this);
+            std::cout << "\n";
         }
-    }
-};
-
-class BinaryASTNode : public ASTNode
-{
-public:
-    BinaryASTNode(std::unique_ptr<ASTNode> left, std::unique_ptr<ASTNode> right)
-        : leftOperand(std::move(left)), rightOperand(std::move(right)) {}
-
-protected:
-    std::unique_ptr<ASTNode> leftOperand;
-    std::unique_ptr<ASTNode> rightOperand;
-
-    virtual void printOperator() const = 0;
-};
-
-class AndASTNode : public BinaryASTNode
-{
-public:
-    using BinaryASTNode::BinaryASTNode; // Inherit constructors
-
-    // Override the print method
-    void printOperator() const override
-    {
-        std::cout << " AND "; // Print the AND operator
-    }
-};
-
-class OrASTNode : public BinaryASTNode
-{
-public:
-    using BinaryASTNode::BinaryASTNode; // Inherit constructors
-
-    // Override the print method
-    void printOperator() const override
-    {
-        std::cout << " OR "; // Print the OR operator
-    }
-};
-
-// legacy system failure
-
-/*
-CONCRETE CLASSES FOR MY AST
-*/
-
-class ProgramNode : public ListNode
-{
-public:
-    ProgramNode()
-    {
-        nodeName = "ProgramNode";
+        std::cout << "}\n";
     }
 
-    std::vector<std::unique_ptr<ASTNode>> declarations;
-};
-
-// DECLARATIONS
-
-class GlobalDeclarationsNode : public ASTNode
-{
-public:
-    GlobalDeclarationsNode()
+    void visit(Declaration &node) override
     {
-        nodeName = "GlobalDeclarationsNode";
-    }
-};
-
-class DeclarationNode : public ASTNode
-{
-public:
-    DeclarationNode()
-    {
-        nodeName = "DeclarationNode";
-    }
-    std::unique_ptr<ASTNode> declaration;
-
-    void setDeclaration(std::unique_ptr<ASTNode> decl)
-    {
-        if (decl)
+        std::cout << "Declaration: {\n";
+        if (node.getDeclarationSpecifiers() != nullptr)
         {
-            declaration = std::move(decl);
+            node.getDeclarationSpecifiers()->accept(*this);
+        }
+        if (node.getDeclaratorList() != nullptr)
+        {
+            std::cout << ", \n";
+            node.getDeclaratorList()->accept(*this);
+        }
+        std::cout << "}\n";
+    }
+
+    void visit(Type &node) override
+    {
+        std::cout << "Type (" << node.getBaseType() << ")";
+    }
+
+    void visit(Specifier &node) override
+    {
+        std::cout << "Specifier " << node.getSpecifier() << " " << node.getSpecifierType();
+    }
+
+    void visit(DeclarationSpecifiers &node) override
+    {
+        std::cout << "DeclarationSpecifiers: ";
+        if (node.getType() != nullptr)
+        {
+            node.getType()->accept(*this);
+        }
+        if (node.getSpecifiers() != nullptr)
+        {
+            std::cout << "Type: ";
+            node.getSpecifiers()->accept(*this);
+            std::cout << "\n";
         }
     }
 
-    virtual ~DeclarationNode() = default;
-};
-
-// EXPRESIONS
-class BinaryOpNode : public ASTNode
-{
-public:
-    BinaryOpNode()
+    void visit(Declarator &node) override
     {
-        nodeName = "BinaryOpNode";
+        std::cout << "Declarator, Identifier(" << node.getIdentifier() << ")";
+        if (node.isPointer())
+        {
+            std::cout << "Is Pointer \n";
+        }
+        if (node.isArray())
+        {
+            std::cout << "Is Array \n";
+        }
+        if (node.isFunction())
+        {
+            std::cout << "Is Function pointer \n";
+        }
+        if (node.hasInitializer())
+        {
+            std::cout << ", with Initializer ";
+            node.getInitializer()->accept(*this);
+        }
     }
-    std::unique_ptr<ASTNode> left;
-    std::unique_ptr<ASTNode> right;
-    std::string op;
 
-    BinaryOpNode(std::unique_ptr<ASTNode> left, const std::string &op, std::unique_ptr<ASTNode> right)
-        : left(std::move(left)), op(op), right(std::move(right)) {}
-};
-
-class AssignmentNode : public ASTNode
-{
-public:
-    AssignmentNode()
+    void visit(DeclatatorList &node) override
     {
-        nodeName = "AssignmentNode";
+        std::cout << "DeclaratorList {\n";
+        for (const auto &decl : node.getDeclarators())
+        {
+            if (decl != nullptr)
+            {
+                decl->accept(*this);
+                std::cout << "\n";
+            }
+        }
+        std::cout << "}\n";
     }
-    std::string id;
-    std::unique_ptr<ASTNode> expr;
 
-    AssignmentNode(const std::string &id, std::unique_ptr<ASTNode> expr)
-        : id(id), expr(std::move(expr)) {}
-};
-
-// STATEMENTS
-
-// add statements node here: jump, labaled, iterative, etc
-
-// TERMINAL nodes
-class ConstantIntegerNode : public ASTNode
-{
-public:
-    int value;
-    explicit ConstantIntegerNode(int value) : value(value)
+    void visit(Initializer &node) override
     {
-        nodeName = "ConstIntegerNode";
+        std::cout << "Initializer ";
+        node.getExpr()->accept(*this);
     }
-    void print() const override
-    {
-        ASTNode::print();
-        std::cout << value << std::endl;
-    }
-};
 
-class ConstantFloatNode : public ASTNode
-{
-public:
-    float value;
-    explicit ConstantFloatNode(float value) : value(value)
+    void visit(InitializerList &node) override
     {
-        nodeName = "ConstFloatNode";
-    }
-    void print() const override
-    {
-        ASTNode::print();
-        std::cout << value << std::endl;
-    }
-};
-
-class StringLiteralNode : public ASTNode
-{
-public:
-    std::string value;
-    explicit StringLiteralNode(std::string value) : value(value)
-    {
-        nodeName = "StringLiteralNode";
-    }
-    void print() const override
-    {
-        ASTNode::print();
-        std::cout << value << std::endl;
+        std::cout << "BraceInitializer";
     }
 };

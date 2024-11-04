@@ -1,3 +1,5 @@
+int a=0;
+
 func int add(int a, int b) {
     int result =0+1;
     result += a;
@@ -20,7 +22,7 @@ struct Point {
 func int main() {
     int x = 10;
     int y = 20;
-    int arr[10] = {0, 1,2,3,4,5,6,7,8,9}
+    int arr[10] = {0, 1,2,3,4,5,6,7,8,9};
     float result;
     int someOperation = 12;
     struct Point p1;

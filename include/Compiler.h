@@ -4,7 +4,6 @@
 #include <iostream>
 #include <iostream>
 #include <string>
-#include "AST.h"
 #include "Parser.h"
 
 class Compiler

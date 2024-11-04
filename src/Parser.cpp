@@ -85,37 +85,29 @@ void Parser::expect(TokenType expected)
 PARSER
 */
 
-std::unique_ptr<ASTNode> Parser::parsePROGRAM()
+// PROGRAM -> GLOBAL_DECLARATIONS PROGRAM_PRIME
+std::unique_ptr<Program> Parser::parsePROGRAM()
 {
-    // auto programNode = std::make_unique<ProgramNode>();
-    // programNode->push_back_node(parseGLOBAL_DECLARATIONS());
-    // programNode->push_back_node(parsePROGRAM_PRIME());
-    parseGLOBAL_DECLARATIONS();
-    parsePROGRAM_PRIME();
+    std::vector<std::unique_ptr<ASTNode>> topLevelDeclarations;
+
+    topLevelDeclarations.push_back(parseGLOBAL_DECLARATIONS());
+
+    // PROGRAM_PRIME -> GLOBAL_DECLARATIONS PROGRAM_PRIME | ϵ
+    while (isDeclarationFirst())
+    {
+        topLevelDeclarations.push_back(parseGLOBAL_DECLARATIONS());
+    }
 
     if (currentToken.getType() != TokenType::END_OF_FILE)
     {
         throw std::runtime_error("Unexpected token: " + currentToken.getValue());
     }
-    return nullptr;
-}
+    std::unique_ptr<Program> program = std::make_unique<Program>(std::move(topLevelDeclarations));
 
-// PROGRAM_PRIME -> GLOBAL_DECLARATIONS PROGRAM_PRIME | ϵ
-std::unique_ptr<ASTNode> Parser::parsePROGRAM_PRIME()
-{
-    auto programNode = std::make_unique<ProgramNode>();
-    // Base Case: If the token is not in FIRST(PROGRAM_PRIME), return an empty ProgramPrimeAST for ε
-    if (!isDeclarationFirst())
-    {
-        return nullptr; // Return empty node for ε
-    }
+    PrintVisitor printVisitor;
+    program->accept(printVisitor);
 
-    // Recursive Case: Parse a GLOBAL_DECLARATIONS node and recursively parse remaining PROGRAM_PRIME
-    auto programPrimeNode = parseGLOBAL_DECLARATIONS();
-
-    // Recursively parse the next PROGRAM_PRIME
-    std::unique_ptr<ASTNode> nextProgramPrime = parsePROGRAM_PRIME();
-    return nullptr;
+    return program;
 }
 
 // GLOBAL_DECLARATIONS -> DECLARATION | FUNCTION_DEFINITION
@@ -123,19 +115,18 @@ std::unique_ptr<ASTNode> Parser::parseGLOBAL_DECLARATIONS()
 {
     if (currentToken.getType() == TokenType::KEYWORD && currentToken.getValue() == "func")
     {
-        auto declarationNode = std::make_unique<DeclarationNode>();
-        declarationNode->setDeclaration(parseFUNCTION_DEFINITION());
-        return declarationNode;
+        std::unique_ptr<FunctionDecl> functionDecl = parseFUNCTION_DEFINITION();
+        return functionDecl;
     }
-
-    if (isBasicType())
+    else if (isBasicType())
     {
-        auto declarationNode = std::make_unique<DeclarationNode>();
-        declarationNode->setDeclaration(parseDECLARATION());
-        return declarationNode;
+        std::unique_ptr<Declaration> declaration = parseDECLARATION();
+        return declaration;
     }
-
-    return nullptr;
+    else
+    {
+        throw std::runtime_error("Syntax error: Expected declaration or function definition");
+    }
 }
 
 // ADDITIVE_EXPRESSION -> MULTIPLICATIVE_EXPRESSION ADDITIVE_EXPRESSION_PRIME
@@ -207,7 +198,7 @@ std::unique_ptr<ASTNode> Parser::parseARGUMENT_EXPRESSION_LIST_PRIME()
 }
 
 // ASSIGNMENT_EXPRESSION -> CONDITIONAL_EXPRESSION ASSIGNMENT_EXPRESSION_FAC
-std::unique_ptr<ASTNode> Parser::parseASSIGNMENT_EXPRESSION()
+std::unique_ptr<Expr> Parser::parseASSIGNMENT_EXPRESSION()
 {
     parseCONDITIONAL_EXPRESSION();
     parseASSIGNMENT_EXPRESSION_FAC();
@@ -362,32 +353,38 @@ std::unique_ptr<ASTNode> Parser::parseCONSTANT()
 }
 
 // DECLARATION -> DECLARATION_SPECIFIERS DECLARATION_FAC
-std::unique_ptr<ASTNode> Parser::parseDECLARATION()
+std::unique_ptr<Declaration> Parser::parseDECLARATION()
 {
-    parseDECLARATION_SPECIFIERS();
-    parseDECLARATION_FAC();
-    return nullptr;
+    std::unique_ptr<DeclarationSpecifiers> DeclarationSpec = parseDECLARATION_SPECIFIERS();
+    std::unique_ptr<DeclatatorList> declaratorList = parseDECLARATION_FAC();
+    return std::make_unique<Declaration>(std::move(DeclarationSpec), std::move(declaratorList));
 }
 
 // FIRST(INIT_DECLARATOR_LIST)= 	( * IDENTIFIER
 // DECLARATION_FAC -> ; | INIT_DECLARATOR_LIST ;
-std::unique_ptr<ASTNode> Parser::parseDECLARATION_FAC()
+std::unique_ptr<DeclatatorList> Parser::parseDECLARATION_FAC()
 {
     if (currentToken.getType() == TokenType::PUNCTUATION && currentToken.getValue() == ";")
     {
         consume();
+        // empty declaration, example: int;
+        return nullptr;
     }
     else if (
         (currentToken.getType() == TokenType::PUNCTUATION && currentToken.getValue() == "(") || (currentToken.getType() == TokenType::ARITHMETIC_OPERATOR && currentToken.getValue() == "*") || (currentToken.getType() == TokenType::IDENTIFIER))
     {
-        parseINIT_DECLARATOR_LIST();
+        std::unique_ptr<DeclatatorList> declaratorList = parseINIT_DECLARATOR_LIST();
         if (currentToken.getType() != TokenType::PUNCTUATION || currentToken.getValue() != ";")
         {
             throw std::runtime_error("Syntax error: Expected ; at the end of declaration");
         }
         consume();
+        return declaratorList;
     }
-    return nullptr;
+    else
+    {
+        throw std::runtime_error("Syntax error: Expected ; or INIT_DECLARATOR_LIST");
+    }
 }
 
 // DECLARATION_LIST -> DECLARATION DECLARATION_LIST_PRIME
@@ -410,11 +407,15 @@ std::unique_ptr<ASTNode> Parser::parseDECLARATION_LIST_PRIME()
 }
 
 // DECLARATION_SPECIFIERS -> TYPE_SPECIFIER DECLARATION_SPECIFIERS_PRIME
-std::unique_ptr<ASTNode> Parser::parseDECLARATION_SPECIFIERS()
+std::unique_ptr<DeclarationSpecifiers> Parser::parseDECLARATION_SPECIFIERS()
 {
-    parseTYPE_SPECIFIER();
-    parseDECLARATION_SPECIFIERS_PRIME();
-    return nullptr;
+    std::unique_ptr<Type> type = parseTYPE_SPECIFIER();
+    std::unique_ptr<Specifier> specifier = parseDECLARATION_SPECIFIERS_PRIME();
+    if (specifier != nullptr)
+    {
+        return std::make_unique<DeclarationSpecifiers>(std::move(type), std::move(specifier));
+    }
+    return std::make_unique<DeclarationSpecifiers>(std::move(type), nullptr);
 }
 
 // FIRST(TYPE_QUALIFIER)=  const restrict volatile
@@ -422,100 +423,124 @@ std::unique_ptr<ASTNode> Parser::parseDECLARATION_SPECIFIERS()
 // FIRST(STORAGE_SPECIFIER) =	auto register static
 
 // DECLARATION_SPECIFIERS_PRIME -> TYPE_QUALIFIER | FUNCTION_SPECIFIER | STORAGE_SPECIFIER | ϵ
-std::unique_ptr<ASTNode> Parser::parseDECLARATION_SPECIFIERS_PRIME()
+std::unique_ptr<Specifier> Parser::parseDECLARATION_SPECIFIERS_PRIME()
 {
     if (currentToken.getType() == TokenType::KEYWORD)
     {
         const std::string &tokenValue = currentToken.getValue();
         if (tokenValue == "const" || tokenValue == "restrict" || tokenValue == "volatile")
         {
-            parseTYPE_QUALIFIER();
+            return parseTYPE_QUALIFIER();
         }
         else if (tokenValue == "inline")
         {
-            parseFUNCTION_SPECIFIER();
+            return parseFUNCTION_SPECIFIER();
         }
         else if (tokenValue == "auto" || tokenValue == "register" || tokenValue == "static")
         {
-            parseSTORAGE_SPECIFIER();
+            return parseSTORAGE_SPECIFIER();
         }
     }
-    else
-    {
-        // throw std::runtime_error("Syntax error: Expected declaration specifier Token, declaration specifier prime. Got: " + currentToken.getValue());
-    }
-
     return nullptr;
 }
 
 // FIRST(DIRECT_DECLARATOR) = 	( IDENTIFIER
 // FIRST(POINTER) = *
 // DECLARATOR -> POINTER DIRECT_DECLARATOR | DIRECT_DECLARATOR
-std::unique_ptr<ASTNode> Parser::parseDECLARATOR()
+std::unique_ptr<Declarator> Parser::parseDECLARATOR()
 {
     if (currentToken.getType() == TokenType::ARITHMETIC_OPERATOR && currentToken.getValue() == "*")
     {
-        parsePOINTER();
-        parseDIRECT_DECLARATOR();
+        std::unique_ptr<Declarator> declarator = std::make_unique<Declarator>();
+        declarator->setPointer(parsePOINTER());
+        parseDIRECT_DECLARATOR(declarator);
+        return declarator;
     }
     else if ((currentToken.getType() == TokenType::PUNCTUATION && currentToken.getValue() == "(") || currentToken.getType() == TokenType::IDENTIFIER)
     {
-        parseDIRECT_DECLARATOR();
+        std::unique_ptr<Declarator> declarator = std::make_unique<Declarator>();
+        parseDIRECT_DECLARATOR(declarator);
+        return declarator;
     }
-    return nullptr;
+    else
+    {
+        throw std::runtime_error("Syntax error: Expected POINTER or DIRECT_DECLARATOR");
+    }
 }
 
 // DIRECT_DECLARATOR -> IDENTIFIER DIRECT_DECLARATOR_PRIME | ( DECLARATOR ) DIRECT_DECLARATOR_PRIME
-std::unique_ptr<ASTNode> Parser::parseDIRECT_DECLARATOR()
+void Parser::parseDIRECT_DECLARATOR(std::unique_ptr<Declarator> &declarator)
 {
     if (currentToken.getType() == TokenType::IDENTIFIER)
     {
+        declarator->setIdentifier(currentToken.getValue());
         consume();
-        parseDIRECT_DECLARATOR_PRIME();
+        parseDIRECT_DECLARATOR_PRIME(declarator);
     }
+    // for function pointer declaration
     else if (currentToken.getType() == TokenType::PUNCTUATION && currentToken.getValue() == "(")
     {
         consume();
-        parseDECLARATOR();
+
+        std::unique_ptr<Declarator> functionDeclarator = parseDECLARATOR();
+        if (functionDeclarator != nullptr)
+        {
+            declarator->setDeclarator(std::move(functionDeclarator));
+        }
+
         if (currentToken.getType() != TokenType::PUNCTUATION || currentToken.getValue() != ")")
         {
 
             throw std::runtime_error("Syntax error: Expected closing ) in declarator");
         }
         consume();
-        parseDIRECT_DECLARATOR_PRIME();
+        parseDIRECT_DECLARATOR_PRIME(declarator);
     }
-    return nullptr;
+    else
+    {
+        throw std::runtime_error("Syntax error: Expected IDENTIFIER or ( in declarator");
+    }
 }
 
 // DIRECT_DECLARATOR_PRIME -> [ STATIC_OPT_FAC TYPE_QUALIFIER_LIST_OPT_FAC	ASSIGNMENT_EXPRESSION_OPT_FAC ] DIRECT_DECLARATOR_PRIME | ( PARAMETER_LIST_OPT_FAC ) DIRECT_DECLARATOR_PRIME | ϵ
-std::unique_ptr<ASTNode> Parser::parseDIRECT_DECLARATOR_PRIME()
+void Parser::parseDIRECT_DECLARATOR_PRIME(std::unique_ptr<Declarator> &declarator)
 {
-    if (currentToken.getType() == TokenType::PUNCTUATION && currentToken.getValue() == "[")
+    while (currentToken.getType() == TokenType::PUNCTUATION && currentToken.getValue() == "[" || currentToken.getType() == TokenType::PUNCTUATION && currentToken.getValue() == "(")
     {
-        consume();
-        parseSTATIC_OPT_FAC();
-        parseTYPE_QUALIFIER_LIST_OPT_FAC();
-        parseASSIGNMENT_EXPRESSION_OPT_FAC();
-        if (currentToken.getType() != TokenType::PUNCTUATION || currentToken.getValue() != "]")
+        // in array definition
+        if (currentToken.getType() == TokenType::PUNCTUATION && currentToken.getValue() == "[")
         {
-            throw std::runtime_error("Syntax error: Expected closing ] in declarator");
+            consume();
+            arraySize arraySize;
+            arraySize.isStatic = parseSTATIC_OPT_FAC();
+            std::unique_ptr<Specifier> typeQualifier = parseTYPE_QUALIFIER_LIST_OPT_FAC();
+            if (typeQualifier != nullptr)
+            {
+                arraySize.typeQualifier = typeQualifier->getSpecifier();
+            }
+
+            arraySize.expr = parseASSIGNMENT_EXPRESSION_OPT_FAC();
+            if (currentToken.getType() != TokenType::PUNCTUATION || currentToken.getValue() != "]")
+            {
+                throw std::runtime_error("Syntax error: Expected closing ] in declarator");
+            }
+            consume();
+            declarator->addArraySize(std::move(arraySize));
+            declarator->setIsArray(true);
         }
-        consume();
-        parseDIRECT_DECLARATOR_PRIME();
-    }
-    else if (currentToken.getType() == TokenType::PUNCTUATION && currentToken.getValue() == "(")
-    {
-        consume();
-        parsePARAMETER_LIST_OPT_FAC();
-        if (currentToken.getType() != TokenType::PUNCTUATION || currentToken.getValue() != ")")
+        // in function definition
+        else if (currentToken.getType() == TokenType::PUNCTUATION && currentToken.getValue() == "(")
         {
-            throw std::runtime_error("Syntax error: Expected closing ) in declarator");
+            consume();
+            parsePARAMETER_LIST_OPT_FAC();
+            if (currentToken.getType() != TokenType::PUNCTUATION || currentToken.getValue() != ")")
+            {
+                throw std::runtime_error("Syntax error: Expected closing ) in declarator");
+            }
+            consume();
+            declarator->setFunction(true);
         }
-        consume();
-        parseDIRECT_DECLARATOR_PRIME();
     }
-    return nullptr;
 }
 
 // EQUALITY_EXPRESSION -> RELATIONAL_EXPRESSION EQUALITY_EXPRESSION_PRIME
@@ -645,7 +670,7 @@ std::unique_ptr<ASTNode> Parser::parseFOR_OPTIONAL_EXPRESSION()
 }
 
 // FUNCTION_DEFINITION -> func DECLARATION_SPECIFIERS DECLARATOR FUNCTION_DEF_FAC
-std::unique_ptr<ASTNode> Parser::parseFUNCTION_DEFINITION()
+std::unique_ptr<FunctionDecl> Parser::parseFUNCTION_DEFINITION()
 {
     if (currentToken.getType() == TokenType::KEYWORD && currentToken.getValue() == "func")
     {
@@ -680,11 +705,13 @@ std::unique_ptr<ASTNode> Parser::parseFUNCTION_DEF_FAC()
 }
 
 // FUNCTION_SPECIFIER -> inline
-std::unique_ptr<ASTNode> Parser::parseFUNCTION_SPECIFIER()
+std::unique_ptr<Specifier> Parser::parseFUNCTION_SPECIFIER()
 {
     if (currentToken.getType() == TokenType::KEYWORD && currentToken.getValue() == "inline")
     {
         // save it here
+        consume();
+        return std::make_unique<Specifier>(currentToken.getValue(), "function");
     }
     else
     {
@@ -751,15 +778,18 @@ std::unique_ptr<ASTNode> Parser::parseINCLUSIVE_OR_EXPRESSION_PRIME()
 }
 
 // INITIALIZER -> INITIALIZER_BRACE_FAC | ASSIGNMENT_EXPRESSION
-std::unique_ptr<ASTNode> Parser::parseINITIALIZER()
+std::unique_ptr<Initializer> Parser::parseINITIALIZER()
 {
+    std::unique_ptr<Initializer> initializer = std::make_unique<Initializer>();
     if (currentToken.getType() == TokenType::PUNCTUATION && currentToken.getValue() == "{")
     {
-        parseINITIALIZER_BRACE_FAC();
+        initializer->setInitializerList(parseINITIALIZER_BRACE_FAC());
+        return initializer;
     }
     else if (isExpressionFirst())
     {
-        parseASSIGNMENT_EXPRESSION();
+        initializer->setExpression(parseASSIGNMENT_EXPRESSION());
+        return initializer;
     }
     else
     {
@@ -769,12 +799,12 @@ std::unique_ptr<ASTNode> Parser::parseINITIALIZER()
 }
 
 // INITIALIZER_BRACE_FAC -> { INITIALIZER_LIST }
-std::unique_ptr<ASTNode> Parser::parseINITIALIZER_BRACE_FAC()
+std::unique_ptr<InitializerList> Parser::parseINITIALIZER_BRACE_FAC()
 {
     if (currentToken.getType() == TokenType::PUNCTUATION && currentToken.getValue() == "{")
     {
         consume();
-        parseINITIALIZER_LIST();
+        std::unique_ptr<InitializerList> initializer = parseINITIALIZER_LIST();
         if (currentToken.getType() == TokenType::PUNCTUATION && currentToken.getValue() == "}")
         {
             consume();
@@ -783,6 +813,7 @@ std::unique_ptr<ASTNode> Parser::parseINITIALIZER_BRACE_FAC()
         {
             throw std::runtime_error("Syntax error: Expected closing } in initializer");
         }
+        return initializer;
     }
     else
     {
@@ -793,63 +824,56 @@ std::unique_ptr<ASTNode> Parser::parseINITIALIZER_BRACE_FAC()
 }
 
 // INITIALIZER_LIST -> INITIALIZER INITIALIZER_LIST_PRIME
-std::unique_ptr<ASTNode> Parser::parseINITIALIZER_LIST()
+std::unique_ptr<InitializerList> Parser::parseINITIALIZER_LIST()
 {
     parseINITIALIZER();
-    parseINITIALIZER_LIST_PRIME();
-    return nullptr;
-}
-
-// INITIALIZER_LIST_PRIME -> , INITIALIZER INITIALIZER_LIST_PRIME | ϵ
-std::unique_ptr<ASTNode> Parser::parseINITIALIZER_LIST_PRIME()
-{
-    if (currentToken.getType() == TokenType::PUNCTUATION && currentToken.getValue() == ",")
+    // INITIALIZER_LIST_PRIME -> , INITIALIZER INITIALIZER_LIST_PRIME | ϵ
+    while (currentToken.getType() == TokenType::PUNCTUATION && currentToken.getValue() == ",")
     {
         consume();
         parseINITIALIZER();
-        parseINITIALIZER_LIST_PRIME();
     }
+
     return nullptr;
 }
 
 // INIT_DECLARATOR -> DECLARATOR INIT_DECLARATOR_FAC
-std::unique_ptr<ASTNode> Parser::parseINIT_DECLARATOR()
+std::unique_ptr<Declarator> Parser::parseINIT_DECLARATOR()
 {
-    parseDECLARATOR();
-    parseINIT_DECLARATOR_FAC();
-    return nullptr;
+    std::unique_ptr<Declarator> declarator = parseDECLARATOR();
+    if (declarator == nullptr)
+    {
+        throw std::runtime_error("Syntax error: Expected declarator");
+    }
+    declarator->setInitializer(parseINIT_DECLARATOR_FAC());
+    return declarator;
 }
 
 // INIT_DECLARATOR_FAC -> = INITIALIZER | ϵ
-std::unique_ptr<ASTNode> Parser::parseINIT_DECLARATOR_FAC()
+std::unique_ptr<Initializer> Parser::parseINIT_DECLARATOR_FAC()
 {
     if (currentToken.getType() == TokenType::ASSIGNMENT_OPERATOR && currentToken.getValue() == "=")
     {
         consume();
-        parseINITIALIZER();
+        return parseINITIALIZER();
     }
 
     return nullptr;
 }
 
 // INIT_DECLARATOR_LIST -> INIT_DECLARATOR INIT_DECLARATOR_LIST_PRIME
-std::unique_ptr<ASTNode> Parser::parseINIT_DECLARATOR_LIST()
+std::unique_ptr<DeclatatorList> Parser::parseINIT_DECLARATOR_LIST()
 {
-    parseINIT_DECLARATOR();
-    parseINIT_DECLARATOR_LIST_PRIME();
-    return nullptr;
-}
+    std::vector<std::unique_ptr<Declarator>> declarators;
+    declarators.push_back(std::move(parseINIT_DECLARATOR()));
 
-// INIT_DECLARATOR_LIST_PRIME -> , INIT_DECLARATOR INIT_DECLARATOR_LIST_PRIME | ϵ
-std::unique_ptr<ASTNode> Parser::parseINIT_DECLARATOR_LIST_PRIME()
-{
-    if (currentToken.getType() == TokenType::PUNCTUATION && currentToken.getValue() == ",")
+    // INIT_DECLARATOR_LIST_PRIME -> , INIT_DECLARATOR INIT_DECLARATOR_LIST_PRIME | ϵ
+    while (currentToken.getType() == TokenType::PUNCTUATION && currentToken.getValue() == ",")
     {
         consume();
-        parseINIT_DECLARATOR();
-        parseINIT_DECLARATOR_LIST_PRIME();
+        declarators.push_back(std::move(parseINIT_DECLARATOR()));
     }
-    return nullptr;
+    return std::make_unique<DeclatatorList>(std::move(declarators));
 }
 
 // ITERATION_STATEMENT -> while ( EXPRESSION ) STATEMENT | do STATEMENT while ( EXPRESSION ) ; | for ( FOR_INIT_STATEMENT ) STATEMENT
@@ -1110,17 +1134,18 @@ std::unique_ptr<ASTNode> Parser::parsePARAM_DECL_FAC()
 }
 
 // POINTER -> *
-std::unique_ptr<ASTNode> Parser::parsePOINTER()
+bool Parser::parsePOINTER()
 {
     if (currentToken.getType() == TokenType::ARITHMETIC_OPERATOR && currentToken.getValue() == "*")
     {
         consume();
+        return true;
     }
     else
     {
         throw std::runtime_error("Syntax error: Expected * in pointer");
     }
-    return nullptr;
+    return false;
 }
 
 // FIRST(ARGUMENT_EXPRESSION_LIST) = 	( ++ -- FLOAT_CONSTANT IDENTIFIER INTEGER_CONSTANT STRING_LITERAL sizeof
@@ -1363,22 +1388,24 @@ std::unique_ptr<ASTNode> Parser::parseSTATEMENT()
 }
 
 // STATIC_OPT_FAC -> static | ϵ
-std::unique_ptr<ASTNode> Parser::parseSTATIC_OPT_FAC()
+bool Parser::parseSTATIC_OPT_FAC()
 {
     if (currentToken.getType() == TokenType::KEYWORD && currentToken.getValue() == "static")
     {
+        true;
         consume();
     }
 
-    return nullptr;
+    return false;
 }
 
 // STORAGE_SPECIFIER -> static | auto | register
-std::unique_ptr<ASTNode> Parser::parseSTORAGE_SPECIFIER()
+std::unique_ptr<Specifier> Parser::parseSTORAGE_SPECIFIER()
 {
     if (currentToken.getType() == TokenType::KEYWORD && (currentToken.getValue() == "static" || currentToken.getValue() == "auto" || currentToken.getValue() == "register"))
     {
         consume();
+        return std::make_unique<Specifier>(currentToken.getValue(), "Storage");
     }
     else
     {
@@ -1518,11 +1545,12 @@ std::unique_ptr<ASTNode> Parser::parseSTRUCT_SPEC_FAC2()
 }
 
 // TYPE_QUALIFIER -> const | restrict | volatile
-std::unique_ptr<ASTNode> Parser::parseTYPE_QUALIFIER()
+std::unique_ptr<Specifier> Parser::parseTYPE_QUALIFIER()
 {
     if (currentToken.getType() == TokenType::KEYWORD && (currentToken.getValue() == "const" || currentToken.getValue() == "restrict" || currentToken.getValue() == "volatile"))
     {
         consume();
+        return std::make_unique<Specifier>(currentToken.getValue(), "Qualifier");
     }
     else
     {
@@ -1533,21 +1561,23 @@ std::unique_ptr<ASTNode> Parser::parseTYPE_QUALIFIER()
 }
 
 // TYPE_QUALIFIER_LIST_OPT_FAC -> TYPE_QUALIFIER | ϵ
-std::unique_ptr<ASTNode> Parser::parseTYPE_QUALIFIER_LIST_OPT_FAC()
+std::unique_ptr<Specifier> Parser::parseTYPE_QUALIFIER_LIST_OPT_FAC()
 {
     if (currentToken.getType() == TokenType::KEYWORD && (currentToken.getValue() == "const" || currentToken.getValue() == "restrict" || currentToken.getValue() == "volatile"))
     {
-        parseTYPE_QUALIFIER();
+        return parseTYPE_QUALIFIER();
     }
     return nullptr;
 }
 
 // TYPE_SPECIFIER -> int | void | char | short | long | float | double | signed | unsigned | bool | STRUCT_SPECIFIER
-std::unique_ptr<ASTNode> Parser::parseTYPE_SPECIFIER()
+std::unique_ptr<Type> Parser::parseTYPE_SPECIFIER()
 {
     if (currentToken.getType() == TokenType::KEYWORD && (currentToken.getValue() == "int" || currentToken.getValue() == "void" || currentToken.getValue() == "char" || currentToken.getValue() == "short" || currentToken.getValue() == "long" || currentToken.getValue() == "float" || currentToken.getValue() == "double" || currentToken.getValue() == "signed" || currentToken.getValue() == "unsigned" || currentToken.getValue() == "bool"))
     {
+        std::string type = currentToken.getValue();
         consume();
+        return std::make_unique<Type>(type);
     }
     else if (currentToken.getType() == TokenType::KEYWORD && currentToken.getValue() == "struct")
     {

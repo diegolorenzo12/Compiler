@@ -39,7 +39,7 @@ int Compiler::compile()
     Lexer lex(sourceCodeStream);
     lex.tokenize();
     TokenTable &tokenTable = lex.getTokens();
-    tokenTable.printTokens();
+    // tokenTable.printTokens();
 
     Parser parser(tokenTable);
     parser.parsePROGRAM();
