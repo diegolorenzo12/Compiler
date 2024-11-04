@@ -103,6 +103,3 @@ public:
         }
     }
 };
-
-
-// Define otros nodos específicos si es necesario.
