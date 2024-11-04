@@ -11,6 +11,7 @@ class LiteralExpr;
 class VariableExpr;
 class FunctionDecl;
 class Declaration;
+class BlockStmt;
 class Type;
 class Specifier;
 class DeclarationSpecifiers;
@@ -18,6 +19,8 @@ class Declarator;
 class DeclatatorList;
 class Initializer;
 class InitializerList;
+class BraceInitializer;
+class ExpressionInitializer;
 
 class ASTVisitor
 {
@@ -36,8 +39,10 @@ public:
     virtual void visit(DeclarationSpecifiers &node) = 0;
     virtual void visit(Declarator &node) = 0;
     virtual void visit(DeclatatorList &node) = 0;
-    virtual void visit(Initializer &node) = 0;
+    virtual void visit(ExpressionInitializer &node) = 0;
+    virtual void visit(BraceInitializer &node) = 0;
     virtual void visit(InitializerList &node) = 0;
+    virtual void visit(BlockStmt &node) = 0;
 };
 
 // ASTVisitor base class for the visitor pattern
@@ -83,7 +88,6 @@ class Stmt : public ASTNode
 {
 };
 
-// Example: Binary Expression Node (e.g., "a + b")
 class BinaryExpr : public Expr
 {
 public:
@@ -143,20 +147,21 @@ private:
 class FunctionDecl : public ASTNode
 {
 public:
-    FunctionDecl(const std::string &name, std::vector<std::unique_ptr<Stmt>> body)
-        : name_(name), body_(std::move(body)) {}
+    FunctionDecl(std::unique_ptr<DeclarationSpecifiers> declarationSpecifiers, std::unique_ptr<Declarator> declarator, std::unique_ptr<BlockStmt> block)
+        : declarationSpecifiers_(std::move(declarationSpecifiers)), declarator_(std::move(declarator)), block_(std::move(block)) {}
 
     void accept(ASTVisitor &visitor) override
     {
         visitor.visit(*this);
     }
-
-    const std::string &getName() const { return name_; }
-    const std::vector<std::unique_ptr<Stmt>> &getBody() const { return body_; }
+    BlockStmt *getBody() const { return block_.get(); }
+    DeclarationSpecifiers *getDeclarationSpecifiers() const { return declarationSpecifiers_.get(); }
+    Declarator *getDeclarator() const { return declarator_.get(); }
 
 private:
-    std::string name_;
-    std::vector<std::unique_ptr<Stmt>> body_;
+    std::unique_ptr<BlockStmt> block_;
+    std::unique_ptr<DeclarationSpecifiers> declarationSpecifiers_;
+    std::unique_ptr<Declarator> declarator_;
 };
 
 class Type : public ASTNode
@@ -297,32 +302,55 @@ private:
 class Initializer : public ASTNode
 {
 public:
-    Initializer() {}
+    void accept(ASTVisitor &visitor) override = 0;
+};
+
+class ExpressionInitializer : public Initializer
+{
+public:
+    ExpressionInitializer(std::unique_ptr<Expr> expr) : expr_(std::move(expr)) {}
+    void accept(ASTVisitor &visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    Expr *getExpr() const { return expr_.get(); }
+    void setExpression(std::unique_ptr<Expr> expr) { expr_ = std::move(expr); }
+
+private:
+    std::unique_ptr<Expr> expr_;
+};
+
+// Derived class for brace initializers
+class BraceInitializer : public Initializer
+{
+public:
+    BraceInitializer(std::unique_ptr<InitializerList> initializerList)
+        : initializerList_(std::move(initializerList)) {}
 
     void accept(ASTVisitor &visitor) override
     {
         visitor.visit(*this);
     }
 
-    void setExpression(std::unique_ptr<Expr> expr) { expr_ = std::move(expr); }
-    bool isExpression() const { return expr_ != nullptr; }
-    Expr *getExpr() const { return expr_.get(); }
-    void setExpr(std::unique_ptr<Expr> expr) { expr_ = std::move(expr); }
-    void setInitializerList(std::unique_ptr<InitializerList> InitializerList) { InitializerList_ = std::move(InitializerList); }
-    bool isBraceInitializer() const { return InitializerList_ != nullptr; }
+    InitializerList *getInitializerList() const { return initializerList_.get(); }
 
 private:
-    std::unique_ptr<Expr> expr_;
-    std::unique_ptr<InitializerList> InitializerList_;
+    std::unique_ptr<InitializerList> initializerList_;
 };
 
 class InitializerList : public ASTNode
 {
 public:
+    InitializerList(std::vector<std::unique_ptr<Initializer>> InitializerList)
+        : InitializerList_(std::move(InitializerList)) {}
+
     void accept(ASTVisitor &visitor) override
     {
         visitor.visit(*this);
     }
+
+    const std::vector<std::unique_ptr<Initializer>> &getInitializerList() const { return InitializerList_; }
 
     void addInitializer(std::unique_ptr<Initializer> initializer)
     {
@@ -331,6 +359,60 @@ public:
 
 private:
     std::vector<std::unique_ptr<Initializer>> InitializerList_;
+};
+
+class BlockItemBase : public Stmt
+{
+public:
+    virtual ~BlockItemBase() = default;
+    virtual void accept(ASTVisitor &visitor) = 0; // Interface for visiting
+};
+
+class BlockStmt : public Stmt
+{
+public:
+    BlockStmt(std::vector<std::unique_ptr<BlockItemBase>> item) : item_(std::move(item)) {}
+
+    void accept(ASTVisitor &visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    const std::vector<std::unique_ptr<BlockItemBase>> &getItems() const { return item_; }
+
+private:
+    std::vector<std::unique_ptr<BlockItemBase>>
+        item_;
+};
+
+class DeclarationWrapper : public BlockItemBase
+{
+public:
+    DeclarationWrapper(std::unique_ptr<Declaration> declaration)
+        : declaration_(std::move(declaration)) {}
+
+    void accept(ASTVisitor &visitor) override
+    {
+        declaration_->accept(visitor);
+    }
+
+private:
+    std::unique_ptr<Declaration> declaration_;
+};
+
+class StatementWrapper : public BlockItemBase
+{
+public:
+    StatementWrapper(std::unique_ptr<Stmt> statement)
+        : statement_(std::move(statement)) {}
+
+    void accept(ASTVisitor &visitor) override
+    {
+        statement_->accept(visitor);
+    }
+
+private:
+    std::unique_ptr<Stmt> statement_;
 };
 
 /*
@@ -375,12 +457,20 @@ public:
 
     void visit(FunctionDecl &node) override
     {
-        std::cout << "Function " << node.getName() << " {\n";
-        for (const auto &stmt : node.getBody())
+        std::cout << "Function " << " {\n";
+        if (node.getDeclarationSpecifiers() != nullptr)
         {
-            stmt->accept(*this);
-            std::cout << "\n";
+            node.getDeclarationSpecifiers()->accept(*this);
         }
+        if (node.getDeclarator() != nullptr)
+        {
+            node.getDeclarator()->accept(*this);
+        }
+        if (node.getBody() != nullptr)
+        {
+            node.getBody()->accept(*this);
+        }
+
         std::cout << "}\n";
     }
 
@@ -412,6 +502,7 @@ public:
     void visit(DeclarationSpecifiers &node) override
     {
         std::cout << "DeclarationSpecifiers: ";
+
         if (node.getType() != nullptr)
         {
             node.getType()->accept(*this);
@@ -427,6 +518,7 @@ public:
     void visit(Declarator &node) override
     {
         std::cout << "Declarator, Identifier(" << node.getIdentifier() << ")";
+
         if (node.isPointer())
         {
             std::cout << "Is Pointer \n";
@@ -437,11 +529,10 @@ public:
         }
         if (node.isFunction())
         {
-            std::cout << "Is Function pointer \n";
+            std::cout << " Is Function \n";
         }
         if (node.hasInitializer())
         {
-            std::cout << ", with Initializer ";
             node.getInitializer()->accept(*this);
         }
     }
@@ -451,6 +542,7 @@ public:
         std::cout << "DeclaratorList {\n";
         for (const auto &decl : node.getDeclarators())
         {
+
             if (decl != nullptr)
             {
                 decl->accept(*this);
@@ -460,14 +552,45 @@ public:
         std::cout << "}\n";
     }
 
-    void visit(Initializer &node) override
+    void visit(ExpressionInitializer &node) override
     {
         std::cout << "Initializer ";
-        node.getExpr()->accept(*this);
+        if (node.getExpr() != nullptr)
+        {
+            node.getExpr()->accept(*this);
+        }
+    }
+
+    void visit(BraceInitializer &node) override
+    {
+        std::cout << "BraceInitializer";
+        if (node.getInitializerList() != nullptr)
+        {
+            node.getInitializerList()->accept(*this);
+        }
     }
 
     void visit(InitializerList &node) override
     {
         std::cout << "BraceInitializer";
+        for (const auto &initializer : node.getInitializerList())
+        {
+            if (initializer != nullptr)
+            {
+                initializer->accept(*this);
+                std::cout << "\n";
+            }
+        }
+    }
+
+    void visit(BlockStmt &node) override
+    {
+        std::cout << "BlockStmt {\n";
+        // for (const auto &stmt : node.getStatements())
+        // {
+        //     stmt->accept(*this);
+        //     std::cout << "\n";
+        // }
+        std::cout << "}\n";
     }
 };

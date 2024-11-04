@@ -40,10 +40,10 @@ private:
     std::unique_ptr<ASTNode> parseASSIGNMENT_EXPRESSION_FAC();
     std::unique_ptr<ASTNode> parseASSIGNMENT_EXPRESSION_OPT_FAC();
     std::unique_ptr<ASTNode> parseASSIGNMENT_OPERATOR();
-    std::unique_ptr<ASTNode> parseBLOCK();
-    std::unique_ptr<ASTNode> parseBLOCK_CONTENT();
-    std::unique_ptr<ASTNode> parseBLOCK_ITEM();
-    std::unique_ptr<ASTNode> parseBLOCK_ITEM_LIST();
+    std::unique_ptr<BlockStmt> parseBLOCK();
+    std::unique_ptr<BlockStmt> parseBLOCK_CONTENT();
+    std::unique_ptr<BlockItemBase> parseBLOCK_ITEM();
+    std::unique_ptr<BlockStmt> parseBLOCK_ITEM_LIST();
     std::unique_ptr<ASTNode> parseBLOCK_ITEM_LIST_PRIME();
     std::unique_ptr<ASTNode> parseCONDITIONAL_EXPRESSION();
     std::unique_ptr<ASTNode> parseCONDITIONAL_EXPRESSION_PRIME();
@@ -68,7 +68,7 @@ private:
     std::unique_ptr<ASTNode> parseFOR_INIT_STATEMENT();
     std::unique_ptr<ASTNode> parseFOR_OPTIONAL_EXPRESSION();
     std::unique_ptr<FunctionDecl> parseFUNCTION_DEFINITION();
-    std::unique_ptr<ASTNode> parseFUNCTION_DEF_FAC();
+    std::unique_ptr<BlockStmt> parseFUNCTION_DEF_FAC();
     std::unique_ptr<Specifier> parseFUNCTION_SPECIFIER();
     std::unique_ptr<ASTNode> parseGLOBAL_DECLARATIONS();
     std::unique_ptr<ASTNode> parseIDENTIFIER_LIST();
