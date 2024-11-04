@@ -28,8 +28,7 @@ private:
     bool isBlockFirst() const;
     bool isStatementFirst() const;
 
-    std::unique_ptr<ASTNode> parseGlobalDeclarations();
-
+    std::unique_ptr<ASTNode> parseGLOBALDECLARATIONS();
     std::unique_ptr<Expr> parseADDITIVE_EXPRESSION();
     std::unique_ptr<ASTNode> parseADDITIVE_EXPRESSION_PRIME();
     std::unique_ptr<Expr> parseAND_EXPRESSION();
@@ -56,7 +55,6 @@ private:
     std::unique_ptr<Specifier> parseDECLARATION_SPECIFIERS_PRIME();
     std::unique_ptr<Declarator> parseDECLARATOR();
     void parseDIRECT_DECLARATOR(std::unique_ptr<Declarator> &declarator);
-    // std::unique_ptr<DirectDeclarator> parseDIRECT_DECLARATOR_PRIME();
     void parseDIRECT_DECLARATOR_PRIME(std::unique_ptr<Declarator> &declarato);
     std::unique_ptr<Expr> parseEQUALITY_EXPRESSION();
     std::unique_ptr<ASTNode> parseEQUALITY_EXPRESSION_PRIME();
@@ -125,7 +123,3 @@ private:
     std::unique_ptr<Type> parseTYPE_SPECIFIER();
     std::unique_ptr<Expr> parseUNARY_EXPRESSION();
 };
-
-/*
-
-*/
