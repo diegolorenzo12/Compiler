@@ -291,10 +291,28 @@ std::unique_ptr<BlockStmt> Parser::parseBLOCK_ITEM_LIST()
 }
 
 // CONDITIONAL_EXPRESSION -> LOGICAL_OR_EXPRESSION CONDITIONAL_EXPRESSION_PRIME
-std::unique_ptr<Expr> Parser::parseCONDITIONAL_EXPRESSION()
+std::unique_ptr<ConditionalExpression> Parser::parseCONDITIONAL_EXPRESSION()
 {
-    parseLOGICAL_OR_EXPRESSION();
-    parseCONDITIONAL_EXPRESSION_PRIME();
+    std::unique_ptr<Expr> logicalOrExpr = parseLOGICAL_OR_EXPRESSION();
+
+    // CONDITIONAL_EXPRESSION_PRIME -> ? EXPRESSION : CONDITIONAL_EXPRESSION | ϵ
+    if (currentToken.getType() == TokenType::PUNCTUATION && currentToken.getValue() == "?")
+    {
+        consume();
+        std::unique_ptr<Expr> expr = parseEXPRESSION();
+        if (currentToken.getType() == TokenType::PUNCTUATION && currentToken.getValue() == ":")
+        {
+            consume();
+        }
+        else
+        {
+            throw std::runtime_error("Syntax error: Expected ':' Token");
+        }
+        std::unique_ptr<ConditionalExpression> conditionalExpr = parseCONDITIONAL_EXPRESSION();
+        return std::make_unique<ConditionalExpression>(std::move(logicalOrExpr), std::move(expr), std::move(conditionalExpr));
+    }
+    return std::make_unique<ConditionalExpression>(std::move(logicalOrExpr), nullptr, nullptr);
+
     return nullptr;
 }
 
@@ -493,11 +511,31 @@ void Parser::parseDIRECT_DECLARATOR_PRIME(std::unique_ptr<Declarator> &declarato
 }
 
 // EQUALITY_EXPRESSION -> RELATIONAL_EXPRESSION EQUALITY_EXPRESSION_PRIME
-std::unique_ptr<ASTNode> Parser::parseEQUALITY_EXPRESSION()
+std::unique_ptr<Expr> Parser::parseEQUALITY_EXPRESSION()
 {
-    parseRELATIONAL_EXPRESSION();
-    parseEQUALITY_EXPRESSION_PRIME();
-    return nullptr;
+    std::unique_ptr<Expr> lhs = parseRELATIONAL_EXPRESSION();
+
+    // EQUALITY_EXPRESSION_PRIME -> == RELATIONAL_EXPRESSION EQUALITY_EXPRESSION_PRIME | != RELATIONAL_EXPRESSION EQUALITY_EXPRESSION_PRIME | ϵ
+    while (currentToken.getType() == TokenType::COMPARISON_OPERATOR)
+    {
+        if (currentToken.getValue() == "==")
+        {
+            consume();
+            std::unique_ptr<Expr> rhs = parseRELATIONAL_EXPRESSION();
+            lhs = std::make_unique<BinaryExpr>(std::move(lhs), "==", std::move(rhs));
+        }
+        else if (currentToken.getValue() == "!=")
+        {
+            consume();
+            std::unique_ptr<Expr> rhs = parseRELATIONAL_EXPRESSION();
+            lhs = std::make_unique<BinaryExpr>(std::move(lhs), "!=", std::move(rhs));
+        }
+        else
+        {
+            break;
+        }
+    }
+    return lhs;
 }
 
 // EQUALITY_EXPRESSION_PRIME -> == RELATIONAL_EXPRESSION EQUALITY_EXPRESSION_PRIME | != RELATIONAL_EXPRESSION EQUALITY_EXPRESSION_PRIME | ϵ
@@ -935,153 +973,109 @@ std::unique_ptr<LabaledStatement> Parser::parseLABELED_STATEMENT()
 }
 
 // EXCLUSIVE_OR_EXPRESSION -> AND_EXPRESSION EXCLUSIVE_OR_EXPRESSION_PRIME
-std::unique_ptr<ASTNode> Parser::parseEXCLUSIVE_OR_EXPRESSION()
+std::unique_ptr<Expr> Parser::parseEXCLUSIVE_OR_EXPRESSION()
 {
-    parseAND_EXPRESSION();
-    parseEXCLUSIVE_OR_EXPRESSION_PRIME();
-    return nullptr;
-}
+    std::unique_ptr<Expr> lhs = parseAND_EXPRESSION();
 
-// EXCLUSIVE_OR_EXPRESSION_PRIME -> ^ AND_EXPRESSION EXCLUSIVE_OR_EXPRESSION_PRIME | ϵ
-std::unique_ptr<ASTNode> Parser::parseEXCLUSIVE_OR_EXPRESSION_PRIME()
-{
-    if (currentToken.getType() == TokenType::ARITHMETIC_OPERATOR && currentToken.getValue() == "^")
+    // EXCLUSIVE_OR_EXPRESSION_PRIME -> ^ AND_EXPRESSION EXCLUSIVE_OR_EXPRESSION_PRIME | ϵ
+    while (currentToken.getType() == TokenType::ARITHMETIC_OPERATOR && currentToken.getValue() == "^")
     {
-        parseAND_EXPRESSION();
-        parseEXCLUSIVE_OR_EXPRESSION_PRIME();
+        consume();
+        std::unique_ptr<Expr> rhs = parseAND_EXPRESSION();
+        lhs = std::make_unique<BinaryExpr>(std::move(lhs), "^", std::move(rhs));
     }
-
-    return nullptr;
+    return lhs;
 }
 
 // INCLUSIVE_OR_EXPRESSION -> EXCLUSIVE_OR_EXPRESSION INCLUSIVE_OR_EXPRESSION_PRIME
-std::unique_ptr<ASTNode> Parser::parseINCLUSIVE_OR_EXPRESSION()
+std::unique_ptr<Expr> Parser::parseINCLUSIVE_OR_EXPRESSION()
 {
-    parseEXCLUSIVE_OR_EXPRESSION();
-    parseINCLUSIVE_OR_EXPRESSION_PRIME();
-    return nullptr;
-}
-
-// INCLUSIVE_OR_EXPRESSION_PRIME -> | EXCLUSIVE_OR_EXPRESSION INCLUSIVE_OR_EXPRESSION_PRIME | ϵ
-std::unique_ptr<ASTNode> Parser::parseINCLUSIVE_OR_EXPRESSION_PRIME()
-{
-    if (currentToken.getType() == TokenType::ARITHMETIC_OPERATOR && currentToken.getValue() == "|")
+    std::unique_ptr<Expr> lhs = parseEXCLUSIVE_OR_EXPRESSION();
+    while (currentToken.getType() == TokenType::ARITHMETIC_OPERATOR && currentToken.getValue() == "|")
     {
         consume();
-        parseEXCLUSIVE_OR_EXPRESSION();
-        parseINCLUSIVE_OR_EXPRESSION_PRIME();
+        std::unique_ptr<Expr> rhs = parseEXCLUSIVE_OR_EXPRESSION();
+        lhs = std::make_unique<BinaryExpr>(std::move(lhs), "|", std::move(rhs));
     }
-    return nullptr;
+    return lhs;
 }
 
 // LOGICAL_AND_EXPRESSION -> INCLUSIVE_OR_EXPRESSION LOGICAL_AND_EXPRESSION_PRIME
-std::unique_ptr<ASTNode> Parser::parseLOGICAL_AND_EXPRESSION()
+std::unique_ptr<Expr> Parser::parseLOGICAL_AND_EXPRESSION()
 {
-    parseINCLUSIVE_OR_EXPRESSION();
-    parseLOGICAL_AND_EXPRESSION_PRIME();
-    return nullptr;
-}
+    std::unique_ptr<Expr> lhs = parseINCLUSIVE_OR_EXPRESSION();
 
-// LOGICAL_AND_EXPRESSION_PRIME -> && INCLUSIVE_OR_EXPRESSION LOGICAL_AND_EXPRESSION_PRIME | ϵ
-std::unique_ptr<ASTNode> Parser::parseLOGICAL_AND_EXPRESSION_PRIME()
-{
-    if (currentToken.getType() == TokenType::COMPARISON_OPERATOR && currentToken.getValue() == "&&")
+    // LOGICAL_AND_EXPRESSION_PRIME -> && INCLUSIVE_OR_EXPRESSION LOGICAL_AND_EXPRESSION_PRIME | ϵ
+    while (currentToken.getType() == TokenType::COMPARISON_OPERATOR && currentToken.getValue() == "&&")
     {
         consume();
-        parseINCLUSIVE_OR_EXPRESSION();
-        parseLOGICAL_AND_EXPRESSION_PRIME();
+        std::unique_ptr<Expr> rhs = parseINCLUSIVE_OR_EXPRESSION();
+        lhs = std::make_unique<BinaryExpr>(std::move(lhs), "&&", std::move(rhs));
     }
-    return nullptr;
+    return lhs;
 }
 
 // LOGICAL_OR_EXPRESSION -> LOGICAL_AND_EXPRESSION LOGICAL_OR_EXPRESSION_PRIME
-std::unique_ptr<ASTNode> Parser::parseLOGICAL_OR_EXPRESSION()
+std::unique_ptr<Expr> Parser::parseLOGICAL_OR_EXPRESSION()
 {
-    parseLOGICAL_AND_EXPRESSION();
-    parseLOGICAL_OR_EXPRESSION_PRIME();
+    std::unique_ptr<Expr> lhs = parseLOGICAL_AND_EXPRESSION();
 
-    return nullptr;
-}
-
-// LOGICAL_OR_EXPRESSION_PRIME -> || LOGICAL_AND_EXPRESSION LOGICAL_OR_EXPRESSION_PRIME | ϵ
-std::unique_ptr<ASTNode> Parser::parseLOGICAL_OR_EXPRESSION_PRIME()
-{
-    if (currentToken.getType() == TokenType::COMPARISON_OPERATOR && currentToken.getValue() == "||")
+    // LOGICAL_OR_EXPRESSION_PRIME -> || LOGICAL_AND_EXPRESSION LOGICAL_OR_EXPRESSION_PRIME | ϵ
+    while (currentToken.getType() == TokenType::COMPARISON_OPERATOR && currentToken.getValue() == "||")
     {
+        std::string op = currentToken.getValue();
         consume();
-        parseLOGICAL_AND_EXPRESSION();
-        parseLOGICAL_OR_EXPRESSION_PRIME();
+        std::unique_ptr<Expr> rhs = parseLOGICAL_AND_EXPRESSION();
+        lhs = std::make_unique<BinaryExpr>(std::move(lhs), op, std::move(rhs));
     }
 
-    return nullptr;
+    return lhs;
 }
 
 // ADDITIVE_EXPRESSION -> MULTIPLICATIVE_EXPRESSION ADDITIVE_EXPRESSION_PRIME
-std::unique_ptr<ASTNode> Parser::parseADDITIVE_EXPRESSION()
+std::unique_ptr<Expr> Parser::parseADDITIVE_EXPRESSION()
 {
     //  ( ++ -- FLOAT_CONSTANT IDENTIFIER INTEGER_CONSTANT STRING_LITERAL sizeof
-    parseMULTIPLICATIVE_EXPRESSION();
-    parseADDITIVE_EXPRESSION_PRIME();
-    return nullptr;
+    std::unique_ptr<Expr> lhs = parseMULTIPLICATIVE_EXPRESSION();
+
+    // ADDITIVE_EXPRESSION_PRIME -> + MULTIPLICATIVE_EXPRESSION ADDITIVE_EXPRESSION_PRIME | - MULTIPLICATIVE_EXPRESSION ADDITIVE_EXPRESSION_PRIME | ϵ
+    while (currentToken.getType() == TokenType::ARITHMETIC_OPERATOR && (currentToken.getValue() == "+" || currentToken.getValue() == "-"))
+    {
+        std::string op = currentToken.getValue();
+        consume();
+        std::unique_ptr<Expr> rhs = parseMULTIPLICATIVE_EXPRESSION();
+        lhs = std::make_unique<BinaryExpr>(std::move(lhs), op, std::move(rhs));
+    }
+    return lhs;
 }
 
-// ADDITIVE_EXPRESSION_PRIME -> + MULTIPLICATIVE_EXPRESSION ADDITIVE_EXPRESSION_PRIME | - MULTIPLICATIVE_EXPRESSION ADDITIVE_EXPRESSION_PRIME | ϵ
-std::unique_ptr<ASTNode> Parser::parseADDITIVE_EXPRESSION_PRIME()
+// AND_EXPRESSION -> EQUALITY_EXPRESSION AND_EXPRESSION_PRIME
+std::unique_ptr<Expr> Parser::parseAND_EXPRESSION()
 {
-    if (currentToken.getType() != TokenType::ARITHMETIC_OPERATOR)
-    {
-        return nullptr;
-    }
-    if (currentToken.getValue() == "+" || currentToken.getValue() == "-")
+    std::unique_ptr<Expr> lhs = parseEQUALITY_EXPRESSION();
+
+    // AND_EXPRESSION_PRIME -> & EQUALITY_EXPRESSION AND_EXPRESSION_PRIME | ϵ
+    while (currentToken.getType() == TokenType::ARITHMETIC_OPERATOR && currentToken.getValue() == "&")
     {
         consume();
-        parseMULTIPLICATIVE_EXPRESSION();
-        parseADDITIVE_EXPRESSION_PRIME();
+        std::unique_ptr<Expr> rhs = parseEQUALITY_EXPRESSION();
+        lhs = std::make_unique<BinaryExpr>(std::move(lhs), "&", std::move(rhs));
     }
-    return nullptr;
-}
-
-std::unique_ptr<ASTNode> Parser::parseAND_EXPRESSION()
-{
-    parseEQUALITY_EXPRESSION();
-    parseAND_EXPRESSION_PRIME();
-    return nullptr;
-}
-
-// AND_EXPRESSION_PRIME -> & EQUALITY_EXPRESSION AND_EXPRESSION_PRIME | ϵ
-std::unique_ptr<ASTNode> Parser::parseAND_EXPRESSION_PRIME()
-{
-    if (currentToken.getType() != TokenType::ARITHMETIC_OPERATOR)
-    {
-        return nullptr;
-    }
-    if (currentToken.getValue() != "&")
-    {
-        consume();
-        parseEQUALITY_EXPRESSION();
-        parseAND_EXPRESSION_PRIME();
-    }
-    return nullptr;
+    return lhs;
 }
 
 // MULTIPLICATIVE_EXPRESSION -> UNARY_EXPRESSION MULTIPLICATIVE_EXPRESSION_PRIME
-std::unique_ptr<ASTNode> Parser::parseMULTIPLICATIVE_EXPRESSION()
+std::unique_ptr<Expr> Parser::parseMULTIPLICATIVE_EXPRESSION()
 {
-    parseUNARY_EXPRESSION();
-    parseMULTIPLICATIVE_EXPRESSION_PRIME();
-    return nullptr;
-}
-
-// MULTIPLICATIVE_EXPRESSION_PRIME -> * UNARY_EXPRESSION MULTIPLICATIVE_EXPRESSION_PRIME | / UNARY_EXPRESSION MULTIPLICATIVE_EXPRESSION_PRIME | % UNARY_EXPRESSION MULTIPLICATIVE_EXPRESSION_PRIME | ϵ
-std::unique_ptr<ASTNode> Parser::parseMULTIPLICATIVE_EXPRESSION_PRIME()
-{
-    if (currentToken.getType() == TokenType::ARITHMETIC_OPERATOR && (currentToken.getValue() == "*" || currentToken.getValue() == "/" || currentToken.getValue() == "%"))
+    std::unique_ptr<Expr> lhs = parseUNARY_EXPRESSION();
+    // MULTIPLICATIVE_EXPRESSION_PRIME -> * UNARY_EXPRESSION MULTIPLICATIVE_EXPRESSION_PRIME | / UNARY_EXPRESSION MULTIPLICATIVE_EXPRESSION_PRIME | % UNARY_EXPRESSION MULTIPLICATIVE_EXPRESSION_PRIME | ϵ
+    while (currentToken.getType() == TokenType::ARITHMETIC_OPERATOR && (currentToken.getValue() == "*" || currentToken.getValue() == "/" || currentToken.getValue() == "%"))
     {
+        std::string op = currentToken.getValue();
         consume();
-        parseUNARY_EXPRESSION();
-        parseMULTIPLICATIVE_EXPRESSION_PRIME();
+        std::unique_ptr<Expr> rhs = parseUNARY_EXPRESSION();
+        lhs = std::make_unique<BinaryExpr>(std::move(lhs), op, std::move(rhs));
     }
-
     return nullptr;
 }
 
@@ -1116,26 +1110,26 @@ std::unique_ptr<ASTNode> Parser::parsePRIMARY_EXPRESSION()
 }
 
 // RELATIONAL_EXPRESSION -> SHIFT_EXPRESSION RELATIONAL_EXPRESSION_PRIME
-std::unique_ptr<ASTNode> Parser::parseRELATIONAL_EXPRESSION()
+std::unique_ptr<Expr> Parser::parseRELATIONAL_EXPRESSION()
 {
-    parseSHIFT_EXPRESSION();
-    parseRELATIONAL_EXPRESSION_PRIME();
-    return nullptr;
-}
+    std::unique_ptr<Expr> lhs = parseSHIFT_EXPRESSION();
 
-// RELATIONAL_EXPRESSION_PRIME -> < SHIFT_EXPRESSION RELATIONAL_EXPRESSION_PRIME | > SHIFT_EXPRESSION RELATIONAL_EXPRESSION_PRIME | <= SHIFT_EXPRESSION RELATIONAL_EXPRESSION_PRIME | >= SHIFT_EXPRESSION RELATIONAL_EXPRESSION_PRIME | ϵ
-std::unique_ptr<ASTNode> Parser::parseRELATIONAL_EXPRESSION_PRIME()
-{
-    if (currentToken.getType() == TokenType::COMPARISON_OPERATOR)
+    // RELATIONAL_EXPRESSION_PRIME -> < SHIFT_EXPRESSION RELATIONAL_EXPRESSION_PRIME | > SHIFT_EXPRESSION RELATIONAL_EXPRESSION_PRIME | <= SHIFT_EXPRESSION RELATIONAL_EXPRESSION_PRIME | >= SHIFT_EXPRESSION RELATIONAL_EXPRESSION_PRIME | ϵ
+    while (currentToken.getType() == TokenType::COMPARISON_OPERATOR)
     {
         if (currentToken.getValue() == "<" || currentToken.getValue() == ">" || currentToken.getValue() == "<=" || currentToken.getValue() == ">=")
         {
+            std::string op = currentToken.getValue();
             consume();
-            parseSHIFT_EXPRESSION();
-            parseRELATIONAL_EXPRESSION_PRIME();
+            std::unique_ptr<Expr> rhs = parseSHIFT_EXPRESSION();
+            lhs = std::make_unique<BinaryExpr>(std::move(lhs), op, std::move(rhs));
+        }
+        else
+        {
+            break;
         }
     }
-    return nullptr;
+    return lhs;
 }
 
 // PARAMETER_DECLARATION -> DECLARATION_SPECIFIERS PARAM_DECL_FAC
@@ -1329,24 +1323,19 @@ std::unique_ptr<SelectionStatement> Parser::parseSELECTION_STATEMENT()
 }
 
 // SHIFT_EXPRESSION -> ADDITIVE_EXPRESSION SHIFT_EXPRESSION_PRIME
-std::unique_ptr<ASTNode> Parser::parseSHIFT_EXPRESSION()
+std::unique_ptr<Expr> Parser::parseSHIFT_EXPRESSION()
 {
-    parseADDITIVE_EXPRESSION();
-    parseSHIFT_EXPRESSION_PRIME();
-    return nullptr;
-}
+    std::unique_ptr<Expr> lhs = parseADDITIVE_EXPRESSION();
 
-// SHIFT_EXPRESSION_PRIME -> << ADDITIVE_EXPRESSION SHIFT_EXPRESSION_PRIME | >> ADDITIVE_EXPRESSION SHIFT_EXPRESSION_PRIME | ϵ
-std::unique_ptr<ASTNode> Parser::parseSHIFT_EXPRESSION_PRIME()
-{
+    // SHIFT_EXPRESSION_PRIME -> << ADDITIVE_EXPRESSION SHIFT_EXPRESSION_PRIME | >> ADDITIVE_EXPRESSION SHIFT_EXPRESSION_PRIME | ϵ
     if (currentToken.getType() == TokenType::ARITHMETIC_OPERATOR && (currentToken.getValue() == "<<" || currentToken.getValue() == ">>"))
     {
+        std::string op = currentToken.getValue();
         consume();
-        parseADDITIVE_EXPRESSION();
-        parseSHIFT_EXPRESSION_PRIME();
+        std::unique_ptr<Expr> rhs = parseADDITIVE_EXPRESSION();
+        lhs = std::make_unique<BinaryExpr>(std::move(lhs), op, std::move(rhs));
     }
-
-    return nullptr;
+    return lhs;
 }
 
 // SPECIFIER_QUALIFIER_LIST -> TYPE_SPECIFIER
@@ -1605,7 +1594,7 @@ std::unique_ptr<Type> Parser::parseTYPE_SPECIFIER()
 // FIRST(POSTFIX_EXPRESSION)=     ( FLOAT_CONSTANT IDENTIFIER INTEGER_CONSTANT STRING_LITERAL
 
 // UNARY_EXPRESSION -> POSTFIX_EXPRESSION | ++ UNARY_EXPRESSION | -- UNARY_EXPRESSION | sizeof UNARY_EXPRESSION
-std::unique_ptr<ASTNode> Parser::parseUNARY_EXPRESSION()
+std::unique_ptr<Expr> Parser::parseUNARY_EXPRESSION()
 {
     if (currentToken.getType() == TokenType::PUNCTUATION && currentToken.getValue() == "(" || currentToken.getType() == TokenType::FLOAT_CONSTANT || currentToken.getType() == TokenType::IDENTIFIER || currentToken.getType() == TokenType::INTEGER_CONSTANT || currentToken.getType() == TokenType::STRING_LITERAL)
     {

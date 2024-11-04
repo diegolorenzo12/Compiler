@@ -37,6 +37,7 @@ class ForWithExpression;
 class ReturnStatement;
 class ContinueStatement;
 class BreakStatement;
+class ConditionalExpression;
 
 #include "ASTVisitor.h"
 
@@ -667,6 +668,23 @@ public:
     }
 };
 
-/*
-PRINT ABSTRACT SYNTAX TREE
-*/
+class ConditionalExpression : public Expr
+{
+public:
+    ConditionalExpression(std::unique_ptr<Expr> logicalOrExpression, std::unique_ptr<Expr> expression, std::unique_ptr<ConditionalExpression> conditionalExpression)
+        : logicalOrExpression(std::move(logicalOrExpression)), expression(std::move(expression)), conditionalExpression(std::move(conditionalExpression)) {}
+
+    void accept(ASTVisitor &visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    Expr *getLogicalOrExpression() const { return logicalOrExpression.get(); }
+    Expr *getExpression() const { return expression.get(); }
+    ConditionalExpression *getConditionalExpression() const { return conditionalExpression.get(); }
+
+private:
+    std::unique_ptr<Expr> logicalOrExpression;
+    std::unique_ptr<Expr> expression;                             // optional
+    std::unique_ptr<ConditionalExpression> conditionalExpression; // optional
+};

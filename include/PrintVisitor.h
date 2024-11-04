@@ -1,7 +1,9 @@
-#pragma once
 #include "ASTVisitor.h"
 #include <iostream>
-#include "AST.h"
+
+/*
+PRINT ABSTRACT SYNTAX TREE
+*/
 
 class PrintVisitor : public ASTVisitor
 {
@@ -343,5 +345,22 @@ public:
     void visit(BreakStatement &node) override
     {
         std::cout << "BreakStatement ";
+    }
+
+    void visit(ConditionalExpression &node) override
+    {
+        std::cout << "ConditionalExpression ";
+        if (node.getLogicalOrExpression() != nullptr)
+        {
+            node.getLogicalOrExpression()->accept(*this);
+        }
+        if (node.getExpression() != nullptr)
+        {
+            node.getExpression()->accept(*this);
+            if (node.getConditionalExpression() != nullptr)
+            {
+                node.getConditionalExpression()->accept(*this);
+            }
+        }
     }
 };

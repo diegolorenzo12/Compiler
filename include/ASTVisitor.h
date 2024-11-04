@@ -37,4 +37,5 @@ public:
     virtual void visit(ReturnStatement &node) = 0;
     virtual void visit(ContinueStatement &node) = 0;
     virtual void visit(BreakStatement &node) = 0;
+    virtual void visit(ConditionalExpression &node) = 0;
 };

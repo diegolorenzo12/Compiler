@@ -30,9 +30,9 @@ private:
 
     std::unique_ptr<ASTNode> parseGlobalDeclarations();
 
-    std::unique_ptr<ASTNode> parseADDITIVE_EXPRESSION();
+    std::unique_ptr<Expr> parseADDITIVE_EXPRESSION();
     std::unique_ptr<ASTNode> parseADDITIVE_EXPRESSION_PRIME();
-    std::unique_ptr<ASTNode> parseAND_EXPRESSION();
+    std::unique_ptr<Expr> parseAND_EXPRESSION();
     std::unique_ptr<ASTNode> parseAND_EXPRESSION_PRIME();
     std::unique_ptr<ASTNode> parseARGUMENT_EXPRESSION_LIST();
     std::unique_ptr<ASTNode> parseARGUMENT_EXPRESSION_LIST_PRIME();
@@ -45,7 +45,7 @@ private:
     std::unique_ptr<BlockItemBase> parseBLOCK_ITEM();
     std::unique_ptr<BlockStmt> parseBLOCK_ITEM_LIST();
     std::unique_ptr<ASTNode> parseBLOCK_ITEM_LIST_PRIME();
-    std::unique_ptr<Expr> parseCONDITIONAL_EXPRESSION();
+    std::unique_ptr<ConditionalExpression> parseCONDITIONAL_EXPRESSION();
     std::unique_ptr<ASTNode> parseCONDITIONAL_EXPRESSION_PRIME();
     std::unique_ptr<ASTNode> parseCONSTANT();
     std::unique_ptr<Declaration> parseDECLARATION();
@@ -58,9 +58,9 @@ private:
     void parseDIRECT_DECLARATOR(std::unique_ptr<Declarator> &declarator);
     // std::unique_ptr<DirectDeclarator> parseDIRECT_DECLARATOR_PRIME();
     void parseDIRECT_DECLARATOR_PRIME(std::unique_ptr<Declarator> &declarato);
-    std::unique_ptr<ASTNode> parseEQUALITY_EXPRESSION();
+    std::unique_ptr<Expr> parseEQUALITY_EXPRESSION();
     std::unique_ptr<ASTNode> parseEQUALITY_EXPRESSION_PRIME();
-    std::unique_ptr<ASTNode> parseEXCLUSIVE_OR_EXPRESSION();
+    std::unique_ptr<Expr> parseEXCLUSIVE_OR_EXPRESSION();
     std::unique_ptr<ASTNode> parseEXCLUSIVE_OR_EXPRESSION_PRIME();
     std::unique_ptr<Expr> parseEXPRESSION();
     std::unique_ptr<ASTNode> parseEXPRESSION_PRIME();
@@ -73,7 +73,7 @@ private:
     std::unique_ptr<ASTNode> parseGLOBAL_DECLARATIONS();
     std::unique_ptr<ASTNode> parseIDENTIFIER_LIST();
     std::unique_ptr<ASTNode> parseIDENTIFIER_LIST_PRIME();
-    std::unique_ptr<ASTNode> parseINCLUSIVE_OR_EXPRESSION();
+    std::unique_ptr<Expr> parseINCLUSIVE_OR_EXPRESSION();
     std::unique_ptr<ASTNode> parseINCLUSIVE_OR_EXPRESSION_PRIME();
     std::unique_ptr<Initializer> parseINITIALIZER();
     std::unique_ptr<InitializerList> parseINITIALIZER_BRACE_FAC();
@@ -86,11 +86,11 @@ private:
     std::unique_ptr<IterationStatement> parseITERATION_STATEMENT();
     std::unique_ptr<JumpStatement> parseJUMP_STATEMENT();
     std::unique_ptr<LabaledStatement> parseLABELED_STATEMENT();
-    std::unique_ptr<ASTNode> parseLOGICAL_AND_EXPRESSION();
+    std::unique_ptr<Expr> parseLOGICAL_AND_EXPRESSION();
     std::unique_ptr<ASTNode> parseLOGICAL_AND_EXPRESSION_PRIME();
-    std::unique_ptr<ASTNode> parseLOGICAL_OR_EXPRESSION();
+    std::unique_ptr<Expr> parseLOGICAL_OR_EXPRESSION();
     std::unique_ptr<ASTNode> parseLOGICAL_OR_EXPRESSION_PRIME();
-    std::unique_ptr<ASTNode> parseMULTIPLICATIVE_EXPRESSION();
+    std::unique_ptr<Expr> parseMULTIPLICATIVE_EXPRESSION();
     std::unique_ptr<ASTNode> parseMULTIPLICATIVE_EXPRESSION_PRIME();
     std::unique_ptr<ASTNode> parsePARAMETER_DECLARATION();
     std::unique_ptr<ASTNode> parsePARAMETER_LIST();
@@ -102,10 +102,10 @@ private:
     std::unique_ptr<ASTNode> parsePOSTFIX_EXPRESSION();
     std::unique_ptr<ASTNode> parsePOSTFIX_EXPRESSION_PRIME();
     std::unique_ptr<ASTNode> parsePRIMARY_EXPRESSION();
-    std::unique_ptr<ASTNode> parseRELATIONAL_EXPRESSION();
+    std::unique_ptr<Expr> parseRELATIONAL_EXPRESSION();
     std::unique_ptr<ASTNode> parseRELATIONAL_EXPRESSION_PRIME();
     std::unique_ptr<SelectionStatement> parseSELECTION_STATEMENT();
-    std::unique_ptr<ASTNode> parseSHIFT_EXPRESSION();
+    std::unique_ptr<Expr> parseSHIFT_EXPRESSION();
     std::unique_ptr<ASTNode> parseSHIFT_EXPRESSION_PRIME();
     std::unique_ptr<ASTNode> parseSPECIFIER_QUALIFIER_LIST();
     std::unique_ptr<Stmt> parseSTATEMENT();
@@ -123,7 +123,7 @@ private:
     std::unique_ptr<Specifier> parseTYPE_QUALIFIER();
     std::unique_ptr<Specifier> parseTYPE_QUALIFIER_LIST_OPT_FAC();
     std::unique_ptr<Type> parseTYPE_SPECIFIER();
-    std::unique_ptr<ASTNode> parseUNARY_EXPRESSION();
+    std::unique_ptr<Expr> parseUNARY_EXPRESSION();
 };
 
 /*
