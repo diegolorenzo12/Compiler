@@ -127,6 +127,12 @@ A table-driven lexer provides several advantages over a directly coded lexer:
 - **Maintainability:** The table-driven approach simplifies maintenance. If new keywords, tokens, or operators need to be added, it can be done by updating the relevant table entries.
 - **Efficiency:** This method can be computationally efficient as it avoids large, nested conditional structures (such as if-else or switch cases) by making use of direct table lookups.
 
+To further enhance our development process, we later migrated the lexer to **Flex**, a powerful lexical analyzer generator that simplifies the process of defining and managing the lexer. Flex allows for easier modifications and faster updates since it provides a more abstracted way of writing lexer rules. With Flex, the need for manual table management is reduced, and changes can be implemented by simply updating the lexer definition file. This streamlines the addition of new keywords, operators, or tokens, thus improving development speed and reducing the likelihood of errors.
+
+For instructions on how to install Flex and set up your environment, refer to the section [Installation and Running](#installation-and-running).
+You can copy and paste this code into your Markdown editor or file. If you need further assistance,
+
+
 ## Syntax Analysis
 
 ### Overview
