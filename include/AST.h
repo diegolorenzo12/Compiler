@@ -1,223 +1,108 @@
 #pragma once
 #include <memory>
-#include <string>
 #include <vector>
+#include <string>
 #include <iostream>
 
-class ASTNode
-{
+class ASTNode {
 public:
+    virtual void print(int indent = 0) const = 0;
     virtual ~ASTNode() = default;
-
-    virtual void print() const
-    {
-        std::cout << "nodeName" << ":\n";
-    }
-
-protected:
-    std::string nodeName;
 };
 
-/*
-ABSTRACT CLASES
-*/
-
-class ListNode : public ASTNode
-{
+class ProgramNode : public ASTNode {
 public:
-    std::vector<std::unique_ptr<ASTNode>> nodes;
+    std::vector<std::unique_ptr<ASTNode>> children;
 
-    // Method to add a declaration if it is not null
-    void push_back_node(std::unique_ptr<ASTNode> node)
-    {
-        if (node)
-        {
-            nodes.push_back(std::move(node)); // Only add non-null declarations
-        }
+    void addChild(std::unique_ptr<ASTNode> child) {
+        children.push_back(std::move(child));
     }
 
-    void push_back_vec(std::unique_ptr<ListNode> nodeList)
-    {
-        if (nodeList)
-        {
-            for (auto &node : nodeList->nodes)
-            {
-                nodes.push_back(std::move(node));
+    void print(int indent = 0) const override {
+        std::cout << std::string(indent, ' ') << "ProgramNode" << std::endl;
+        for (const auto& child : children) {
+            child->print(indent + 2);
+        }
+    }
+};
+
+class DeclarationNode : public ASTNode {
+public:
+    std::unique_ptr<ASTNode> declaration;
+
+    void setDeclaration(std::unique_ptr<ASTNode> decl) {
+        declaration = std::move(decl);
+    }
+
+    void print(int indent = 0) const override {
+        std::cout << std::string(indent, ' ') << "DeclarationNode" << std::endl;
+        if (declaration) {
+            declaration->print(indent + 2);
+        }
+    }
+};
+
+class ExpressionNode : public ASTNode {
+public:
+    std::string value;
+    ExpressionNode(const std::string& value) : value(value) {}
+
+    void print(int indent = 0) const override {
+        std::cout << std::string(indent, ' ') << "ExpressionNode: " << value << std::endl;
+    }
+};
+
+class BlockNode : public ASTNode {
+public:
+    std::vector<std::unique_ptr<ASTNode>> statements;
+
+    void addStatement(std::unique_ptr<ASTNode> stmt) {
+        statements.push_back(std::move(stmt));
+    }
+
+    void print(int indent = 0) const override {
+        std::cout << std::string(indent, ' ') << "BlockNode" << std::endl;
+        for (const auto& stmt : statements) {
+            if (stmt) {
+                stmt->print(indent + 2);
             }
         }
     }
-    // Override the print method to print all declarations
-    void print() const override
-    {
-        ASTNode::print(); // Call print on base class
-        for (const auto &node : nodes)
-        {
-            node->print(); // Print each declaration
+};
+
+class FunctionDefinitionNode : public ASTNode {
+public:
+    std::unique_ptr<ASTNode> declarationSpecifiers;
+    std::unique_ptr<ASTNode> declarator;
+    std::unique_ptr<BlockNode> body;
+
+    FunctionDefinitionNode() = default;
+
+    void setDeclarationSpecifiers(std::unique_ptr<ASTNode> specifiers) {
+        declarationSpecifiers = std::move(specifiers);
+    }
+
+    void setDeclarator(std::unique_ptr<ASTNode> decl) {
+        declarator = std::move(decl);
+    }
+
+    void setBody(std::unique_ptr<BlockNode> block) {
+        body = std::move(block);
+    }
+
+    void print(int indent = 0) const override {
+        std::cout << std::string(indent, ' ') << "FunctionDefinitionNode" << std::endl;
+        if (declarationSpecifiers) {
+            declarationSpecifiers->print(indent + 2);
+        }
+        if (declarator) {
+            declarator->print(indent + 2);
+        }
+        if (body) {
+            body->print(indent + 2);
         }
     }
 };
 
-class BinaryASTNode : public ASTNode
-{
-public:
-    BinaryASTNode(std::unique_ptr<ASTNode> left, std::unique_ptr<ASTNode> right)
-        : leftOperand(std::move(left)), rightOperand(std::move(right)) {}
 
-protected:
-    std::unique_ptr<ASTNode> leftOperand;
-    std::unique_ptr<ASTNode> rightOperand;
-
-    virtual void printOperator() const = 0;
-};
-
-class AndASTNode : public BinaryASTNode
-{
-public:
-    using BinaryASTNode::BinaryASTNode; // Inherit constructors
-
-    // Override the print method
-    void printOperator() const override
-    {
-        std::cout << " AND "; // Print the AND operator
-    }
-};
-
-class OrASTNode : public BinaryASTNode
-{
-public:
-    using BinaryASTNode::BinaryASTNode; // Inherit constructors
-
-    // Override the print method
-    void printOperator() const override
-    {
-        std::cout << " OR "; // Print the OR operator
-    }
-};
-
-// legacy system failure
-
-/*
-CONCRETE CLASSES FOR MY AST
-*/
-
-class ProgramNode : public ListNode
-{
-public:
-    ProgramNode()
-    {
-        nodeName = "ProgramNode";
-    }
-
-    std::vector<std::unique_ptr<ASTNode>> declarations;
-};
-
-// DECLARATIONS
-
-class GlobalDeclarationsNode : public ASTNode
-{
-public:
-    GlobalDeclarationsNode()
-    {
-        nodeName = "GlobalDeclarationsNode";
-    }
-};
-
-class DeclarationNode : public ASTNode
-{
-public:
-    DeclarationNode()
-    {
-        nodeName = "DeclarationNode";
-    }
-    std::unique_ptr<ASTNode> declaration;
-
-    void setDeclaration(std::unique_ptr<ASTNode> decl)
-    {
-        if (decl)
-        {
-            declaration = std::move(decl);
-        }
-    }
-
-    virtual ~DeclarationNode() = default;
-};
-
-// EXPRESIONS
-class BinaryOpNode : public ASTNode
-{
-public:
-    BinaryOpNode()
-    {
-        nodeName = "BinaryOpNode";
-    }
-    std::unique_ptr<ASTNode> left;
-    std::unique_ptr<ASTNode> right;
-    std::string op;
-
-    BinaryOpNode(std::unique_ptr<ASTNode> left, const std::string &op, std::unique_ptr<ASTNode> right)
-        : left(std::move(left)), op(op), right(std::move(right)) {}
-};
-
-class AssignmentNode : public ASTNode
-{
-public:
-    AssignmentNode()
-    {
-        nodeName = "AssignmentNode";
-    }
-    std::string id;
-    std::unique_ptr<ASTNode> expr;
-
-    AssignmentNode(const std::string &id, std::unique_ptr<ASTNode> expr)
-        : id(id), expr(std::move(expr)) {}
-};
-
-// STATEMENTS
-
-// add statements node here: jump, labaled, iterative, etc
-
-// TERMINAL nodes
-class ConstantIntegerNode : public ASTNode
-{
-public:
-    int value;
-    explicit ConstantIntegerNode(int value) : value(value)
-    {
-        nodeName = "ConstIntegerNode";
-    }
-    void print() const override
-    {
-        ASTNode::print();
-        std::cout << value << std::endl;
-    }
-};
-
-class ConstantFloatNode : public ASTNode
-{
-public:
-    float value;
-    explicit ConstantFloatNode(float value) : value(value)
-    {
-        nodeName = "ConstFloatNode";
-    }
-    void print() const override
-    {
-        ASTNode::print();
-        std::cout << value << std::endl;
-    }
-};
-
-class StringLiteralNode : public ASTNode
-{
-public:
-    std::string value;
-    explicit StringLiteralNode(std::string value) : value(value)
-    {
-        nodeName = "StringLiteralNode";
-    }
-    void print() const override
-    {
-        ASTNode::print();
-        std::cout << value << std::endl;
-    }
-};
+// Define otros nodos específicos si es necesario.
