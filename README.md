@@ -175,7 +175,7 @@ cmake --build .
 ```
 
 > [!NOTE]  
-> If error in Flex is not found when running cmake, try setting the LEX enviroment variable by running the generated .bat, .sh or manually setting it from the path conan created. 
+> If you see the error "FLEX_EXECUTABLE not found." when running cmake, try setting the LEX enviroment variable by running the generated .bat, .sh or manually setting it from the path conan created. 
 
 ### Build and Run the Project
 
@@ -186,17 +186,12 @@ cd build/
 cmake --build . --target run
 ```
 
-## Testing and Validation
-
-- **Testing methodology:**
-- **Results obtained:**
-- **Specific test cases:**
-
 ## Tools and Development Environment
 
-- **Programming languages used:**
-- **Development tools:**
-- **Testing and simulation environment:**
+- **Programming languages used:** C++
+- **Development tools:** CMake, Conan for package management
+
+For installation instructions, see the [Installation and Running](#installation-and-running) section.
 
 ## Demonstration
 
