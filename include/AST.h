@@ -21,6 +21,22 @@ class Initializer;
 class InitializerList;
 class BraceInitializer;
 class ExpressionInitializer;
+class DeclarationWrapper;
+class StatementWrapper;
+class LabaledStatement;
+class CaseStatement;
+class DefaultStatement;
+class ExpressionStatement;
+class SwitchStatement;
+class IfStatement;
+class WhileStatement;
+class DoWhileStatement;
+class ForStatement;
+class ForWitDeclaration;
+class ForWithExpression;
+class ReturnStatement;
+class ContinueStatement;
+class BreakStatement;
 
 class ASTVisitor
 {
@@ -43,6 +59,21 @@ public:
     virtual void visit(BraceInitializer &node) = 0;
     virtual void visit(InitializerList &node) = 0;
     virtual void visit(BlockStmt &node) = 0;
+    virtual void visit(DeclarationWrapper &node) = 0;
+    virtual void visit(StatementWrapper &node) = 0;
+    virtual void visit(CaseStatement &node) = 0;
+    virtual void visit(DefaultStatement &node) = 0;
+    virtual void visit(ExpressionStatement &node) = 0;
+    virtual void visit(SwitchStatement &node) = 0;
+    virtual void visit(IfStatement &node) = 0;
+    virtual void visit(ForStatement &node) = 0;
+    virtual void visit(WhileStatement &node) = 0;
+    virtual void visit(DoWhileStatement &node) = 0;
+    virtual void visit(ForWitDeclaration &node) = 0;
+    virtual void visit(ForWithExpression &node) = 0;
+    virtual void visit(ReturnStatement &node) = 0;
+    virtual void visit(ContinueStatement &node) = 0;
+    virtual void visit(BreakStatement &node) = 0;
 };
 
 // ASTVisitor base class for the visitor pattern
@@ -396,6 +427,8 @@ public:
         declaration_->accept(visitor);
     }
 
+    Declaration *getDeclaration() const { return declaration_.get(); }
+
 private:
     std::unique_ptr<Declaration> declaration_;
 };
@@ -411,8 +444,265 @@ public:
         statement_->accept(visitor);
     }
 
+    Stmt *getStatement() const { return statement_.get(); }
+
 private:
     std::unique_ptr<Stmt> statement_;
+};
+
+class LabaledStatement : public Stmt
+{
+public:
+    virtual ~LabaledStatement() = default;
+    virtual void accept(ASTVisitor &visitor) = 0;
+};
+
+class CaseStatement : public LabaledStatement
+{
+public:
+    CaseStatement(std::unique_ptr<Expr> expr, std::unique_ptr<Stmt> statement)
+        : expr_(std::move(expr)), statement_(std::move(statement)) {}
+
+    void accept(ASTVisitor &visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    Expr *getExpr() const { return expr_.get(); }
+    Stmt *getStatement() const { return statement_.get(); }
+
+private:
+    std::unique_ptr<Expr> expr_;
+    std::unique_ptr<Stmt> statement_;
+};
+
+class DefaultStatement : public LabaledStatement
+{
+public:
+    DefaultStatement(std::unique_ptr<Stmt> statement)
+        : statement_(std::move(statement)) {}
+
+    void accept(ASTVisitor &visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    Stmt *getStatement() const { return statement_.get(); }
+
+private:
+    std::unique_ptr<Stmt> statement_;
+};
+
+class ExpressionStatement : public Stmt
+{
+public:
+    ExpressionStatement(std::unique_ptr<Expr> expr) : expr_(std::move(expr)) {}
+
+    void accept(ASTVisitor &visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    Expr *getExpr() const { return expr_.get(); }
+
+private:
+    std::unique_ptr<Expr> expr_;
+};
+
+class SelectionStatement : public Stmt
+{
+public:
+    virtual ~SelectionStatement() = default;
+    virtual void accept(ASTVisitor &visitor) = 0;
+};
+
+class SwitchStatement : public SelectionStatement
+{
+public:
+    SwitchStatement(std::unique_ptr<Expr> condition, std::unique_ptr<Stmt> body)
+        : condition_(std::move(condition)), body_(std::move(body)) {}
+
+    void accept(ASTVisitor &visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    Expr *getCondition() const { return condition_.get(); }
+    Stmt *getBody() const { return body_.get(); }
+
+private:
+    std::unique_ptr<Expr> condition_;
+    std::unique_ptr<Stmt> body_;
+};
+
+class IfStatement : public SelectionStatement
+{
+public:
+    IfStatement(std::unique_ptr<Expr> condition, std::unique_ptr<Stmt> then)
+        : condition_(std::move(condition)), then_(std::move(then)) {}
+
+    void accept(ASTVisitor &visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    Expr *getCondition() const { return condition_.get(); }
+    Stmt *getThen() const { return then_.get(); }
+
+private:
+    std::unique_ptr<Expr> condition_;
+    std::unique_ptr<Stmt> then_;
+};
+
+class IterationStatement : public Stmt
+{
+public:
+    virtual ~IterationStatement() = default;
+    virtual void accept(ASTVisitor &visitor) = 0;
+};
+
+class ForInitStatement : public Stmt
+{
+public:
+    virtual ~ForInitStatement() = default;
+    virtual void accept(ASTVisitor &visitor) = 0;
+};
+
+class ForStatement : public IterationStatement
+{
+public:
+    ForStatement(std::unique_ptr<ForInitStatement> init, std::unique_ptr<Stmt> statement)
+        : init_(std::move(init)), statement_(std::move(statement)) {}
+
+    void accept(ASTVisitor &visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    ForInitStatement *getInit() const { return init_.get(); }
+    Stmt *getStatement() const { return statement_.get(); }
+
+private:
+    std::unique_ptr<ForInitStatement> init_;
+    std::unique_ptr<Stmt> statement_;
+};
+
+class ForWitDeclaration : public ForInitStatement
+{
+public:
+    ForWitDeclaration(std::unique_ptr<Declaration> declaration, std::unique_ptr<Expr> expr, std::unique_ptr<Expr> optionalExpr)
+        : declaration_(std::move(declaration)), expr_(std::move(expr)), optionalExpr_(std::move(optionalExpr)) {}
+
+    void accept(ASTVisitor &visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    Declaration *getDeclaration() const { return declaration_.get(); }
+    Expr *getExpr() const { return expr_.get(); }
+    Expr *getOptionalExpr() const { return optionalExpr_.get(); }
+
+private:
+    std::unique_ptr<Declaration> declaration_;
+    std::unique_ptr<Expr> expr_;
+    std::unique_ptr<Expr> optionalExpr_;
+};
+
+class ForWithExpression : public ForInitStatement
+{
+public:
+    ForWithExpression(std::unique_ptr<Expr> expr, std::unique_ptr<Expr> expr2, std::unique_ptr<Expr> optionalExpr)
+        : expr_(std::move(expr)), expr2_(std::move(expr2)), optionalExpr_(std::move(optionalExpr)) {}
+
+    void accept(ASTVisitor &visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    Expr *getExpr() const { return expr_.get(); }
+    Expr *getExpr2() const { return expr2_.get(); }
+    Expr *getOptionalExpr() const { return optionalExpr_.get(); }
+
+private:
+    std::unique_ptr<Expr> expr_;
+    std::unique_ptr<Expr> expr2_;
+    std::unique_ptr<Expr> optionalExpr_;
+};
+
+class WhileStatement : public IterationStatement
+{
+public:
+    WhileStatement(std::unique_ptr<Expr> condition, std::unique_ptr<Stmt> body)
+        : condition_(std::move(condition)), body_(std::move(body)) {}
+
+    void accept(ASTVisitor &visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    Expr *getCondition() const { return condition_.get(); }
+    Stmt *getBody() const { return body_.get(); }
+
+private:
+    std::unique_ptr<Expr> condition_;
+    std::unique_ptr<Stmt> body_;
+};
+
+class DoWhileStatement : public IterationStatement
+{
+public:
+    DoWhileStatement(std::unique_ptr<Expr> condition, std::unique_ptr<Stmt> body)
+        : condition_(std::move(condition)), body_(std::move(body)) {}
+
+    void accept(ASTVisitor &visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    Expr *getCondition() const { return condition_.get(); }
+    Stmt *getBody() const { return body_.get(); }
+
+private:
+    std::unique_ptr<Expr> condition_;
+    std::unique_ptr<Stmt> body_;
+};
+
+class JumpStatement : public Stmt
+{
+};
+
+class ReturnStatement : public JumpStatement
+{
+public:
+    ReturnStatement(std::unique_ptr<Expr> expr) : expr_(std::move(expr)) {}
+
+    void accept(ASTVisitor &visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    Expr *getExpr() const { return expr_.get(); }
+
+private:
+    std::unique_ptr<Expr> expr_;
+};
+
+class ContinueStatement : public JumpStatement
+{
+public:
+    void accept(ASTVisitor &visitor) override
+    {
+        visitor.visit(*this);
+    }
+};
+
+class BreakStatement : public JumpStatement
+{
+public:
+    void accept(ASTVisitor &visitor) override
+    {
+        visitor.visit(*this);
+    }
 };
 
 /*
@@ -586,11 +876,178 @@ public:
     void visit(BlockStmt &node) override
     {
         std::cout << "BlockStmt {\n";
-        // for (const auto &stmt : node.getStatements())
-        // {
-        //     stmt->accept(*this);
-        //     std::cout << "\n";
-        // }
+        for (const auto &item : node.getItems())
+        {
+            item->accept(*this);
+            std::cout << "\n";
+        }
         std::cout << "}\n";
+    }
+
+    void visit(DeclarationWrapper &node) override
+    {
+        std::cout << "DeclarationWrapper ";
+        if (node.getDeclaration() != nullptr)
+        {
+            node.getDeclaration()->accept(*this);
+        }
+    }
+
+    void visit(StatementWrapper &node) override
+    {
+        std::cout << "StatementWrapper ";
+        if (node.getStatement() != nullptr)
+        {
+            node.getStatement()->accept(*this);
+        }
+    }
+
+    void visit(CaseStatement &node) override
+    {
+        std::cout << "CaseStatement ";
+        if (node.getExpr() != nullptr)
+        {
+            node.getExpr()->accept(*this);
+        }
+        if (node.getStatement() != nullptr)
+        {
+            node.getStatement()->accept(*this);
+        }
+    }
+
+    void visit(DefaultStatement &node) override
+    {
+        std::cout << "DefaultStatement ";
+        if (node.getStatement() != nullptr)
+        {
+            node.getStatement()->accept(*this);
+        }
+    }
+
+    void visit(ExpressionStatement &node) override
+    {
+        std::cout << "ExpressionStatement ";
+        if (node.getExpr() != nullptr)
+        {
+            node.getExpr()->accept(*this);
+        }
+    }
+
+    void visit(SwitchStatement &node) override
+    {
+        std::cout << "SwitchStatement ";
+        if (node.getCondition() != nullptr)
+        {
+            node.getCondition()->accept(*this);
+        }
+        if (node.getBody() != nullptr)
+        {
+            node.getBody()->accept(*this);
+        }
+    }
+
+    void visit(IfStatement &node) override
+    {
+        std::cout << "IfStatement ";
+        if (node.getCondition() != nullptr)
+        {
+            node.getCondition()->accept(*this);
+        }
+        if (node.getThen() != nullptr)
+        {
+            node.getThen()->accept(*this);
+        }
+    }
+
+    void visit(WhileStatement &node) override
+    {
+        std::cout << "WhileStatement ";
+        if (node.getCondition() != nullptr)
+        {
+            node.getCondition()->accept(*this);
+        }
+        if (node.getBody() != nullptr)
+        {
+            node.getBody()->accept(*this);
+        }
+    }
+
+    void visit(DoWhileStatement &node) override
+    {
+        std::cout << "DoWhileStatement ";
+        if (node.getCondition() != nullptr)
+        {
+            node.getCondition()->accept(*this);
+        }
+        if (node.getBody() != nullptr)
+        {
+            node.getBody()->accept(*this);
+        }
+    }
+
+    void visit(ForStatement &node) override
+    {
+        std::cout << "ForStatement ";
+        if (node.getInit() != nullptr)
+        {
+            node.getInit()->accept(*this);
+        }
+        if (node.getStatement() != nullptr)
+        {
+            node.getStatement()->accept(*this);
+        }
+    }
+
+    void visit(ForWitDeclaration &node) override
+    {
+        std::cout << "ForWitDeclaration ";
+        if (node.getDeclaration() != nullptr)
+        {
+            node.getDeclaration()->accept(*this);
+        }
+        if (node.getExpr() != nullptr)
+        {
+            node.getExpr()->accept(*this);
+        }
+        if (node.getOptionalExpr() != nullptr)
+        {
+            node.getOptionalExpr()->accept(*this);
+        }
+    }
+
+    void visit(ForWithExpression &node) override
+    {
+        std::cout << "ForWithExpression ";
+        if (node.getExpr() != nullptr)
+        {
+            node.getExpr()->accept(*this);
+        }
+        if (node.getExpr2() != nullptr)
+        {
+            node.getExpr2()->accept(*this);
+        }
+        if (node.getOptionalExpr() != nullptr)
+        {
+            node.getOptionalExpr()->accept(*this);
+        }
+    }
+
+    void visit(ReturnStatement &node) override
+    {
+        std::cout << "ReturnStatement ";
+        if (node.getExpr() != nullptr)
+        {
+            node.getExpr()->accept(*this);
+        }
+    }
+
+    void visit(ContinueStatement &node) override
+    {
+        std::cout << "ContinueStatement ";
+    }
+
+    void visit(BreakStatement &node) override
+    {
+        std::cout << "BreakStatement ";
     }
 };

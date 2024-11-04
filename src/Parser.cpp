@@ -262,11 +262,13 @@ std::unique_ptr<BlockItemBase> Parser::parseBLOCK_ITEM()
 {
     if (isBasicType())
     {
-        parseDECLARATION();
+        std::unique_ptr<Declaration> declaration = parseDECLARATION();
+        return std::make_unique<DeclarationWrapper>(std::move(declaration));
     }
     else if (isStatementFirst())
     {
-        parseSTATEMENT();
+        std::unique_ptr<Stmt> statement = parseSTATEMENT();
+        return std::make_unique<StatementWrapper>(std::move(statement));
     }
     else
     {
@@ -278,18 +280,18 @@ std::unique_ptr<BlockItemBase> Parser::parseBLOCK_ITEM()
 // BLOCK_ITEM_LIST -> BLOCK_ITEM BLOCK_ITEM_LIST_PRIME
 std::unique_ptr<BlockStmt> Parser::parseBLOCK_ITEM_LIST()
 {
-    std::vector<std::unique_ptr<BlockStmt>> blockItems;
-    parseBLOCK_ITEM();
+    std::vector<std::unique_ptr<BlockItemBase>> blockItems;
+    blockItems.push_back(parseBLOCK_ITEM());
     // BLOCK_ITEM_LIST_PRIME -> BLOCK_ITEM BLOCK_ITEM_LIST_PRIME | ϵ
     while (isBlockFirst())
     {
-        parseBLOCK_ITEM();
+        blockItems.push_back(parseBLOCK_ITEM());
     }
-    return nullptr;
+    return std::make_unique<BlockStmt>(std::move(blockItems));
 }
 
 // CONDITIONAL_EXPRESSION -> LOGICAL_OR_EXPRESSION CONDITIONAL_EXPRESSION_PRIME
-std::unique_ptr<ASTNode> Parser::parseCONDITIONAL_EXPRESSION()
+std::unique_ptr<Expr> Parser::parseCONDITIONAL_EXPRESSION()
 {
     parseLOGICAL_OR_EXPRESSION();
     parseCONDITIONAL_EXPRESSION_PRIME();
@@ -520,7 +522,7 @@ std::unique_ptr<ASTNode> Parser::parseEQUALITY_EXPRESSION_PRIME()
 }
 
 // EXPRESSION -> ASSIGNMENT_EXPRESSION EXPRESSION_PRIME
-std::unique_ptr<ASTNode> Parser::parseEXPRESSION()
+std::unique_ptr<Expr> Parser::parseEXPRESSION()
 {
     parseASSIGNMENT_EXPRESSION();
     parseEXPRESSION_PRIME();
@@ -540,20 +542,22 @@ std::unique_ptr<ASTNode> Parser::parseEXPRESSION_PRIME()
 }
 
 // EXPRESSION_STATEMENT -> ; | EXPRESSION ;
-std::unique_ptr<ASTNode> Parser::parseEXPRESSION_STATEMENT()
+std::unique_ptr<Expr> Parser::parseEXPRESSION_STATEMENT()
 {
     if (currentToken.getType() == TokenType::PUNCTUATION && currentToken.getValue() == ";")
     {
         consume();
+        // empty statement
     }
     else if (isExpressionFirst())
     {
-        parseEXPRESSION();
+        std::unique_ptr<Expr> expression = parseEXPRESSION();
         if (currentToken.getType() != TokenType::PUNCTUATION || currentToken.getValue() != ";")
         {
             throw std::runtime_error("Syntax error: Expected ; at the end of an expression");
         }
         consume();
+        return expression;
     }
     else
     {
@@ -565,19 +569,18 @@ std::unique_ptr<ASTNode> Parser::parseEXPRESSION_STATEMENT()
 
 // FIRST(EXPRESSION_STATEMENT)=    ( ++ -- ; FLOAT_CONSTANT IDENTIFIER INTEGER_CONSTANT STRING_LITERAL sizeof
 // FOR_INIT_STATEMENT -> EXPRESSION_STATEMENT EXPRESSION_STATEMENT FOR_OPTIONAL_EXPRESSION | DECLARATION EXPRESSION_STATEMENT FOR_OPTIONAL_EXPRESSION
-std::unique_ptr<ASTNode> Parser::parseFOR_INIT_STATEMENT()
+std::unique_ptr<ForInitStatement> Parser::parseFOR_INIT_STATEMENT()
 {
     if (isDeclarationFirst())
     {
-        parseDECLARATION();
-        parseEXPRESSION_STATEMENT();
-        parseFOR_OPTIONAL_EXPRESSION();
+        std::unique_ptr<Declaration> declaration = parseDECLARATION();
+        std::unique_ptr<Expr> expression = parseEXPRESSION_STATEMENT();
+        std::unique_ptr<Expr> optionalExpression = parseFOR_OPTIONAL_EXPRESSION();
+        return std::make_unique<ForWitDeclaration>(std::move(declaration), std::move(expression), std::move(optionalExpression));
     }
     else if (isExpressionFirst() || currentToken.getType() == TokenType::PUNCTUATION && currentToken.getValue() == ";")
     {
-        parseEXPRESSION_STATEMENT();
-        parseEXPRESSION_STATEMENT();
-        parseFOR_OPTIONAL_EXPRESSION();
+        return std::make_unique<ForWithExpression>(parseEXPRESSION_STATEMENT(), parseEXPRESSION_STATEMENT(), parseFOR_OPTIONAL_EXPRESSION());
     }
     else
     {
@@ -587,11 +590,11 @@ std::unique_ptr<ASTNode> Parser::parseFOR_INIT_STATEMENT()
 }
 
 // FOR_OPTIONAL_EXPRESSION -> EXPRESSION | ϵ
-std::unique_ptr<ASTNode> Parser::parseFOR_OPTIONAL_EXPRESSION()
+std::unique_ptr<Expr> Parser::parseFOR_OPTIONAL_EXPRESSION()
 {
     if (isExpressionFirst())
     {
-        parseEXPRESSION();
+        return parseEXPRESSION();
     }
     return nullptr;
 }
@@ -791,7 +794,7 @@ std::unique_ptr<DeclatatorList> Parser::parseINIT_DECLARATOR_LIST()
 }
 
 // ITERATION_STATEMENT -> while ( EXPRESSION ) STATEMENT | do STATEMENT while ( EXPRESSION ) ; | for ( FOR_INIT_STATEMENT ) STATEMENT
-std::unique_ptr<ASTNode> Parser::parseITERATION_STATEMENT()
+std::unique_ptr<IterationStatement> Parser::parseITERATION_STATEMENT()
 {
     if (currentToken.getType() == TokenType::KEYWORD && currentToken.getValue() == "while")
     {
@@ -802,18 +805,18 @@ std::unique_ptr<ASTNode> Parser::parseITERATION_STATEMENT()
         }
 
         consume();
-        parseEXPRESSION();
+        std::unique_ptr<Expr> expr = parseEXPRESSION();
         if (currentToken.getType() != TokenType::PUNCTUATION || currentToken.getValue() != ")")
         {
             throw std::runtime_error("Syntax error: Expected closing ) in while statement");
         }
         consume();
-        parseSTATEMENT();
+        return std::make_unique<WhileStatement>(std::move(expr), parseSTATEMENT());
     }
     else if (currentToken.getType() == TokenType::KEYWORD && currentToken.getValue() == "do")
     {
         consume();
-        parseSTATEMENT();
+        std::unique_ptr<Stmt> statement = parseSTATEMENT();
         if (currentToken.getType() != TokenType::KEYWORD || currentToken.getValue() != "while")
         {
             throw std::runtime_error("Syntax error: Expected while in do-while statement");
@@ -824,7 +827,7 @@ std::unique_ptr<ASTNode> Parser::parseITERATION_STATEMENT()
             throw std::runtime_error("Syntax error: Expected opening ( in do-while statement");
         }
         consume();
-        parseEXPRESSION();
+        std::unique_ptr<Expr> expr = parseEXPRESSION();
         if (currentToken.getType() != TokenType::PUNCTUATION || currentToken.getValue() != ")")
         {
             throw std::runtime_error("Syntax error: Expected closing ) in do-while statement");
@@ -835,6 +838,7 @@ std::unique_ptr<ASTNode> Parser::parseITERATION_STATEMENT()
             throw std::runtime_error("Syntax error: Expected ; in do-while statement");
         }
         consume();
+        return std::make_unique<DoWhileStatement>(std::move(expr), std::move(statement));
     }
     else if (currentToken.getType() == TokenType::KEYWORD && currentToken.getValue() == "for")
     {
@@ -844,13 +848,13 @@ std::unique_ptr<ASTNode> Parser::parseITERATION_STATEMENT()
             throw std::runtime_error("Syntax error: Expected opening ( in for statement");
         }
         consume();
-        parseFOR_INIT_STATEMENT();
+        std::unique_ptr<ForInitStatement> forInitStatement = parseFOR_INIT_STATEMENT();
         if (currentToken.getType() != TokenType::PUNCTUATION || currentToken.getValue() != ")")
         {
             throw std::runtime_error("Syntax error: Expected closing ) in for statement");
         }
         consume();
-        parseSTATEMENT();
+        return std::make_unique<ForStatement>(std::move(forInitStatement), parseSTATEMENT());
     }
     else
     {
@@ -861,7 +865,7 @@ std::unique_ptr<ASTNode> Parser::parseITERATION_STATEMENT()
 }
 
 // JUMP_STATEMENT -> continue ; | break ; | return EXPRESSION_STATEMENT
-std::unique_ptr<ASTNode> Parser::parseJUMP_STATEMENT()
+std::unique_ptr<JumpStatement> Parser::parseJUMP_STATEMENT()
 {
     if (currentToken.getType() == TokenType::KEYWORD && currentToken.getValue() == "continue")
     {
@@ -871,6 +875,7 @@ std::unique_ptr<ASTNode> Parser::parseJUMP_STATEMENT()
             throw std::runtime_error("Syntax error: Expected ; in continue statement");
         }
         consume();
+        return std::make_unique<ContinueStatement>();
     }
     else if (currentToken.getType() == TokenType::KEYWORD && currentToken.getValue() == "break")
     {
@@ -880,11 +885,12 @@ std::unique_ptr<ASTNode> Parser::parseJUMP_STATEMENT()
             throw std::runtime_error("Syntax error: Expected ; in break statement");
         }
         consume();
+        return std::make_unique<BreakStatement>();
     }
     else if (currentToken.getType() == TokenType::KEYWORD && currentToken.getValue() == "return")
     {
         consume();
-        parseEXPRESSION_STATEMENT();
+        return std::make_unique<ReturnStatement>(std::move(parseEXPRESSION_STATEMENT()));
     }
     else
     {
@@ -895,18 +901,19 @@ std::unique_ptr<ASTNode> Parser::parseJUMP_STATEMENT()
 }
 
 // LABELED_STATEMENT -> case CONDITIONAL_EXPRESSION : STATEMENT | default : STATEMENT
-std::unique_ptr<ASTNode> Parser::parseLABELED_STATEMENT()
+std::unique_ptr<LabaledStatement> Parser::parseLABELED_STATEMENT()
 {
     if (currentToken.getType() == TokenType::KEYWORD && currentToken.getValue() == "case")
     {
         consume();
-        parseCONDITIONAL_EXPRESSION();
+        std::unique_ptr<Expr> expr = parseCONDITIONAL_EXPRESSION();
         if (currentToken.getType() != TokenType::PUNCTUATION || currentToken.getValue() != ":")
         {
             throw std::runtime_error("Syntax error: Expected : in case statement");
         }
         consume();
-        parseSTATEMENT();
+        std::unique_ptr<Stmt> statement = parseSTATEMENT();
+        return std::make_unique<CaseStatement>(std::move(expr), std::move(statement));
     }
     else if (currentToken.getType() == TokenType::KEYWORD && currentToken.getValue() == "default")
     {
@@ -916,7 +923,8 @@ std::unique_ptr<ASTNode> Parser::parseLABELED_STATEMENT()
             throw std::runtime_error("Syntax error: Expected : in default statement");
         }
         consume();
-        parseSTATEMENT();
+        std::unique_ptr<Stmt> statement = parseSTATEMENT();
+        return std::make_unique<DefaultStatement>(std::move(statement));
     }
     else
     {
@@ -1278,7 +1286,7 @@ std::unique_ptr<ASTNode> Parser::parsePOSTFIX_EXPRESSION_PRIME()
 }
 
 // SELECTION_STATEMENT -> if ( EXPRESSION ) STATEMENT | switch ( EXPRESSION ) STATEMENT
-std::unique_ptr<ASTNode> Parser::parseSELECTION_STATEMENT()
+std::unique_ptr<SelectionStatement> Parser::parseSELECTION_STATEMENT()
 {
     if (currentToken.getType() == TokenType::KEYWORD && currentToken.getValue() == "if")
     {
@@ -1288,13 +1296,13 @@ std::unique_ptr<ASTNode> Parser::parseSELECTION_STATEMENT()
             throw std::runtime_error("Syntax error: Expected opening ( in if statement");
         }
         consume();
-        parseEXPRESSION();
+        std::unique_ptr<Expr> expression = parseEXPRESSION();
         if (currentToken.getType() != TokenType::PUNCTUATION || currentToken.getValue() != ")")
         {
             throw std::runtime_error("Syntax error: Expected closing ) in if statement");
         }
         consume();
-        parseSTATEMENT();
+        return std::make_unique<IfStatement>(std::move(expression), std::move(parseSTATEMENT()));
     }
     else if (currentToken.getType() == TokenType::KEYWORD && currentToken.getValue() == "switch")
     {
@@ -1304,13 +1312,13 @@ std::unique_ptr<ASTNode> Parser::parseSELECTION_STATEMENT()
             throw std::runtime_error("Syntax error: Expected opening ( in switch statement");
         }
         consume();
-        parseEXPRESSION();
+        std::unique_ptr<Expr> expression = parseEXPRESSION();
         if (currentToken.getType() != TokenType::PUNCTUATION || currentToken.getValue() != ")")
         {
             throw std::runtime_error("Syntax error: Expected closing ) in switch statement");
         }
         consume();
-        parseSTATEMENT();
+        return std::make_unique<SwitchStatement>(std::move(expression), std::move(parseSTATEMENT()));
     }
     else
     {
@@ -1355,31 +1363,32 @@ std::unique_ptr<ASTNode> Parser::parseSPECIFIER_QUALIFIER_LIST()
 // FIRST(ITERATION_STATEMENT)=  while do for
 // FIRST(JUMP_STATEMENT)=  continue break return
 //  STATEMENT -> LABELED_STATEMENT | BLOCK | EXPRESSION_STATEMENT | SELECTION_STATEMENT | ITERATION_STATEMENT | JUMP_STATEMENT
-std::unique_ptr<ASTNode> Parser::parseSTATEMENT()
+std::unique_ptr<Stmt> Parser::parseSTATEMENT()
 {
     if (currentToken.getType() == TokenType::KEYWORD && currentToken.getValue() == "case" || currentToken.getValue() == "default")
     {
-        parseLABELED_STATEMENT();
+        return parseLABELED_STATEMENT();
     }
     else if (currentToken.getType() == TokenType::PUNCTUATION && currentToken.getValue() == "{")
     {
-        parseBLOCK();
+        return parseBLOCK();
     }
     else if (isExpressionFirst() || currentToken.getType() == TokenType::PUNCTUATION && currentToken.getValue() == ";")
     {
-        parseEXPRESSION_STATEMENT();
+        std::unique_ptr<Expr> expression = parseEXPRESSION_STATEMENT();
+        return std::make_unique<ExpressionStatement>(std::move(expression));
     }
     else if (currentToken.getType() == TokenType::KEYWORD && currentToken.getValue() == "if" || currentToken.getValue() == "switch")
     {
-        parseSELECTION_STATEMENT();
+        return parseSELECTION_STATEMENT();
     }
     else if (currentToken.getType() == TokenType::KEYWORD && currentToken.getValue() == "while" || currentToken.getValue() == "do" || currentToken.getValue() == "for")
     {
-        parseITERATION_STATEMENT();
+        return parseITERATION_STATEMENT();
     }
     else if (currentToken.getType() == TokenType::KEYWORD && currentToken.getValue() == "continue" || currentToken.getValue() == "break" || currentToken.getValue() == "return")
     {
-        parseJUMP_STATEMENT();
+        return parseJUMP_STATEMENT();
     }
     else
     {
