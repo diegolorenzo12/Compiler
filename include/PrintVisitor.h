@@ -25,9 +25,15 @@ public:
     void visit(BinaryExpr &node) override
     {
         std::cout << "(";
-        node.getLHS()->accept(*this);
+        if (node.getLHS() != nullptr)
+        {
+            node.getLHS()->accept(*this);
+        }
         std::cout << " " << node.getOp() << " ";
-        node.getRHS()->accept(*this);
+        if (node.getRHS() != nullptr)
+        {
+            node.getRHS()->accept(*this);
+        }
         std::cout << ")";
     }
 
@@ -107,19 +113,22 @@ public:
 
         if (node.isPointer())
         {
-            std::cout << "Is Pointer \n";
+            std::cout << ", Is Pointer \n";
         }
-        if (node.isArray())
+        if (node.getDeclarator() != nullptr)
         {
-            std::cout << "Is Array \n";
+            node.getDeclarator()->accept(*this);
         }
-        if (node.isFunction())
-        {
-            std::cout << " Is Function \n";
-        }
-        if (node.hasInitializer())
+        if (node.getInitializer() != nullptr)
         {
             node.getInitializer()->accept(*this);
+        }
+        for (const auto &decl : node.getDirectDeclarators())
+        {
+            if (decl != nullptr)
+            {
+                decl->accept(*this);
+            }
         }
     }
 
@@ -389,6 +398,140 @@ public:
         if (node.getArraySize() != nullptr)
         {
             node.getArraySize()->accept(*this);
+        }
+    }
+
+    void visit(AssigmentExpressionList &node) override
+    {
+        std::cout << "AssigmentExpressionList ";
+        for (const auto &arg : node.getAssigmentExpression())
+        {
+            if (arg != nullptr)
+            {
+                arg->accept(*this);
+            }
+        }
+    }
+
+    void visit(AssigmentOperator &node) override
+    {
+        std::cout << "AssigmentOperator " << node.getOp();
+    }
+
+    void visit(AssigmentExpression &node) override
+    {
+        std::cout << "AssigmentExpression ";
+        if (node.getConditionalExpression() != nullptr)
+        {
+            node.getConditionalExpression()->accept(*this);
+        }
+        if (node.getAssigmentExpression() != nullptr)
+        {
+            node.getAssigmentExpression()->accept(*this);
+        }
+        if (node.getAssigmentOperator() != nullptr)
+        {
+            node.getAssigmentOperator()->accept(*this);
+        }
+    }
+
+    void visit(ArgumentsPostFixExpression &node) override
+    {
+        std::cout << "ArgumentsPostFixExpression: ";
+        if (node.getArgumentList() != nullptr)
+        {
+            node.getArgumentList()->accept(*this);
+        }
+    }
+
+    void visit(DotOperatorPostfixExpression &node) override
+    {
+        std::cout << "DotOperatorPostfixExpression " << node.getIdentifier() << " ";
+    }
+
+    void visit(ArrowOperatorPostfixExpression &node) override
+    {
+        std::cout << "ArrowOperatorPostfixExpression " << node.getIdentifier() << " ";
+    }
+
+    void visit(IncrementDecrementPostfixExpression &node) override
+    {
+        std::cout << "IncrementDecrementPostfixExpression " << node.getOp() << " ";
+    }
+
+    void visit(PostfixExpressions &node) override
+    {
+        std::cout << "PostfixExpressions ";
+        if (node.getPrimaryExpression() != nullptr)
+        {
+            node.getPrimaryExpression()->accept(*this);
+        }
+        for (const auto &expr : node.getPostfixExpressions())
+        {
+            if (expr != nullptr)
+            {
+                expr->accept(*this);
+            }
+        }
+    }
+
+    void visit(UnaryIncrementDecrementOperator &node) override
+    {
+        std::cout << "UnaryIncrementDecrementOperator " << node.getOp() << " ";
+        if (node.getUnaryExpr() != nullptr)
+        {
+            node.getUnaryExpr()->accept(*this);
+        }
+    }
+
+    void visit(IdentifierList &node) override
+    {
+        std::cout << "IdentifierList ";
+        for (const auto &id : node.getIdentifiers())
+        {
+            std::cout << id << " ";
+        }
+    }
+
+    void visit(ArrayDirectDeclarator &node) override
+    {
+        std::cout << "ArrayDirectDeclarator ";
+        if (node.getIsStatic())
+        {
+            std::cout << "Is Static ";
+        }
+        if (node.getArrSize() != nullptr)
+        {
+            node.getArrSize()->accept(*this);
+        }
+        if (node.getTypeQualifier() != nullptr)
+        {
+            node.getTypeQualifier()->accept(*this);
+        }
+    }
+
+    void visit(ParameterDeclaration &node) override
+    {
+        std::cout << "ParameterDeclaration ";
+        if (node.getDeclarationSpecifiers() != nullptr)
+        {
+            node.getDeclarationSpecifiers()->accept(*this);
+        }
+        if (node.getDeclarator() != nullptr)
+        {
+            node.getDeclarator()->accept(*this);
+        }
+    }
+
+    void visit(ParameterDeclarationList &node) override
+    {
+        std::cout << "ParameterDeclarationList ";
+        for (const auto &param : node.getParameters())
+        {
+            if (param != nullptr)
+            {
+                param->accept(*this);
+            }
         }
     }
 };

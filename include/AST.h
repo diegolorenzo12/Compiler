@@ -43,6 +43,20 @@ class ConstantExpression;
 class IdentifierExpression;
 class PrimaryExpression;
 class ArrayPostFixExpression;
+class AssigmentExpressionList;
+class AssigmentOperator;
+class AssigmentExpression;
+class ArgumentsPostFixExpression;
+class DotOperatorPostfixExpression;
+class ArrowOperatorPostfixExpression;
+class IncrementDecrementPostfixExpression;
+class PostfixExpressions;
+class UnaryIncrementDecrementOperator;
+class ArrayDirectDeclarator;
+class FunctionDirectDeclarator;
+class IdentifierList;
+class ParameterDeclaration;
+class ParameterDeclarationList;
 
 #include "ASTVisitor.h"
 
@@ -217,11 +231,13 @@ private:
     std::unique_ptr<Specifier> specifier_;
 };
 
-struct arraySize // In direct declarator
+class DirectDeclarator : public ASTNode
 {
-    std::unique_ptr<ASTNode> expr;
-    bool isStatic;
-    std::string typeQualifier;
+public:
+    virtual ~DirectDeclarator() = default;
+
+    // Accept method for the visitor
+    virtual void accept(ASTVisitor &visitor) = 0;
 };
 
 class Declarator : public ASTNode
@@ -233,31 +249,111 @@ public:
     {
         visitor.visit(*this);
     }
-
-    const void setIdentifier(std::string identifier) { identifier_ = identifier; }
+    // optional pointer
     const void setPointer(bool isPointer) { isPointer_ = isPointer; }
     const bool isPointer() const { return isPointer_; }
+
+    const void setIdentifier(std::string identifier) { identifier_ = identifier; }
     const std::string &getIdentifier() const { return identifier_; }
+
+    // optional dclarator
+    void setDeclarator(std::unique_ptr<Declarator> declarator) { declarator_ = std::move(declarator); }
+    const std::unique_ptr<Declarator> &getDeclarator() const { return declarator_; }
+
+    // optional initializer for INIT_DECLARATOR
+    void setInitializer(std::unique_ptr<Initializer> initializer) { initializer_ = std::move(initializer); }
     const std::unique_ptr<Initializer> &getInitializer() const { return initializer_; }
-    const bool hasInitializer() const { return initializer_ != nullptr; }
 
     // from direct declarator
-    void addArraySize(arraySize arraySize) { arraySizes_.push_back(std::move(arraySize)); }
-    void setFunction(bool isFunction) { isFunction_ = isFunction; }
-    const bool isFunction() const { return isFunction_; }
-    void setIsArray(bool isArray) { isArray_ = isArray; }
-    const bool isArray() const { return isArray_; }
-    void setDeclarator(std::unique_ptr<Declarator> declarator) { declarator_ = std::move(declarator); }
-    void setInitializer(std::unique_ptr<Initializer> initializer) { initializer_ = std::move(initializer); }
+    void addDirectDeclarator(std::unique_ptr<DirectDeclarator> directDeclarator) { directDeclarators.push_back(std::move(directDeclarator)); }
+    const std::vector<std::unique_ptr<DirectDeclarator>> &getDirectDeclarators() const { return directDeclarators; }
 
 private:
     std::string identifier_;
     std::unique_ptr<Initializer> initializer_; // optional
     std::unique_ptr<Declarator> declarator_;   // optional
     bool isPointer_ = false;
-    bool isArray_ = false;
-    std::vector<arraySize> arraySizes_; // optional
-    bool isFunction_ = false;
+    std::vector<std::unique_ptr<DirectDeclarator>> directDeclarators;
+};
+
+class ArrayDirectDeclarator : public DirectDeclarator
+{
+public:
+    ArrayDirectDeclarator(std::unique_ptr<Expr> ArrSize, std::unique_ptr<Specifier> typeQualifier, bool isStatic)
+        : ArrSize(std::move(ArrSize)), typeQualifier(std::move(typeQualifier)), isStatic(isStatic) {}
+
+    void accept(ASTVisitor &visitor) override
+    {
+        visitor.visit(*this);
+    }
+    Expr *getArrSize() const { return ArrSize.get(); }
+    Specifier *getTypeQualifier() const { return typeQualifier.get(); }
+    bool getIsStatic() const { return isStatic; }
+
+private:
+    bool isStatic;
+    std::unique_ptr<Specifier> typeQualifier;
+    std::unique_ptr<Expr> ArrSize;
+};
+
+class FunctionDirectDeclarator : public DirectDeclarator
+{
+public:
+    virtual ~FunctionDirectDeclarator() = default;
+    virtual void accept(ASTVisitor &visitor) = 0;
+};
+
+class IdentifierList : public FunctionDirectDeclarator
+{
+public:
+    IdentifierList(std::vector<std::string> identifiers)
+        : identifiers_(std::move(identifiers)) {}
+
+    void accept(ASTVisitor &visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    const std::vector<std::string> &getIdentifiers() const { return identifiers_; }
+
+private:
+    std::vector<std::string> identifiers_;
+};
+
+class ParameterDeclaration : public ASTNode
+{
+public:
+    ParameterDeclaration(std::unique_ptr<DeclarationSpecifiers> declarationSpecifiers, std::unique_ptr<Declarator> declarator)
+        : declarationSpecifiers_(std::move(declarationSpecifiers)), declarator_(std::move(declarator)) {}
+
+    void accept(ASTVisitor &visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    const std::unique_ptr<DeclarationSpecifiers> &getDeclarationSpecifiers() const { return declarationSpecifiers_; }
+    const std::unique_ptr<Declarator> &getDeclarator() const { return declarator_; }
+
+private:
+    std::unique_ptr<DeclarationSpecifiers> declarationSpecifiers_;
+    std::unique_ptr<Declarator> declarator_;
+};
+
+class ParameterDeclarationList : public FunctionDirectDeclarator
+{
+public:
+    ParameterDeclarationList(std::vector<std::unique_ptr<ParameterDeclaration>> parameters)
+        : parameters_(std::move(parameters)) {}
+
+    void accept(ASTVisitor &visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    const std::vector<std::unique_ptr<ParameterDeclaration>> &getParameters() const { return parameters_; }
+
+private:
+    std::vector<std::unique_ptr<ParameterDeclaration>> parameters_;
 };
 
 class DeclatatorList : public ASTNode
@@ -772,14 +868,14 @@ private:
     std::unique_ptr<Expr> expr;
 };
 
-class PostfixExpression : public Expr
+class PostfixExpressionBase : public Expr
 {
 public:
-    virtual ~PostfixExpression() = default;
+    virtual ~PostfixExpressionBase() = default;
     virtual void accept(ASTVisitor &visitor) = 0;
 };
 
-class ArrayPostFixExpression : public PostfixExpression
+class ArrayPostFixExpression : public PostfixExpressionBase
 {
 public:
     ArrayPostFixExpression(std::unique_ptr<Expr> expr) : ArraySize(std::move(expr)) {}
@@ -797,24 +893,186 @@ private:
 
 class AssigmentExpression : public Expr
 {
+public:
+    AssigmentExpression(std::unique_ptr<ConditionalExpression> conditionalExpression, std::unique_ptr<AssigmentExpression> assigmentExpression, std::unique_ptr<AssigmentOperator> assigmentOperator)
+        : conditionalExpression(std::move(conditionalExpression)), assigmentExpression(std::move(assigmentExpression)), assigmentOperator(std::move(assigmentOperator)) {}
+
+    void accept(ASTVisitor &visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    ConditionalExpression *getConditionalExpression() const { return conditionalExpression.get(); }
+    AssigmentExpression *getAssigmentExpression() const { return assigmentExpression.get(); }
+    AssigmentOperator *getAssigmentOperator() const { return assigmentOperator.get(); }
+
+private:
+    std::unique_ptr<ConditionalExpression> conditionalExpression;
+    std::unique_ptr<AssigmentExpression> assigmentExpression; // optional
+    std::unique_ptr<AssigmentOperator> assigmentOperator;     // optional
 };
 
-class ArgumentExpressionList : public ASTNode
+class AssigmentOperator : public Expr
 {
+public:
+    AssigmentOperator(std::string op)
+        : op(std::move(op)) {}
+
+    void accept(ASTVisitor &visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    const std::string &getOp() const { return op; }
+
+private:
+    std::string op;
 };
 
-// class ArgumentsPostFixExpression : public PostfixExpression
-// {
-// };
+class AssigmentExpressionList : public Expr
+{
+public:
+    AssigmentExpressionList(std::vector<std::unique_ptr<AssigmentExpression>> assigmentExpression)
+        : assigmentExpression(std::move(assigmentExpression)) {}
+
+    void accept(ASTVisitor &visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    const std::vector<std::unique_ptr<AssigmentExpression>> &getAssigmentExpression() const
+    {
+        return assigmentExpression;
+    }
+
+    void addAssigmentExpression(std::unique_ptr<AssigmentExpression> expr)
+    {
+        assigmentExpression.push_back(std::move(expr));
+    }
+
+private:
+    std::vector<std::unique_ptr<AssigmentExpression>> assigmentExpression;
+};
+
+class ArgumentsPostFixExpression : public PostfixExpressionBase
+{
+public:
+    ArgumentsPostFixExpression(std::unique_ptr<AssigmentExpressionList> argumentList) : argumentList(std::move(argumentList)) {}
+
+    void accept(ASTVisitor &visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    AssigmentExpressionList *getArgumentList() const { return argumentList.get(); }
+
+private:
+    std::unique_ptr<AssigmentExpressionList> argumentList;
+};
 
 // class StructPostfixExpression : public PostfixExpression
 // {
 // };
 
-// class StructDeferencePostfixExpression : public PostfixExpression
-// {
-// };
+class DotOperatorPostfixExpression : public PostfixExpressionBase
+{
+public:
+    DotOperatorPostfixExpression(std::string identifier) : identifier(identifier) {}
 
-// class ArgumentList : public ASTNode
-// {
-// };
+    void accept(ASTVisitor &visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    const std::string &getIdentifier() const { return identifier; }
+
+private:
+    std::string identifier;
+};
+
+class ArrowOperatorPostfixExpression : public PostfixExpressionBase
+{
+public:
+    ArrowOperatorPostfixExpression(std::string identifier) : identifier(identifier) {}
+
+    void accept(ASTVisitor &visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    const std::string &getIdentifier() const { return identifier; }
+
+private:
+    std::string identifier;
+};
+
+class IncrementDecrementPostfixExpression : public PostfixExpressionBase
+{
+public:
+    IncrementDecrementPostfixExpression(std::string op) : op(op) {}
+
+    void accept(ASTVisitor &visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    const std::string &getOp() const { return op; }
+
+private:
+    std::string op;
+};
+
+class UnaryExpr : public Expr
+{
+public:
+    virtual ~UnaryExpr() = default;
+    virtual void accept(ASTVisitor &visitor) = 0;
+};
+
+class PostfixExpressions : public UnaryExpr
+{
+public:
+    PostfixExpressions(std::unique_ptr<PrimaryExpression> primaryExpression, std::vector<std::unique_ptr<PostfixExpressionBase>> postfixExpression)
+        : primaryExpression(std::move(primaryExpression)), postfixExpression(std::move(postfixExpression)) {}
+
+    void accept(ASTVisitor &visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    const std::vector<std::unique_ptr<PostfixExpressionBase>> &getPostfixExpressions() const
+    {
+        return postfixExpression;
+    }
+
+    PrimaryExpression *getPrimaryExpression() const { return primaryExpression.get(); }
+
+    void addPostfixExpression(std::unique_ptr<PostfixExpressionBase> expr)
+    {
+        postfixExpression.push_back(std::move(expr));
+    }
+
+private:
+    std::vector<std::unique_ptr<PostfixExpressionBase>> postfixExpression;
+    std::unique_ptr<PrimaryExpression> primaryExpression;
+};
+
+class UnaryIncrementDecrementOperator : public UnaryExpr
+{
+public:
+    UnaryIncrementDecrementOperator(std::string op, std::unique_ptr<UnaryExpr> unaryExpr)
+        : op(op), unaryExpr(std::move(unaryExpr)) {}
+
+    void accept(ASTVisitor &visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    UnaryExpr *getUnaryExpr() const { return unaryExpr.get(); }
+
+    const std::string &getOp() const { return op; }
+
+private:
+    std::string op;
+    std::unique_ptr<UnaryExpr> unaryExpr;
+};

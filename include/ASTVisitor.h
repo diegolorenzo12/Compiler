@@ -42,4 +42,17 @@ public:
     virtual void visit(ConstantExpression &node) = 0;
     virtual void visit(IdentifierExpression &node) = 0;
     virtual void visit(ArrayPostFixExpression &node) = 0;
+    virtual void visit(AssigmentExpressionList &node) = 0;
+    virtual void visit(AssigmentOperator &node) = 0;
+    virtual void visit(AssigmentExpression &node) = 0;
+    virtual void visit(ArgumentsPostFixExpression &node) = 0;
+    virtual void visit(DotOperatorPostfixExpression &node) = 0;
+    virtual void visit(ArrowOperatorPostfixExpression &node) = 0;
+    virtual void visit(IncrementDecrementPostfixExpression &node) = 0;
+    virtual void visit(PostfixExpressions &node) = 0;
+    virtual void visit(UnaryIncrementDecrementOperator &node) = 0;
+    virtual void visit(IdentifierList &node) = 0;
+    virtual void visit(ArrayDirectDeclarator &node) = 0;
+    virtual void visit(ParameterDeclaration &node) = 0;
+    virtual void visit(ParameterDeclarationList &node) = 0;
 };
