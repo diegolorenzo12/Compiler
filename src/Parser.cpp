@@ -168,18 +168,12 @@ std::unique_ptr<DeclatatorList> Parser::parseDECLARATION_FAC()
 std::unique_ptr<ASTNode> Parser::parseARGUMENT_EXPRESSION_LIST()
 {
     parseASSIGNMENT_EXPRESSION();
-    parseARGUMENT_EXPRESSION_LIST_PRIME();
-    return nullptr;
-}
+    // ARGUMENT_EXPRESSION_LIST_PRIME -> , ASSIGNMENT_EXPRESSION ARGUMENT_EXPRESSION_LIST_PRIME | ϵ
 
-// ARGUMENT_EXPRESSION_LIST_PRIME -> , ASSIGNMENT_EXPRESSION ARGUMENT_EXPRESSION_LIST_PRIME | ϵ
-std::unique_ptr<ASTNode> Parser::parseARGUMENT_EXPRESSION_LIST_PRIME()
-{
-    if (currentToken.getType() == TokenType::PUNCTUATION && currentToken.getValue() == ",")
+    while (currentToken.getType() == TokenType::PUNCTUATION && currentToken.getValue() == ",")
     {
         consume();
         parseASSIGNMENT_EXPRESSION();
-        parseARGUMENT_EXPRESSION_LIST_PRIME();
     }
     return nullptr;
 }
@@ -337,19 +331,25 @@ std::unique_ptr<ASTNode> Parser::parseCONDITIONAL_EXPRESSION_PRIME()
 }
 
 // CONSTANT -> INTEGER_CONSTANT | FLOAT_CONSTANT | STRING_LITERAL
-std::unique_ptr<ASTNode> Parser::parseCONSTANT()
+std::unique_ptr<ConstantExpression> Parser::parseCONSTANT()
 {
     if (currentToken.getType() == TokenType::INTEGER_CONSTANT)
     {
+        std::unique_ptr<ConstantExpression> constant = std::make_unique<ConstantExpression>(currentToken.getValue(), ConstantType::INTEGER_CONSTANT);
         consume();
+        return constant;
     }
     else if (currentToken.getType() == TokenType::FLOAT_CONSTANT)
     {
+        std::unique_ptr<ConstantExpression> constant = std::make_unique<ConstantExpression>(currentToken.getValue(), ConstantType::FLOAT_CONSTANT);
         consume();
+        return constant;
     }
     else if (currentToken.getType() == TokenType::STRING_LITERAL)
     {
+        std::unique_ptr<ConstantExpression> constant = std::make_unique<ConstantExpression>(currentToken.getValue(), ConstantType::STRING_LITERAL);
         consume();
+        return constant;
     }
     return nullptr;
 }
@@ -1081,25 +1081,28 @@ std::unique_ptr<Expr> Parser::parseMULTIPLICATIVE_EXPRESSION()
 
 // FIRST(CONSTANT)=  INTEGER_CONSTANT FLOAT_CONSTANT STRING_LITERAL
 //  PRIMARY_EXPRESSION -> IDENTIFIER | CONSTANT | ( EXPRESSION )
-std::unique_ptr<ASTNode> Parser::parsePRIMARY_EXPRESSION()
+std::unique_ptr<PrimaryExpression> Parser::parsePRIMARY_EXPRESSION()
 {
-    if (currentToken.getType() == TokenType::IDENTIFIER || currentToken.getType() == TokenType::INTEGER_CONSTANT || currentToken.getType() == TokenType::FLOAT_CONSTANT || currentToken.getType() == TokenType::STRING_LITERAL)
+    if (currentToken.getType() == TokenType::IDENTIFIER)
     {
+        std::string identifier = currentToken.getValue();
         consume();
+        return std::make_unique<IdentifierExpression>(identifier);
     }
     else if (currentToken.getType() == TokenType::PUNCTUATION && currentToken.getValue() == "(")
     {
         consume();
-        parseEXPRESSION();
+        std::unique_ptr<ParenthesizedExpression> parenthesizedExpr = std::make_unique<ParenthesizedExpression>(std::move(parseEXPRESSION()));
         if (currentToken.getType() != TokenType::PUNCTUATION || currentToken.getValue() != ")")
         {
             throw std::runtime_error("Syntax error: Expected closing ) in primary expression");
         }
         consume();
+        return parenthesizedExpr;
     }
     else if (currentToken.getType() == TokenType::INTEGER_CONSTANT || currentToken.getType() == TokenType::FLOAT_CONSTANT || currentToken.getType() == TokenType::STRING_LITERAL)
     {
-        parseCONSTANT();
+        return parseCONSTANT();
     }
     else
     {
@@ -1211,71 +1214,68 @@ std::unique_ptr<ASTNode> Parser::parsePOSTFIX_ARGUMENTS()
 {
     if (isExpressionFirst())
     {
-        parseARGUMENT_EXPRESSION_LIST();
+        return parseARGUMENT_EXPRESSION_LIST();
     }
 
     return nullptr;
 }
 
 // POSTFIX_EXPRESSION -> PRIMARY_EXPRESSION POSTFIX_EXPRESSION_PRIME
-std::unique_ptr<ASTNode> Parser::parsePOSTFIX_EXPRESSION()
+std::unique_ptr<PostfixExpression> Parser::parsePOSTFIX_EXPRESSION()
 {
-    parsePRIMARY_EXPRESSION();
-    parsePOSTFIX_EXPRESSION_PRIME();
-    return nullptr;
-}
+    std::unique_ptr<PrimaryExpression> primaryExpr = parsePRIMARY_EXPRESSION();
 
-// POSTFIX_EXPRESSION_PRIME -> [ EXPRESSION ] POSTFIX_EXPRESSION_PRIME | ( POSTFIX_ARGUMENTS ) POSTFIX_EXPRESSION_PRIME | . IDENTIFIER POSTFIX_EXPRESSION_PRIME | -> IDENTIFIER POSTFIX_EXPRESSION_PRIME | ++ POSTFIX_EXPRESSION_PRIME | -- POSTFIX_EXPRESSION_PRIME | ϵ
-std::unique_ptr<ASTNode> Parser::parsePOSTFIX_EXPRESSION_PRIME()
-{
-    if (currentToken.getType() == TokenType::PUNCTUATION && currentToken.getValue() == "[")
+    // POSTFIX_EXPRESSION_PRIME -> [ EXPRESSION ] POSTFIX_EXPRESSION_PRIME | ( POSTFIX_ARGUMENTS ) POSTFIX_EXPRESSION_PRIME | . IDENTIFIER POSTFIX_EXPRESSION_PRIME | -> IDENTIFIER POSTFIX_EXPRESSION_PRIME | ++ POSTFIX_EXPRESSION_PRIME | -- POSTFIX_EXPRESSION_PRIME | ϵ
+    while (true)
     {
-        consume();
-        parseEXPRESSION();
-        if (currentToken.getType() != TokenType::PUNCTUATION || currentToken.getValue() != "]")
+        if (currentToken.getType() == TokenType::PUNCTUATION && currentToken.getValue() == "[")
         {
-            throw std::runtime_error("Syntax error: Expected closing ] in postfix expression");
+            consume();
+            std::unique_ptr<ArrayPostFixExpression> arrayPostFixExpr = std::make_unique<ArrayPostFixExpression>(parseEXPRESSION());
+            // parseEXPRESSION();
+            if (currentToken.getType() != TokenType::PUNCTUATION || currentToken.getValue() != "]")
+            {
+                throw std::runtime_error("Syntax error: Expected closing ] in postfix expression");
+            }
+            consume();
         }
-        consume();
-        parsePOSTFIX_EXPRESSION_PRIME();
-    }
-    else if (currentToken.getType() == TokenType::PUNCTUATION && currentToken.getValue() == "(")
-    {
-        consume();
-        parsePOSTFIX_ARGUMENTS();
-        if (currentToken.getType() != TokenType::PUNCTUATION || currentToken.getValue() != ")")
+        else if (currentToken.getType() == TokenType::PUNCTUATION && currentToken.getValue() == "(")
         {
-            throw std::runtime_error("Syntax error: Expected closing ) in postfix expression");
+            consume();
+            parsePOSTFIX_ARGUMENTS();
+            if (currentToken.getType() != TokenType::PUNCTUATION || currentToken.getValue() != ")")
+            {
+                throw std::runtime_error("Syntax error: Expected closing ) in postfix expression");
+            }
+            consume();
         }
-        consume();
-        parsePOSTFIX_EXPRESSION_PRIME();
-    }
-    else if (currentToken.getType() == TokenType::PUNCTUATION && currentToken.getValue() == ".")
-    {
-        consume();
-        if (currentToken.getType() != TokenType::IDENTIFIER)
+        else if (currentToken.getType() == TokenType::PUNCTUATION && currentToken.getValue() == ".")
         {
-            throw std::runtime_error("Syntax error: Expected identifier after . in postfix expression");
+            consume();
+            if (currentToken.getType() != TokenType::IDENTIFIER)
+            {
+                throw std::runtime_error("Syntax error: Expected identifier after . in postfix expression");
+            }
+            consume();
         }
-        consume();
-        parsePOSTFIX_EXPRESSION_PRIME();
-    }
-    else if (currentToken.getType() == TokenType::PUNCTUATION && currentToken.getValue() == "->")
-    {
-        consume();
-        if (currentToken.getType() != TokenType::IDENTIFIER)
+        else if (currentToken.getType() == TokenType::PUNCTUATION && currentToken.getValue() == "->")
         {
-            throw std::runtime_error("Syntax error: Expected identifier after -> in postfix expression");
+            consume();
+            if (currentToken.getType() != TokenType::IDENTIFIER)
+            {
+                throw std::runtime_error("Syntax error: Expected identifier after -> in postfix expression");
+            }
+            consume();
         }
-        consume();
-        parsePOSTFIX_EXPRESSION_PRIME();
+        else if (currentToken.getType() == TokenType::INCREMENT_OPERATOR && (currentToken.getValue() == "++" || currentToken.getValue() == "--"))
+        {
+            consume();
+        }
+        else
+        {
+            break;
+        }
     }
-    else if (currentToken.getType() == TokenType::INCREMENT_OPERATOR && (currentToken.getValue() == "++" || currentToken.getValue() == "--"))
-    {
-        consume();
-        parsePOSTFIX_EXPRESSION_PRIME();
-    }
-
     return nullptr;
 }
 

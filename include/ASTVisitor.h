@@ -38,4 +38,8 @@ public:
     virtual void visit(ContinueStatement &node) = 0;
     virtual void visit(BreakStatement &node) = 0;
     virtual void visit(ConditionalExpression &node) = 0;
+    virtual void visit(ParenthesizedExpression &node) = 0;
+    virtual void visit(ConstantExpression &node) = 0;
+    virtual void visit(IdentifierExpression &node) = 0;
+    virtual void visit(ArrayPostFixExpression &node) = 0;
 };

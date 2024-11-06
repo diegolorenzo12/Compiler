@@ -363,4 +363,32 @@ public:
             }
         }
     }
+
+    void visit(ParenthesizedExpression &node) override
+    {
+        std::cout << "ParenthesizedExpression ";
+        if (node.getExpr() != nullptr)
+        {
+            node.getExpr()->accept(*this);
+        }
+    }
+
+    void visit(ConstantExpression &node) override
+    {
+        std::cout << "ConstantExpression(" << node.getConstant() << "), with tyoe: " << node.getConstantTypeString();
+    }
+
+    void visit(IdentifierExpression &node) override
+    {
+        std::cout << "IdentifierExpression(" << node.getIdentifier() << ")";
+    }
+
+    void visit(ArrayPostFixExpression &node) override
+    {
+        std::cout << "ArrayPostFixExpression ";
+        if (node.getArraySize() != nullptr)
+        {
+            node.getArraySize()->accept(*this);
+        }
+    }
 };

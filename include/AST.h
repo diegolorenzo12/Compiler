@@ -38,6 +38,11 @@ class ReturnStatement;
 class ContinueStatement;
 class BreakStatement;
 class ConditionalExpression;
+class ParenthesizedExpression;
+class ConstantExpression;
+class IdentifierExpression;
+class PrimaryExpression;
+class ArrayPostFixExpression;
 
 #include "ASTVisitor.h"
 
@@ -688,3 +693,128 @@ private:
     std::unique_ptr<Expr> expression;                             // optional
     std::unique_ptr<ConditionalExpression> conditionalExpression; // optional
 };
+
+class PrimaryExpression : public Expr
+{
+public:
+    virtual ~PrimaryExpression() = default;
+    virtual void accept(ASTVisitor &visitor) = 0;
+};
+
+class IdentifierExpression : public PrimaryExpression
+{
+public:
+    IdentifierExpression(std::string identifier) : identifier(identifier) {}
+
+    void accept(ASTVisitor &visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    const std::string &getIdentifier() const { return identifier; }
+
+private:
+    std::string identifier;
+};
+
+enum ConstantType
+{
+    INTEGER_CONSTANT,
+    FLOAT_CONSTANT,
+    STRING_LITERAL
+};
+
+class ConstantExpression : public PrimaryExpression
+{
+public:
+    ConstantExpression(std::string constant, ConstantType type) : constant(constant), constantType(type) {}
+
+    void accept(ASTVisitor &visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    const std::string &getConstant() const { return constant; }
+    const ConstantType &getConstantType() const { return constantType; }
+    std::string getConstantTypeString() const
+    {
+        switch (constantType)
+        {
+        case INTEGER_CONSTANT:
+            return "INTEGER_CONSTANT";
+        case FLOAT_CONSTANT:
+            return "FLOAT_CONSTANT";
+        case STRING_LITERAL:
+            return "STRING_LITERAL";
+        default:
+            return "UNKNOWN_CONSTANT";
+        }
+    }
+
+private:
+    ConstantType constantType;
+    std::string constant;
+};
+
+class ParenthesizedExpression : public PrimaryExpression
+{
+public:
+    ParenthesizedExpression(std::unique_ptr<Expr> expr) : expr(std::move(expr)) {}
+
+    void accept(ASTVisitor &visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    Expr *getExpr() const { return expr.get(); }
+
+private:
+    std::unique_ptr<Expr> expr;
+};
+
+class PostfixExpression : public Expr
+{
+public:
+    virtual ~PostfixExpression() = default;
+    virtual void accept(ASTVisitor &visitor) = 0;
+};
+
+class ArrayPostFixExpression : public PostfixExpression
+{
+public:
+    ArrayPostFixExpression(std::unique_ptr<Expr> expr) : ArraySize(std::move(expr)) {}
+
+    void accept(ASTVisitor &visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    Expr *getArraySize() const { return ArraySize.get(); }
+
+private:
+    std::unique_ptr<Expr> ArraySize;
+};
+
+class AssigmentExpression : public Expr
+{
+};
+
+class ArgumentExpressionList : public ASTNode
+{
+};
+
+// class ArgumentsPostFixExpression : public PostfixExpression
+// {
+// };
+
+// class StructPostfixExpression : public PostfixExpression
+// {
+// };
+
+// class StructDeferencePostfixExpression : public PostfixExpression
+// {
+// };
+
+// class ArgumentList : public ASTNode
+// {
+// };

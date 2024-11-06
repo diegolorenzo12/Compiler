@@ -46,7 +46,7 @@ private:
     std::unique_ptr<ASTNode> parseBLOCK_ITEM_LIST_PRIME();
     std::unique_ptr<ConditionalExpression> parseCONDITIONAL_EXPRESSION();
     std::unique_ptr<ASTNode> parseCONDITIONAL_EXPRESSION_PRIME();
-    std::unique_ptr<ASTNode> parseCONSTANT();
+    std::unique_ptr<ConstantExpression> parseCONSTANT();
     std::unique_ptr<Declaration> parseDECLARATION();
     std::unique_ptr<DeclatatorList> parseDECLARATION_FAC();
     std::unique_ptr<ASTNode> parseDECLARATION_LIST();
@@ -97,9 +97,9 @@ private:
     std::unique_ptr<ASTNode> parsePARAM_DECL_FAC();
     bool parsePOINTER();
     std::unique_ptr<ASTNode> parsePOSTFIX_ARGUMENTS();
-    std::unique_ptr<ASTNode> parsePOSTFIX_EXPRESSION();
+    std::unique_ptr<PostfixExpression> parsePOSTFIX_EXPRESSION();
     std::unique_ptr<ASTNode> parsePOSTFIX_EXPRESSION_PRIME();
-    std::unique_ptr<ASTNode> parsePRIMARY_EXPRESSION();
+    std::unique_ptr<PrimaryExpression> parsePRIMARY_EXPRESSION();
     std::unique_ptr<Expr> parseRELATIONAL_EXPRESSION();
     std::unique_ptr<ASTNode> parseRELATIONAL_EXPRESSION_PRIME();
     std::unique_ptr<SelectionStatement> parseSELECTION_STATEMENT();
