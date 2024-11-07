@@ -8,33 +8,43 @@ PRINT ABSTRACT SYNTAX TREE
 class PrintVisitor : public ASTVisitor
 {
 public:
+    void acceptIfNotNull(ASTNode *node)
+    {
+        if (node != nullptr)
+        {
+            node->accept(*this);
+        }
+    }
+
+    void acceptIfNotNull(const std::unique_ptr<ASTNode> &node)
+    {
+        acceptIfNotNull(node.get());
+    }
+
+    template <typename NodeType>
+    void acceptIfNotNull(const std::unique_ptr<NodeType> &node)
+    {
+        acceptIfNotNull(node.get()); // Calls the raw pointer version if valid
+    }
+
     void visit(Program &node) override
     {
         std::cout << "Program {\n";
         for (const auto &decl : node.getTopLevelDeclarations())
         {
-            if (decl != nullptr)
-            {
-                decl->accept(*this);
-                std::cout << "\n";
-            }
+            acceptIfNotNull(decl);
+            std::cout << "\n";
         }
         std::cout << "}\n";
     }
 
     void visit(BinaryExpr &node) override
     {
-        std::cout << "(";
-        if (node.getLHS() != nullptr)
-        {
-            node.getLHS()->accept(*this);
-        }
+        std::cout << "{";
+        acceptIfNotNull(node.getLHS());
         std::cout << " " << node.getOp() << " ";
-        if (node.getRHS() != nullptr)
-        {
-            node.getRHS()->accept(*this);
-        }
-        std::cout << ")";
+        acceptIfNotNull(node.getRHS());
+        std::cout << "}";
     }
 
     void visit(LiteralExpr &node) override
@@ -49,87 +59,54 @@ public:
 
     void visit(FunctionDecl &node) override
     {
-        std::cout << "Function " << " {\n";
-        if (node.getDeclarationSpecifiers() != nullptr)
-        {
-            node.getDeclarationSpecifiers()->accept(*this);
-        }
-        if (node.getDeclarator() != nullptr)
-        {
-            node.getDeclarator()->accept(*this);
-        }
-        if (node.getBody() != nullptr)
-        {
-            node.getBody()->accept(*this);
-        }
-
+        std::cout << "Function {\n";
+        acceptIfNotNull(node.getDeclarationSpecifiers());
+        acceptIfNotNull(node.getDeclarator());
+        acceptIfNotNull(node.getBody());
         std::cout << "}\n";
     }
 
     void visit(Declaration &node) override
     {
         std::cout << "Declaration: {\n";
-        if (node.getDeclarationSpecifiers() != nullptr)
-        {
-            node.getDeclarationSpecifiers()->accept(*this);
-        }
-        if (node.getDeclaratorList() != nullptr)
-        {
-            std::cout << ", \n";
-            node.getDeclaratorList()->accept(*this);
-        }
+        acceptIfNotNull(node.getDeclarationSpecifiers());
+        acceptIfNotNull(node.getDeclaratorList());
         std::cout << "}\n";
     }
 
     void visit(Type &node) override
     {
-        std::cout << "Type (" << node.getBaseType() << ")";
+        std::cout << "Type: " << node.getBaseType() << " ";
     }
 
     void visit(Specifier &node) override
     {
-        std::cout << "Specifier " << node.getSpecifier() << " " << node.getSpecifierType();
+        std::cout << "Specifier:" << node.getSpecifier() << ", SpecifierType:" << node.getSpecifierType();
     }
 
     void visit(DeclarationSpecifiers &node) override
     {
-        std::cout << "DeclarationSpecifiers: ";
+        std::cout << "DeclarationSpecifiers: {";
 
-        if (node.getType() != nullptr)
-        {
-            node.getType()->accept(*this);
-        }
-        if (node.getSpecifiers() != nullptr)
-        {
-            std::cout << "Type: ";
-            node.getSpecifiers()->accept(*this);
-            std::cout << "\n";
-        }
+        acceptIfNotNull(node.getType());
+        acceptIfNotNull(node.getSpecifiers());
+        std::cout << "}\n";
     }
 
     void visit(Declarator &node) override
     {
-        std::cout << "Declarator, Identifier(" << node.getIdentifier() << ")";
+        std::cout << "Declarator:{ \n Identifier: " << node.getIdentifier() << ", \n";
 
         if (node.isPointer())
         {
-            std::cout << ", Is Pointer \n";
+            std::cout << "isPointer: true, \n";
         }
-        if (node.getDeclarator() != nullptr)
-        {
-            node.getDeclarator()->accept(*this);
-        }
-        if (node.getInitializer() != nullptr)
-        {
-            node.getInitializer()->accept(*this);
-        }
+        acceptIfNotNull(node.getDeclarator());
         for (const auto &decl : node.getDirectDeclarators())
         {
-            if (decl != nullptr)
-            {
-                decl->accept(*this);
-            }
+            acceptIfNotNull(decl);
         }
+        acceptIfNotNull(node.getInitializer());
     }
 
     void visit(DeclatatorList &node) override
@@ -137,12 +114,7 @@ public:
         std::cout << "DeclaratorList {\n";
         for (const auto &decl : node.getDeclarators())
         {
-
-            if (decl != nullptr)
-            {
-                decl->accept(*this);
-                std::cout << "\n";
-            }
+            acceptIfNotNull(decl);
         }
         std::cout << "}\n";
     }
@@ -150,19 +122,13 @@ public:
     void visit(ExpressionInitializer &node) override
     {
         std::cout << "Initializer ";
-        if (node.getExpr() != nullptr)
-        {
-            node.getExpr()->accept(*this);
-        }
+        acceptIfNotNull(node.getExpr());
     }
 
     void visit(BraceInitializer &node) override
     {
         std::cout << "BraceInitializer";
-        if (node.getInitializerList() != nullptr)
-        {
-            node.getInitializerList()->accept(*this);
-        }
+        acceptIfNotNull(node.getInitializerList());
     }
 
     void visit(InitializerList &node) override
@@ -170,11 +136,8 @@ public:
         std::cout << "BraceInitializer";
         for (const auto &initializer : node.getInitializerList())
         {
-            if (initializer != nullptr)
-            {
-                initializer->accept(*this);
-                std::cout << "\n";
-            }
+            acceptIfNotNull(initializer);
+            std::cout << "\n";
         }
     }
 
@@ -183,7 +146,7 @@ public:
         std::cout << "BlockStmt {\n";
         for (const auto &item : node.getItems())
         {
-            item->accept(*this);
+            acceptIfNotNull(item);
             std::cout << "\n";
         }
         std::cout << "}\n";
@@ -192,158 +155,90 @@ public:
     void visit(DeclarationWrapper &node) override
     {
         std::cout << "DeclarationWrapper ";
-        if (node.getDeclaration() != nullptr)
-        {
-            node.getDeclaration()->accept(*this);
-        }
+        acceptIfNotNull(node.getDeclaration());
     }
 
     void visit(StatementWrapper &node) override
     {
         std::cout << "StatementWrapper ";
-        if (node.getStatement() != nullptr)
-        {
-            node.getStatement()->accept(*this);
-        }
+        acceptIfNotNull(node.getStatement());
     }
 
     void visit(CaseStatement &node) override
     {
         std::cout << "CaseStatement ";
-        if (node.getExpr() != nullptr)
-        {
-            node.getExpr()->accept(*this);
-        }
-        if (node.getStatement() != nullptr)
-        {
-            node.getStatement()->accept(*this);
-        }
+        acceptIfNotNull(node.getExpr());
+        acceptIfNotNull(node.getStatement());
     }
 
     void visit(DefaultStatement &node) override
     {
         std::cout << "DefaultStatement ";
-        if (node.getStatement() != nullptr)
-        {
-            node.getStatement()->accept(*this);
-        }
+        acceptIfNotNull(node.getStatement());
     }
 
     void visit(ExpressionStatement &node) override
     {
         std::cout << "ExpressionStatement ";
-        if (node.getExpr() != nullptr)
-        {
-            node.getExpr()->accept(*this);
-        }
+        acceptIfNotNull(node.getExpr());
     }
 
     void visit(SwitchStatement &node) override
     {
         std::cout << "SwitchStatement ";
-        if (node.getCondition() != nullptr)
-        {
-            node.getCondition()->accept(*this);
-        }
-        if (node.getBody() != nullptr)
-        {
-            node.getBody()->accept(*this);
-        }
+        acceptIfNotNull(node.getCondition());
+        acceptIfNotNull(node.getBody());
     }
 
     void visit(IfStatement &node) override
     {
         std::cout << "IfStatement ";
-        if (node.getCondition() != nullptr)
-        {
-            node.getCondition()->accept(*this);
-        }
-        if (node.getThen() != nullptr)
-        {
-            node.getThen()->accept(*this);
-        }
+        acceptIfNotNull(node.getCondition());
+        acceptIfNotNull(node.getThen());
     }
 
     void visit(WhileStatement &node) override
     {
         std::cout << "WhileStatement ";
-        if (node.getCondition() != nullptr)
-        {
-            node.getCondition()->accept(*this);
-        }
-        if (node.getBody() != nullptr)
-        {
-            node.getBody()->accept(*this);
-        }
+        acceptIfNotNull(node.getCondition());
+        acceptIfNotNull(node.getBody());
     }
 
     void visit(DoWhileStatement &node) override
     {
         std::cout << "DoWhileStatement ";
-        if (node.getCondition() != nullptr)
-        {
-            node.getCondition()->accept(*this);
-        }
-        if (node.getBody() != nullptr)
-        {
-            node.getBody()->accept(*this);
-        }
+
+        acceptIfNotNull(node.getCondition());
+        acceptIfNotNull(node.getBody());
     }
 
     void visit(ForStatement &node) override
     {
         std::cout << "ForStatement ";
-        if (node.getInit() != nullptr)
-        {
-            node.getInit()->accept(*this);
-        }
-        if (node.getStatement() != nullptr)
-        {
-            node.getStatement()->accept(*this);
-        }
+        acceptIfNotNull(node.getInit());
+        acceptIfNotNull(node.getStatement());
     }
 
     void visit(ForWitDeclaration &node) override
     {
         std::cout << "ForWitDeclaration ";
-        if (node.getDeclaration() != nullptr)
-        {
-            node.getDeclaration()->accept(*this);
-        }
-        if (node.getExpr() != nullptr)
-        {
-            node.getExpr()->accept(*this);
-        }
-        if (node.getOptionalExpr() != nullptr)
-        {
-            node.getOptionalExpr()->accept(*this);
-        }
+        acceptIfNotNull(node.getDeclaration());
+        acceptIfNotNull(node.getExpr());
+        acceptIfNotNull(node.getOptionalExpr());
     }
 
     void visit(ForWithExpression &node) override
     {
         std::cout << "ForWithExpression ";
-        if (node.getExpr() != nullptr)
-        {
-            node.getExpr()->accept(*this);
-        }
-        if (node.getExpr2() != nullptr)
-        {
-            node.getExpr2()->accept(*this);
-        }
-        if (node.getOptionalExpr() != nullptr)
-        {
-            node.getOptionalExpr()->accept(*this);
-        }
+        acceptIfNotNull(node.getExpr());
+        acceptIfNotNull(node.getExpr2());
+        acceptIfNotNull(node.getOptionalExpr());
     }
 
     void visit(ReturnStatement &node) override
     {
         std::cout << "ReturnStatement ";
-        if (node.getExpr() != nullptr)
-        {
-            node.getExpr()->accept(*this);
-        }
+        acceptIfNotNull(node.getExpr());
     }
 
     void visit(ContinueStatement &node) override
@@ -359,32 +254,20 @@ public:
     void visit(ConditionalExpression &node) override
     {
         std::cout << "ConditionalExpression ";
-        if (node.getLogicalOrExpression() != nullptr)
-        {
-            node.getLogicalOrExpression()->accept(*this);
-        }
-        if (node.getExpression() != nullptr)
-        {
-            node.getExpression()->accept(*this);
-            if (node.getConditionalExpression() != nullptr)
-            {
-                node.getConditionalExpression()->accept(*this);
-            }
-        }
+        acceptIfNotNull(node.getLogicalOrExpression());
+        acceptIfNotNull(node.getExpression());
+        acceptIfNotNull(node.getConditionalExpression());
     }
 
     void visit(ParenthesizedExpression &node) override
     {
         std::cout << "ParenthesizedExpression ";
-        if (node.getExpr() != nullptr)
-        {
-            node.getExpr()->accept(*this);
-        }
+        acceptIfNotNull(node.getExpr());
     }
 
     void visit(ConstantExpression &node) override
     {
-        std::cout << "ConstantExpression(" << node.getConstant() << "), with tyoe: " << node.getConstantTypeString();
+        std::cout << "ConstantExpression: { value: " << node.getConstant() << ", type: " << node.getConstantTypeString() << " }";
     }
 
     void visit(IdentifierExpression &node) override
@@ -395,53 +278,35 @@ public:
     void visit(ArrayPostFixExpression &node) override
     {
         std::cout << "ArrayPostFixExpression ";
-        if (node.getArraySize() != nullptr)
+        acceptIfNotNull(node.getArraySize());
+    }
+
+    void visit(AssignmentExpressionList &node) override
+    {
+        std::cout << "AssignmentExpressionList ";
+        for (const auto &arg : node.getAssignmentExpression())
         {
-            node.getArraySize()->accept(*this);
+            acceptIfNotNull(arg);
         }
     }
 
-    void visit(AssigmentExpressionList &node) override
+    void visit(AssignmentOperator &node) override
     {
-        std::cout << "AssigmentExpressionList ";
-        for (const auto &arg : node.getAssigmentExpression())
-        {
-            if (arg != nullptr)
-            {
-                arg->accept(*this);
-            }
-        }
+        std::cout << "AssignmentOperator: " << node.getOp();
     }
 
-    void visit(AssigmentOperator &node) override
+    void visit(AssignmentExpression &node) override
     {
-        std::cout << "AssigmentOperator " << node.getOp();
-    }
-
-    void visit(AssigmentExpression &node) override
-    {
-        std::cout << "AssigmentExpression ";
-        if (node.getConditionalExpression() != nullptr)
-        {
-            node.getConditionalExpression()->accept(*this);
-        }
-        if (node.getAssigmentExpression() != nullptr)
-        {
-            node.getAssigmentExpression()->accept(*this);
-        }
-        if (node.getAssigmentOperator() != nullptr)
-        {
-            node.getAssigmentOperator()->accept(*this);
-        }
+        std::cout << "AssignmentExpression ";
+        acceptIfNotNull(node.getConditionalExpression());
+        acceptIfNotNull(node.getAssignmentExpression());
+        acceptIfNotNull(node.getAssignmentOperator());
     }
 
     void visit(ArgumentsPostFixExpression &node) override
     {
         std::cout << "ArgumentsPostFixExpression: ";
-        if (node.getArgumentList() != nullptr)
-        {
-            node.getArgumentList()->accept(*this);
-        }
+        acceptIfNotNull(node.getArgumentList());
     }
 
     void visit(DotOperatorPostfixExpression &node) override
@@ -462,76 +327,57 @@ public:
     void visit(PostfixExpressions &node) override
     {
         std::cout << "PostfixExpressions ";
-        if (node.getPrimaryExpression() != nullptr)
-        {
-            node.getPrimaryExpression()->accept(*this);
-        }
+        acceptIfNotNull(node.getPrimaryExpression());
         for (const auto &expr : node.getPostfixExpressions())
         {
-            if (expr != nullptr)
-            {
-                expr->accept(*this);
-            }
+            acceptIfNotNull(expr);
         }
     }
 
     void visit(UnaryIncrementDecrementOperator &node) override
     {
-        std::cout << "UnaryIncrementDecrementOperator " << node.getOp() << " ";
-        if (node.getUnaryExpr() != nullptr)
-        {
-            node.getUnaryExpr()->accept(*this);
-        }
+        std::cout << "UnaryIncrementDecrementOperator " << node.getOp() << " {";
+        acceptIfNotNull(node.getUnaryExpr());
+        std::cout << "}";
     }
 
     void visit(IdentifierList &node) override
     {
-        std::cout << "IdentifierList ";
+        std::cout << "IdentifierList {\n";
         for (const auto &id : node.getIdentifiers())
         {
             std::cout << id << " ";
         }
+        std::cout << "}\n";
     }
 
     void visit(ArrayDirectDeclarator &node) override
     {
-        std::cout << "ArrayDirectDeclarator ";
+        std::cout << "ArrayDirectDeclarator {\n";
         if (node.getIsStatic())
         {
-            std::cout << "Is Static ";
+            std::cout << "IsStatic:True, ";
         }
-        if (node.getArrSize() != nullptr)
-        {
-            node.getArrSize()->accept(*this);
-        }
-        if (node.getTypeQualifier() != nullptr)
-        {
-            node.getTypeQualifier()->accept(*this);
-        }
+        acceptIfNotNull(node.getTypeQualifier());
+        acceptIfNotNull(node.getArrSize());
+        std::cout << "}\n";
     }
 
     void visit(ParameterDeclaration &node) override
     {
-        std::cout << "ParameterDeclaration ";
-        if (node.getDeclarationSpecifiers() != nullptr)
-        {
-            node.getDeclarationSpecifiers()->accept(*this);
-        }
-        if (node.getDeclarator() != nullptr)
-        {
-            node.getDeclarator()->accept(*this);
-        }
+        std::cout << "ParameterDeclaration {\n";
+        acceptIfNotNull(node.getDeclarationSpecifiers());
+        acceptIfNotNull(node.getDeclarator());
+        std::cout << "}\n";
     }
 
     void visit(ParameterDeclarationList &node) override
     {
-        std::cout << "ParameterDeclarationList ";
+        std::cout << "ParameterDeclarationList {\n";
         for (const auto &param : node.getParameters())
         {
-            if (param != nullptr)
-            {
-                param->accept(*this);
-            }
+            acceptIfNotNull(param);
         }
+        std::cout << "}\n";
     }
 };

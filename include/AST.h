@@ -43,9 +43,9 @@ class ConstantExpression;
 class IdentifierExpression;
 class PrimaryExpression;
 class ArrayPostFixExpression;
-class AssigmentExpressionList;
-class AssigmentOperator;
-class AssigmentExpression;
+class AssignmentExpressionList;
+class AssignmentOperator;
+class AssignmentExpression;
 class ArgumentsPostFixExpression;
 class DotOperatorPostfixExpression;
 class ArrowOperatorPostfixExpression;
@@ -197,7 +197,7 @@ private:
 class Specifier : public ASTNode
 {
 public:
-    explicit Specifier(std::string specifier, std::string specifierType) : specifier_(std::move(specifier)), specifierType_(std::move(specifierType_)) {}
+    explicit Specifier(std::string specifier, std::string specifierType) : specifier_(std::move(specifier)), specifierType_(std::move(specifierType)) {}
 
     void accept(ASTVisitor &visitor) override
     {
@@ -891,10 +891,10 @@ private:
     std::unique_ptr<Expr> ArraySize;
 };
 
-class AssigmentExpression : public Expr
+class AssignmentExpression : public Expr
 {
 public:
-    AssigmentExpression(std::unique_ptr<ConditionalExpression> conditionalExpression, std::unique_ptr<AssigmentExpression> assigmentExpression, std::unique_ptr<AssigmentOperator> assigmentOperator)
+    AssignmentExpression(std::unique_ptr<ConditionalExpression> conditionalExpression, std::unique_ptr<AssignmentExpression> assigmentExpression, std::unique_ptr<AssignmentOperator> assigmentOperator)
         : conditionalExpression(std::move(conditionalExpression)), assigmentExpression(std::move(assigmentExpression)), assigmentOperator(std::move(assigmentOperator)) {}
 
     void accept(ASTVisitor &visitor) override
@@ -903,19 +903,19 @@ public:
     }
 
     ConditionalExpression *getConditionalExpression() const { return conditionalExpression.get(); }
-    AssigmentExpression *getAssigmentExpression() const { return assigmentExpression.get(); }
-    AssigmentOperator *getAssigmentOperator() const { return assigmentOperator.get(); }
+    AssignmentExpression *getAssignmentExpression() const { return assigmentExpression.get(); }
+    AssignmentOperator *getAssignmentOperator() const { return assigmentOperator.get(); }
 
 private:
     std::unique_ptr<ConditionalExpression> conditionalExpression;
-    std::unique_ptr<AssigmentExpression> assigmentExpression; // optional
-    std::unique_ptr<AssigmentOperator> assigmentOperator;     // optional
+    std::unique_ptr<AssignmentExpression> assigmentExpression; // optional
+    std::unique_ptr<AssignmentOperator> assigmentOperator;     // optional
 };
 
-class AssigmentOperator : public Expr
+class AssignmentOperator : public Expr
 {
 public:
-    AssigmentOperator(std::string op)
+    AssignmentOperator(std::string op)
         : op(std::move(op)) {}
 
     void accept(ASTVisitor &visitor) override
@@ -929,10 +929,10 @@ private:
     std::string op;
 };
 
-class AssigmentExpressionList : public Expr
+class AssignmentExpressionList : public Expr
 {
 public:
-    AssigmentExpressionList(std::vector<std::unique_ptr<AssigmentExpression>> assigmentExpression)
+    AssignmentExpressionList(std::vector<std::unique_ptr<AssignmentExpression>> assigmentExpression)
         : assigmentExpression(std::move(assigmentExpression)) {}
 
     void accept(ASTVisitor &visitor) override
@@ -940,34 +940,34 @@ public:
         visitor.visit(*this);
     }
 
-    const std::vector<std::unique_ptr<AssigmentExpression>> &getAssigmentExpression() const
+    const std::vector<std::unique_ptr<AssignmentExpression>> &getAssignmentExpression() const
     {
         return assigmentExpression;
     }
 
-    void addAssigmentExpression(std::unique_ptr<AssigmentExpression> expr)
+    void addAssignmentExpression(std::unique_ptr<AssignmentExpression> expr)
     {
         assigmentExpression.push_back(std::move(expr));
     }
 
 private:
-    std::vector<std::unique_ptr<AssigmentExpression>> assigmentExpression;
+    std::vector<std::unique_ptr<AssignmentExpression>> assigmentExpression;
 };
 
 class ArgumentsPostFixExpression : public PostfixExpressionBase
 {
 public:
-    ArgumentsPostFixExpression(std::unique_ptr<AssigmentExpressionList> argumentList) : argumentList(std::move(argumentList)) {}
+    ArgumentsPostFixExpression(std::unique_ptr<AssignmentExpressionList> argumentList) : argumentList(std::move(argumentList)) {}
 
     void accept(ASTVisitor &visitor) override
     {
         visitor.visit(*this);
     }
 
-    AssigmentExpressionList *getArgumentList() const { return argumentList.get(); }
+    AssignmentExpressionList *getArgumentList() const { return argumentList.get(); }
 
 private:
-    std::unique_ptr<AssigmentExpressionList> argumentList;
+    std::unique_ptr<AssignmentExpressionList> argumentList;
 };
 
 // class StructPostfixExpression : public PostfixExpression

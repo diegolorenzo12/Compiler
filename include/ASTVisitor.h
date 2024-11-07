@@ -42,9 +42,9 @@ public:
     virtual void visit(ConstantExpression &node) = 0;
     virtual void visit(IdentifierExpression &node) = 0;
     virtual void visit(ArrayPostFixExpression &node) = 0;
-    virtual void visit(AssigmentExpressionList &node) = 0;
-    virtual void visit(AssigmentOperator &node) = 0;
-    virtual void visit(AssigmentExpression &node) = 0;
+    virtual void visit(AssignmentExpressionList &node) = 0;
+    virtual void visit(AssignmentOperator &node) = 0;
+    virtual void visit(AssignmentExpression &node) = 0;
     virtual void visit(ArgumentsPostFixExpression &node) = 0;
     virtual void visit(DotOperatorPostfixExpression &node) = 0;
     virtual void visit(ArrowOperatorPostfixExpression &node) = 0;
