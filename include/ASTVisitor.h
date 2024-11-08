@@ -13,11 +13,11 @@ public:
     virtual void visit(VariableExpr &node) = 0;
     virtual void visit(FunctionDecl &node) = 0;
     virtual void visit(Declaration &node) = 0;
-    virtual void visit(Type &node) = 0;
+    virtual void visit(PrimitiveType &node) = 0;
     virtual void visit(Specifier &node) = 0;
     virtual void visit(DeclarationSpecifiers &node) = 0;
     virtual void visit(Declarator &node) = 0;
-    virtual void visit(DeclatatorList &node) = 0;
+    virtual void visit(DeclaratorList &node) = 0;
     virtual void visit(ExpressionInitializer &node) = 0;
     virtual void visit(BraceInitializer &node) = 0;
     virtual void visit(InitializerList &node) = 0;
@@ -55,4 +55,8 @@ public:
     virtual void visit(ArrayDirectDeclarator &node) = 0;
     virtual void visit(ParameterDeclaration &node) = 0;
     virtual void visit(ParameterDeclarationList &node) = 0;
+    virtual void visit(AnonimousStruct &node) = 0;
+    virtual void visit(StructDeclaration &node) = 0;
+    virtual void visit(StructMemberDeclarationList &node) = 0;
+    virtual void visit(StructMemberDeclaration &node) = 0;
 };

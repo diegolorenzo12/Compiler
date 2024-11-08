@@ -12,11 +12,11 @@ class VariableExpr;
 class FunctionDecl;
 class Declaration;
 class BlockStmt;
-class Type;
+class PrimitiveType;
 class Specifier;
 class DeclarationSpecifiers;
 class Declarator;
-class DeclatatorList;
+class DeclaratorList;
 class Initializer;
 class InitializerList;
 class BraceInitializer;
@@ -57,6 +57,11 @@ class FunctionDirectDeclarator;
 class IdentifierList;
 class ParameterDeclaration;
 class ParameterDeclarationList;
+
+class AnonimousStruct;
+class StructDeclaration;
+class StructMemberDeclarationList;
+class StructMemberDeclaration;
 
 #include "ASTVisitor.h"
 
@@ -180,7 +185,14 @@ private:
 class Type : public ASTNode
 {
 public:
-    Type(std::string baseType, bool isPointer = false)
+    virtual ~Type() = default;
+    virtual void accept(ASTVisitor &visitor) = 0;
+};
+
+class PrimitiveType : public Type
+{
+public:
+    PrimitiveType(std::string baseType, bool isPointer = false)
         : baseType_(std::move(baseType)) {}
 
     void accept(ASTVisitor &visitor) override
@@ -356,10 +368,10 @@ private:
     std::vector<std::unique_ptr<ParameterDeclaration>> parameters_;
 };
 
-class DeclatatorList : public ASTNode
+class DeclaratorList : public ASTNode
 {
 public:
-    DeclatatorList(std::vector<std::unique_ptr<Declarator>> declarators)
+    DeclaratorList(std::vector<std::unique_ptr<Declarator>> declarators)
         : declarators_(std::move(declarators)) {}
 
     void accept(ASTVisitor &visitor) override
@@ -376,7 +388,7 @@ private:
 class Declaration : public ASTNode
 {
 public:
-    Declaration(std::unique_ptr<DeclarationSpecifiers> declarationSpecifiers, std::unique_ptr<DeclatatorList> declaratorList)
+    Declaration(std::unique_ptr<DeclarationSpecifiers> declarationSpecifiers, std::unique_ptr<DeclaratorList> declaratorList)
         : declarationSpecifiers_(std::move(declarationSpecifiers)), declaratorList_(std::move(declaratorList)) {}
 
     void accept(ASTVisitor &visitor) override
@@ -386,12 +398,12 @@ public:
 
     // DECLARATION_SPECIFIERS
     const std::unique_ptr<DeclarationSpecifiers> &getDeclarationSpecifiers() const { return declarationSpecifiers_; }
-    const std::unique_ptr<DeclatatorList> &getDeclaratorList() const { return declaratorList_; }
+    const std::unique_ptr<DeclaratorList> &getDeclaratorList() const { return declaratorList_; }
     // INIT_DECLARATOR_LIST
 
 private:
     std::unique_ptr<DeclarationSpecifiers> declarationSpecifiers_;
-    std::unique_ptr<DeclatatorList> declaratorList_;
+    std::unique_ptr<DeclaratorList> declaratorList_;
 };
 
 class Initializer : public ASTNode
@@ -1075,4 +1087,86 @@ public:
 private:
     std::string op;
     std::unique_ptr<UnaryExpr> unaryExpr;
+};
+
+class StructSpecifier : public Type
+{
+public:
+    virtual ~StructSpecifier() = default;
+    virtual void accept(ASTVisitor &visitor) = 0;
+};
+
+class AnonimousStruct : public StructSpecifier
+{
+public:
+    AnonimousStruct(std::unique_ptr<StructMemberDeclarationList> structDeclarationList)
+        : structMemberDeclarationList(std::move(structDeclarationList)) {}
+
+    void accept(ASTVisitor &visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    StructMemberDeclarationList *getStructDeclarationList() const { return structMemberDeclarationList.get(); }
+
+private:
+    std::unique_ptr<StructMemberDeclarationList> structMemberDeclarationList;
+};
+
+class StructDeclaration : public StructSpecifier
+{
+public:
+    StructDeclaration(std::unique_ptr<StructMemberDeclarationList> structDeclarationList, std::string identifier)
+        : structMemberDeclarationList(std::move(structDeclarationList)), identifier(identifier) {}
+
+    void accept(ASTVisitor &visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    StructMemberDeclarationList *getStructDeclarationList() const { return structMemberDeclarationList.get(); }
+    const std::string &getIdentifier() const { return identifier; }
+
+private:
+    std::string identifier;
+    std::unique_ptr<StructMemberDeclarationList> structMemberDeclarationList;
+};
+
+class StructMemberDeclarationList : public ASTNode
+{
+public:
+    StructMemberDeclarationList(std::vector<std::unique_ptr<StructMemberDeclaration>> structMemberDeclarations)
+        : structMemberDeclarations(std::move(structMemberDeclarations)) {}
+
+    void accept(ASTVisitor &visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    const std::vector<std::unique_ptr<StructMemberDeclaration>> &getStructMemberDeclarations() const
+    {
+        return structMemberDeclarations;
+    }
+
+private:
+    std::vector<std::unique_ptr<StructMemberDeclaration>> structMemberDeclarations;
+};
+
+class StructMemberDeclaration : public ASTNode
+{
+public:
+    StructMemberDeclaration(std::unique_ptr<Type> type, std::unique_ptr<DeclaratorList> declaratorList)
+        : typeSpecifier(std::move(type)), declaratorList(std::move(declaratorList)) {}
+
+    void accept(ASTVisitor &visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    Type *getTypeSpecifier() const { return typeSpecifier.get(); }
+    DeclaratorList *getDeclaratorList() const { return declaratorList.get(); }
+
+private:
+    std::unique_ptr<Type> typeSpecifier;
+    std::unique_ptr<DeclaratorList> declaratorList;
 };

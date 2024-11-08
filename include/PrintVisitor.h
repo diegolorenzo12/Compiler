@@ -74,7 +74,7 @@ public:
         std::cout << "}\n";
     }
 
-    void visit(Type &node) override
+    void visit(PrimitiveType &node) override
     {
         std::cout << "Type: " << node.getBaseType() << " ";
     }
@@ -109,7 +109,7 @@ public:
         acceptIfNotNull(node.getInitializer());
     }
 
-    void visit(DeclatatorList &node) override
+    void visit(DeclaratorList &node) override
     {
         std::cout << "DeclaratorList {\n";
         for (const auto &decl : node.getDeclarators())
@@ -299,8 +299,8 @@ public:
     {
         std::cout << "AssignmentExpression ";
         acceptIfNotNull(node.getConditionalExpression());
-        acceptIfNotNull(node.getAssignmentExpression());
         acceptIfNotNull(node.getAssignmentOperator());
+        acceptIfNotNull(node.getAssignmentExpression());
     }
 
     void visit(ArgumentsPostFixExpression &node) override
@@ -378,6 +378,39 @@ public:
         {
             acceptIfNotNull(param);
         }
+        std::cout << "}\n";
+    }
+
+    void visit(AnonimousStruct &node) override
+    {
+        std::cout << "AnonimousStruct {\n";
+        acceptIfNotNull(node.getStructDeclarationList());
+        std::cout << "}\n";
+    }
+
+    void visit(StructDeclaration &node) override
+    {
+        std::cout << "StructDeclaration {\n";
+        std::cout << "Identifier: " << node.getIdentifier() << "\n";
+        acceptIfNotNull(node.getStructDeclarationList());
+        std::cout << "}\n";
+    }
+
+    void visit(StructMemberDeclarationList &node) override
+    {
+        std::cout << "StructMemberDeclarationList {\n";
+        for (const auto &member : node.getStructMemberDeclarations())
+        {
+            acceptIfNotNull(member);
+        }
+        std::cout << "}\n";
+    }
+
+    void visit(StructMemberDeclaration &node) override
+    {
+        std::cout << "StructMemberDeclaration {\n";
+        acceptIfNotNull(node.getTypeSpecifier());
+        acceptIfNotNull(node.getDeclaratorList());
         std::cout << "}\n";
     }
 };
