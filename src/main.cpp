@@ -4,9 +4,9 @@
 int main()
 {
     Compiler compiler("./test.cmm", 0);
+    int res = compiler.compile();
     try
     {
-        int res = compiler.compile();
         // Throwing an exception with a custom message
         if (res == 0)
         {
