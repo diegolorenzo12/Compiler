@@ -1,4 +1,5 @@
 #include <stdexcept>
+#include "SyntacticException.h"
 #include "Parser.h"
 #include "PrintVisitor.h"
 /*
@@ -75,7 +76,7 @@ void Parser::expect(TokenType expected)
 {
     if (currentToken.getType() != expected)
     {
-        throw std::runtime_error("Unexpected token: " + currentToken.getValue());
+        throw SyntacticException(currentToken.getLineNumber(), "Unexpected token: " + currentToken.getValue());
     }
     consume();
 }
@@ -99,7 +100,7 @@ std::unique_ptr<Program> Parser::parsePROGRAM()
 
     if (currentToken.getType() != TokenType::END_OF_FILE)
     {
-        throw std::runtime_error("Unexpected token: " + currentToken.getValue());
+        throw SyntacticException(currentToken.getLineNumber(), "Unexpected token: " + currentToken.getValue());
     }
     std::unique_ptr<Program> program = std::make_unique<Program>(std::move(topLevelDeclarations));
 
@@ -124,7 +125,7 @@ std::unique_ptr<ASTNode> Parser::parseGlobalDeclarations()
     }
     else
     {
-        throw std::runtime_error("Syntax error: Expected declaration or function definition");
+        throw SyntacticException(currentToken.getLineNumber(), "Expected declaration or function definition");
     }
 }
 
@@ -152,14 +153,14 @@ std::unique_ptr<DeclaratorList> Parser::parseDeclarationFac()
         std::unique_ptr<DeclaratorList> declaratorList = parseInitDeclaratorList();
         if (currentToken.getType() != TokenType::PUNCTUATION || currentToken.getValue() != ";")
         {
-            throw std::runtime_error("Syntax error: Expected ; at the end of declaration");
+            throw SyntacticException(currentToken.getLineNumber(), "Expected ; at the end of declaration");
         }
         consume();
         return declaratorList;
     }
     else
     {
-        throw std::runtime_error("Syntax error: Expected ; or INIT_DECLARATOR_LIST");
+        throw SyntacticException(currentToken.getLineNumber(), "Expected ; or INIT_DECLARATOR_LIST");
     }
 }
 
@@ -235,7 +236,7 @@ std::unique_ptr<BlockStmt> Parser::parseBlock()
         }
         else
         {
-            throw std::runtime_error("Syntax error: Expected '}' at the end of block");
+            throw SyntacticException(currentToken.getLineNumber(), "Expected '}' at the end of block");
         }
     }
 
@@ -267,7 +268,7 @@ std::unique_ptr<BlockItemBase> Parser::parseBlockItem()
     }
     else
     {
-        throw std::runtime_error("Syntax error: Expected declaration or statement");
+        throw SyntacticException(currentToken.getLineNumber(), "Expected declaration or statement");
     }
     return nullptr;
 }
@@ -301,7 +302,7 @@ std::unique_ptr<ConditionalExpression> Parser::parseConditionalExpression()
         }
         else
         {
-            throw std::runtime_error("Syntax error: Expected ':' Token");
+            throw SyntacticException(currentToken.getLineNumber(), "Expected ':' Token");
         }
         std::unique_ptr<ConditionalExpression> conditionalExpr = parseConditionalExpression();
         return std::make_unique<ConditionalExpression>(std::move(logicalOrExpr), std::move(expr), std::move(conditionalExpr));
@@ -410,7 +411,7 @@ std::unique_ptr<Declarator> Parser::parseDeclarator()
     }
     else
     {
-        throw std::runtime_error("Syntax error: Expected POINTER or DIRECT_DECLARATOR");
+        throw SyntacticException(currentToken.getLineNumber(), "Expected POINTER or DIRECT_DECLARATOR");
     }
 }
 
@@ -437,14 +438,14 @@ void Parser::parseDirectDeclarator(std::unique_ptr<Declarator> &declarator)
         if (currentToken.getType() != TokenType::PUNCTUATION || currentToken.getValue() != ")")
         {
 
-            throw std::runtime_error("Syntax error: Expected closing ) in declarator");
+            throw SyntacticException(currentToken.getLineNumber(), "Expected closing ) in declarator");
         }
         consume();
         parseDirectDeclaratorPrime(declarator);
     }
     else
     {
-        throw std::runtime_error("Syntax error: Expected IDENTIFIER or ( in declarator");
+        throw SyntacticException(currentToken.getLineNumber(), "Expected IDENTIFIER or ( in declarator");
     }
 }
 
@@ -462,7 +463,7 @@ void Parser::parseDirectDeclaratorPrime(std::unique_ptr<Declarator> &declarator)
             std::unique_ptr<Expr> expr = parseAssignmentExpressionOptFac();
             if (currentToken.getType() != TokenType::PUNCTUATION || currentToken.getValue() != "]")
             {
-                throw std::runtime_error("Syntax error: Expected closing ] in declarator");
+                throw SyntacticException(currentToken.getLineNumber(), "Expected closing ] in declarator");
             }
             consume();
             std::unique_ptr<ArrayDirectDeclarator> arrayDeclarator = std::make_unique<ArrayDirectDeclarator>(std::move(expr), std::move(typeQualifier), isStatic);
@@ -475,7 +476,7 @@ void Parser::parseDirectDeclaratorPrime(std::unique_ptr<Declarator> &declarator)
             std::unique_ptr<FunctionDirectDeclarator> funcDeclarator = parseParameterListOptFac();
             if (currentToken.getType() != TokenType::PUNCTUATION || currentToken.getValue() != ")")
             {
-                throw std::runtime_error("Syntax error: Expected closing ) in declarator");
+                throw SyntacticException(currentToken.getLineNumber(), "Expected closing ) in declarator");
             }
             consume();
             declarator->addDirectDeclarator(std::move(funcDeclarator));
@@ -539,14 +540,14 @@ std::unique_ptr<Expr> Parser::parseExpressionStatement()
         std::unique_ptr<Expr> expression = parseEXPRESSION();
         if (currentToken.getType() != TokenType::PUNCTUATION || currentToken.getValue() != ";")
         {
-            throw std::runtime_error("Syntax error: Expected ; at the end of an expression");
+            throw SyntacticException(currentToken.getLineNumber(), "Expected ; at the end of an expression");
         }
         consume();
         return expression;
     }
     else
     {
-        throw std::runtime_error("Syntax error: Expected closing semicolon ; or expression.");
+        throw SyntacticException(currentToken.getLineNumber(), "Expected closing semicolon ; or expression.");
     }
 
     return nullptr;
@@ -569,7 +570,7 @@ std::unique_ptr<ForInitStatement> Parser::parseForInitStatement()
     }
     else
     {
-        throw std::runtime_error("Syntax error: Expected EXPRESSION_STATEMENT or DECLARATION.");
+        throw SyntacticException(currentToken.getLineNumber(), "Expected EXPRESSION_STATEMENT or DECLARATION.");
     }
     return nullptr;
 }
@@ -619,7 +620,7 @@ std::unique_ptr<BlockStmt> Parser::parseFunctionDefFac()
     }
     else
     {
-        throw std::runtime_error("Syntax error: Expected declarations or block {}");
+        throw SyntacticException(currentToken.getLineNumber(), "Expected declarations or block {}");
     }
 
     return nullptr;
@@ -636,7 +637,7 @@ std::unique_ptr<Specifier> Parser::parseFunctionSpecifier()
     }
     else
     {
-        throw std::runtime_error("Syntax error: Expected function specifier Token");
+        throw SyntacticException(currentToken.getLineNumber(), "Expected function specifier Token");
     }
 
     return nullptr;
@@ -661,17 +662,17 @@ std::unique_ptr<IdentifierList> Parser::parseIdentifierList()
             }
             else
             {
-                throw std::runtime_error("Syntax error: Expected identifier");
+                throw SyntacticException(currentToken.getLineNumber(), "Expected identifier");
             }
         }
     }
     else
     {
-        throw std::runtime_error("Syntax error: Expected identifier");
+        throw SyntacticException(currentToken.getLineNumber(), "Expected identifier");
     }
     if (identifiers.size() == 0)
     {
-        throw std::runtime_error("Syntax error: Expected identifier");
+        throw SyntacticException(currentToken.getLineNumber(), "Expected identifier");
     }
     return std::make_unique<IdentifierList>(std::move(identifiers));
 }
@@ -691,7 +692,7 @@ std::unique_ptr<Initializer> Parser::parseInitializer()
     }
     else
     {
-        throw std::runtime_error("Syntax error: Expected initializer");
+        throw SyntacticException(currentToken.getLineNumber(), "Expected initializer");
     }
     return nullptr;
 }
@@ -709,13 +710,13 @@ std::unique_ptr<InitializerList> Parser::parseInitializerBraceFac()
         }
         else
         {
-            throw std::runtime_error("Syntax error: Expected closing } in initializer");
+            throw SyntacticException(currentToken.getLineNumber(), "Expected closing } in initializer");
         }
         return initializer;
     }
     else
     {
-        throw std::runtime_error("Syntax error: Expected opening { in initializer");
+        throw SyntacticException(currentToken.getLineNumber(), "Expected opening { in initializer");
     }
 
     return nullptr;
@@ -743,7 +744,7 @@ std::unique_ptr<Declarator> Parser::parseInitDeclarator()
     std::unique_ptr<Declarator> declarator = parseDeclarator();
     if (declarator == nullptr)
     {
-        throw std::runtime_error("Syntax error: Expected declarator");
+        throw SyntacticException(currentToken.getLineNumber(), "Expected declarator");
     }
     declarator->setInitializer(parseInitDeclaratorFac());
     return declarator;
@@ -784,14 +785,14 @@ std::unique_ptr<IterationStatement> Parser::parseIterationStatement()
         consume();
         if (currentToken.getType() != TokenType::PUNCTUATION || currentToken.getValue() != "(")
         {
-            throw std::runtime_error("Syntax error: Expected opening ( in while statement");
+            throw SyntacticException(currentToken.getLineNumber(), "Expected opening ( in while statement");
         }
 
         consume();
         std::unique_ptr<Expr> expr = parseEXPRESSION();
         if (currentToken.getType() != TokenType::PUNCTUATION || currentToken.getValue() != ")")
         {
-            throw std::runtime_error("Syntax error: Expected closing ) in while statement");
+            throw SyntacticException(currentToken.getLineNumber(), "Expected closing ) in while statement");
         }
         consume();
         return std::make_unique<WhileStatement>(std::move(expr), parseStatement());
@@ -802,23 +803,23 @@ std::unique_ptr<IterationStatement> Parser::parseIterationStatement()
         std::unique_ptr<Stmt> statement = parseStatement();
         if (currentToken.getType() != TokenType::KEYWORD || currentToken.getValue() != "while")
         {
-            throw std::runtime_error("Syntax error: Expected while in do-while statement");
+            throw SyntacticException(currentToken.getLineNumber(), "Expected while in do-while statement");
         }
         consume();
         if (currentToken.getType() != TokenType::PUNCTUATION || currentToken.getValue() != "(")
         {
-            throw std::runtime_error("Syntax error: Expected opening ( in do-while statement");
+            throw SyntacticException(currentToken.getLineNumber(), "Expected opening ( in do-while statement");
         }
         consume();
         std::unique_ptr<Expr> expr = parseEXPRESSION();
         if (currentToken.getType() != TokenType::PUNCTUATION || currentToken.getValue() != ")")
         {
-            throw std::runtime_error("Syntax error: Expected closing ) in do-while statement");
+            throw SyntacticException(currentToken.getLineNumber(), "Expected closing ) in do-while statement");
         }
         consume();
         if (currentToken.getType() != TokenType::PUNCTUATION || currentToken.getValue() != ";")
         {
-            throw std::runtime_error("Syntax error: Expected ; in do-while statement");
+            throw SyntacticException(currentToken.getLineNumber(), "Expected ; in do-while statement");
         }
         consume();
         return std::make_unique<DoWhileStatement>(std::move(expr), std::move(statement));
@@ -828,20 +829,20 @@ std::unique_ptr<IterationStatement> Parser::parseIterationStatement()
         consume();
         if (currentToken.getType() != TokenType::PUNCTUATION || currentToken.getValue() != "(")
         {
-            throw std::runtime_error("Syntax error: Expected opening ( in for statement");
+            throw SyntacticException(currentToken.getLineNumber(), "Expected opening ( in for statement");
         }
         consume();
         std::unique_ptr<ForInitStatement> forInitStatement = parseForInitStatement();
         if (currentToken.getType() != TokenType::PUNCTUATION || currentToken.getValue() != ")")
         {
-            throw std::runtime_error("Syntax error: Expected closing ) in for statement");
+            throw SyntacticException(currentToken.getLineNumber(), "Expected closing ) in for statement");
         }
         consume();
         return std::make_unique<ForStatement>(std::move(forInitStatement), parseStatement());
     }
     else
     {
-        throw std::runtime_error("Syntax error: Expected while, do or for statement");
+        throw SyntacticException(currentToken.getLineNumber(), "Expected while, do or for statement");
     }
 
     return nullptr;
@@ -855,7 +856,7 @@ std::unique_ptr<JumpStatement> Parser::parseJumpStatement()
         consume();
         if (currentToken.getType() != TokenType::PUNCTUATION || currentToken.getValue() != ";")
         {
-            throw std::runtime_error("Syntax error: Expected ; in continue statement");
+            throw SyntacticException(currentToken.getLineNumber(), "Expected ; in continue statement");
         }
         consume();
         return std::make_unique<ContinueStatement>();
@@ -865,7 +866,7 @@ std::unique_ptr<JumpStatement> Parser::parseJumpStatement()
         consume();
         if (currentToken.getType() != TokenType::PUNCTUATION || currentToken.getValue() != ";")
         {
-            throw std::runtime_error("Syntax error: Expected ; in break statement");
+            throw SyntacticException(currentToken.getLineNumber(), "Expected ; in break statement");
         }
         consume();
         return std::make_unique<BreakStatement>();
@@ -877,7 +878,7 @@ std::unique_ptr<JumpStatement> Parser::parseJumpStatement()
     }
     else
     {
-        throw std::runtime_error("Syntax error: Expected continue, break or return statement");
+        throw SyntacticException(currentToken.getLineNumber(), "Expected continue, break or return statement");
     }
 
     return nullptr;
@@ -892,7 +893,7 @@ std::unique_ptr<LabaledStatement> Parser::parseLabeledStatement()
         std::unique_ptr<Expr> expr = parseConditionalExpression();
         if (currentToken.getType() != TokenType::PUNCTUATION || currentToken.getValue() != ":")
         {
-            throw std::runtime_error("Syntax error: Expected : in case statement");
+            throw SyntacticException(currentToken.getLineNumber(), "Expected : in case statement");
         }
         consume();
         std::unique_ptr<Stmt> statement = parseStatement();
@@ -903,7 +904,7 @@ std::unique_ptr<LabaledStatement> Parser::parseLabeledStatement()
         consume();
         if (currentToken.getType() != TokenType::PUNCTUATION || currentToken.getValue() != ":")
         {
-            throw std::runtime_error("Syntax error: Expected : in default statement");
+            throw SyntacticException(currentToken.getLineNumber(), "Expected : in default statement");
         }
         consume();
         std::unique_ptr<Stmt> statement = parseStatement();
@@ -911,7 +912,7 @@ std::unique_ptr<LabaledStatement> Parser::parseLabeledStatement()
     }
     else
     {
-        throw std::runtime_error("Syntax error: Expected case or default statement");
+        throw SyntacticException(currentToken.getLineNumber(), "Expected case or default statement");
     }
 
     return nullptr;
@@ -1040,7 +1041,7 @@ std::unique_ptr<PrimaryExpression> Parser::parsePrimaryExpression()
         std::unique_ptr<ParenthesizedExpression> parenthesizedExpr = std::make_unique<ParenthesizedExpression>(std::move(parseEXPRESSION()));
         if (currentToken.getType() != TokenType::PUNCTUATION || currentToken.getValue() != ")")
         {
-            throw std::runtime_error("Syntax error: Expected closing ) in primary expression");
+            throw SyntacticException(currentToken.getLineNumber(), "Expected closing ) in primary expression");
         }
         consume();
         return parenthesizedExpr;
@@ -1051,7 +1052,7 @@ std::unique_ptr<PrimaryExpression> Parser::parsePrimaryExpression()
     }
     else
     {
-        throw std::runtime_error("Syntax error: Expected identifier, constant or expression in primary expression");
+        throw SyntacticException(currentToken.getLineNumber(), "Expected identifier, constant or expression in primary expression");
     }
 
     return nullptr;
@@ -1140,7 +1141,7 @@ bool Parser::parsePointer()
     }
     else
     {
-        throw std::runtime_error("Syntax error: Expected * in pointer");
+        throw SyntacticException(currentToken.getLineNumber(), "Expected * in pointer");
     }
     return false;
 }
@@ -1172,7 +1173,7 @@ std::unique_ptr<PostfixExpressions> Parser::parsePostfixExpression()
             std::unique_ptr<ArrayPostFixExpression> arrayPostFixExpr = std::make_unique<ArrayPostFixExpression>(parseEXPRESSION());
             if (currentToken.getType() != TokenType::PUNCTUATION || currentToken.getValue() != "]")
             {
-                throw std::runtime_error("Syntax error: Expected closing ] in postfix expression");
+                throw SyntacticException(currentToken.getLineNumber(), "Expected closing ] in postfix expression");
             }
             consume();
             postfixExpressions.push_back(std::move(arrayPostFixExpr));
@@ -1183,7 +1184,7 @@ std::unique_ptr<PostfixExpressions> Parser::parsePostfixExpression()
             std::unique_ptr<ArgumentsPostFixExpression> argsPostFixExpr = std::make_unique<ArgumentsPostFixExpression>(parsePostfixArguments());
             if (currentToken.getType() != TokenType::PUNCTUATION || currentToken.getValue() != ")")
             {
-                throw std::runtime_error("Syntax error: Expected closing ) in postfix expression");
+                throw SyntacticException(currentToken.getLineNumber(), "Expected closing ) in postfix expression");
             }
             consume();
             postfixExpressions.push_back(std::move(argsPostFixExpr));
@@ -1193,7 +1194,7 @@ std::unique_ptr<PostfixExpressions> Parser::parsePostfixExpression()
             consume();
             if (currentToken.getType() != TokenType::IDENTIFIER)
             {
-                throw std::runtime_error("Syntax error: Expected identifier after . in postfix expression");
+                throw SyntacticException(currentToken.getLineNumber(), "Expected identifier after . in postfix expression");
             }
             std::unique_ptr<DotOperatorPostfixExpression> dotOperatorPostfixExpr = std::make_unique<DotOperatorPostfixExpression>(currentToken.getValue());
             consume();
@@ -1204,7 +1205,7 @@ std::unique_ptr<PostfixExpressions> Parser::parsePostfixExpression()
             consume();
             if (currentToken.getType() != TokenType::IDENTIFIER)
             {
-                throw std::runtime_error("Syntax error: Expected identifier after -> in postfix expression");
+                throw SyntacticException(currentToken.getLineNumber(), "Expected identifier after -> in postfix expression");
             }
             std::unique_ptr<ArrowOperatorPostfixExpression> arrowOperatorPostfixExpr = std::make_unique<ArrowOperatorPostfixExpression>(currentToken.getValue());
             consume();
@@ -1232,13 +1233,13 @@ std::unique_ptr<SelectionStatement> Parser::parseSelectionStatement()
         consume();
         if (currentToken.getType() != TokenType::PUNCTUATION || currentToken.getValue() != "(")
         {
-            throw std::runtime_error("Syntax error: Expected opening ( in if statement");
+            throw SyntacticException(currentToken.getLineNumber(), "Expected opening ( in if statement");
         }
         consume();
         std::unique_ptr<Expr> expression = parseEXPRESSION();
         if (currentToken.getType() != TokenType::PUNCTUATION || currentToken.getValue() != ")")
         {
-            throw std::runtime_error("Syntax error: Expected closing ) in if statement");
+            throw SyntacticException(currentToken.getLineNumber(), "Expected closing ) in if statement");
         }
         consume();
         return std::make_unique<IfStatement>(std::move(expression), std::move(parseStatement()));
@@ -1248,20 +1249,20 @@ std::unique_ptr<SelectionStatement> Parser::parseSelectionStatement()
         consume();
         if (currentToken.getType() != TokenType::PUNCTUATION || currentToken.getValue() != "(")
         {
-            throw std::runtime_error("Syntax error: Expected opening ( in switch statement");
+            throw SyntacticException(currentToken.getLineNumber(), "Expected opening ( in switch statement");
         }
         consume();
         std::unique_ptr<Expr> expression = parseEXPRESSION();
         if (currentToken.getType() != TokenType::PUNCTUATION || currentToken.getValue() != ")")
         {
-            throw std::runtime_error("Syntax error: Expected closing ) in switch statement");
+            throw SyntacticException(currentToken.getLineNumber(), "Expected closing ) in switch statement");
         }
         consume();
         return std::make_unique<SwitchStatement>(std::move(expression), std::move(parseStatement()));
     }
     else
     {
-        throw std::runtime_error("Syntax error: Expected if or switch statement");
+        throw SyntacticException(currentToken.getLineNumber(), "Expected if or switch statement");
     }
 
     return nullptr;
@@ -1319,7 +1320,7 @@ std::unique_ptr<Stmt> Parser::parseStatement()
     }
     else
     {
-        throw std::runtime_error("Syntax error: Expected statement");
+        throw SyntacticException(currentToken.getLineNumber(), "Expected statement");
     }
 
     return nullptr;
@@ -1347,7 +1348,7 @@ std::unique_ptr<Specifier> Parser::parseStorageSpecifier()
     }
     else
     {
-        throw std::runtime_error("Syntax error: Expected storage specifier Token");
+        throw SyntacticException(currentToken.getLineNumber(), "Expected storage specifier Token");
     }
 
     return nullptr;
@@ -1405,14 +1406,14 @@ std::unique_ptr<DeclaratorList> Parser::parseSTRUCT_DECL_FAC()
         std::unique_ptr<DeclaratorList> declaratorList = parseSTRUCT_DECLARATOR_LIST();
         if (currentToken.getType() != TokenType::PUNCTUATION || currentToken.getValue() != ";")
         {
-            throw std::runtime_error("Syntax error: Expected ; in struct declaration");
+            throw SyntacticException(currentToken.getLineNumber(), "Expected ; in struct declaration");
         }
         consume();
         return declaratorList;
     }
     else
     {
-        throw std::runtime_error("Syntax error: Expected ; or struct declarator list");
+        throw SyntacticException(currentToken.getLineNumber(), "Expected ; or struct declarator list");
     }
 
     return nullptr;
@@ -1428,7 +1429,7 @@ std::unique_ptr<StructSpecifier> Parser::parseSTRUCT_SPECIFIER()
     }
     else
     {
-        throw std::runtime_error("Syntax error: Expected 'struct' specifier Token");
+        throw SyntacticException(currentToken.getLineNumber(), "Expected 'struct' specifier Token");
     }
     return nullptr;
 }
@@ -1442,7 +1443,7 @@ std::unique_ptr<StructSpecifier> Parser::parseSTRUCT_SPEC_FAC()
         std::unique_ptr<StructMemberDeclarationList> structMemberDeclarationList = parseSTRUCT_DECLARATION_LIST();
         if (currentToken.getType() != TokenType::PUNCTUATION || currentToken.getValue() != "}")
         {
-            throw std::runtime_error("Syntax error: Expected closing } in struct specifier");
+            throw SyntacticException(currentToken.getLineNumber(), "Expected closing } in struct specifier");
         }
         consume();
         return std::make_unique<AnonimousStruct>(std::move(structMemberDeclarationList));
@@ -1456,7 +1457,7 @@ std::unique_ptr<StructSpecifier> Parser::parseSTRUCT_SPEC_FAC()
     }
     else
     {
-        throw std::runtime_error("Syntax error: Expected { or IDENTIFIER in struct specifier");
+        throw SyntacticException(currentToken.getLineNumber(), "Expected { or IDENTIFIER in struct specifier");
     }
     return nullptr;
 }
@@ -1470,7 +1471,7 @@ std::unique_ptr<StructMemberDeclarationList> Parser::parseSTRUCT_SPEC_FAC2()
         std::unique_ptr<StructMemberDeclarationList> result = parseSTRUCT_DECLARATION_LIST();
         if (currentToken.getType() != TokenType::PUNCTUATION || currentToken.getValue() != "}")
         {
-            throw std::runtime_error("Syntax error: Expected closing } in struct specifier");
+            throw SyntacticException(currentToken.getLineNumber(), "Expected closing } in struct specifier");
         }
         consume();
         return result;
@@ -1490,7 +1491,7 @@ std::unique_ptr<Specifier> Parser::parseTypeQualifier()
     }
     else
     {
-        throw std::runtime_error("Syntax error: Expected type qualifier Token");
+        throw SyntacticException(currentToken.getLineNumber(), "Expected type qualifier Token");
     }
 
     return nullptr;
@@ -1521,7 +1522,7 @@ std::unique_ptr<Type> Parser::parseTypeSpecifier()
     }
     else
     {
-        throw std::runtime_error("Syntax error: Expected type specifier Token");
+        throw SyntacticException(currentToken.getLineNumber(), "Expected type specifier Token");
     }
 
     return nullptr;
@@ -1549,7 +1550,7 @@ std::unique_ptr<UnaryExpr> Parser::parseUnaryExpression()
     }
     else
     {
-        throw std::runtime_error("Syntax error: Expected postfix expression, ++, -- or sizeof");
+        throw SyntacticException(currentToken.getLineNumber(), "Expected postfix expression, ++, -- or sizeof");
     }
 
     return nullptr;

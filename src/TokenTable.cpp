@@ -33,7 +33,6 @@ void TokenTable::clear()
 {
     tokens.clear();
 }
-
 void TokenTable::printTokens() const
 {
     if (tokens.empty())
@@ -44,6 +43,6 @@ void TokenTable::printTokens() const
 
     for (const Token &token : tokens)
     {
-        std::cout << "Token: " << token.getValue() << ", Type: " << token.getTypeAsString() << std::endl;
+        std::cout << "Token: " << token.getValue() << ", Type: " << token.getTypeAsString() << ", LineNo:" << token.getLineNumber() << std::endl;
     }
 }

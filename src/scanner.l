@@ -6,11 +6,15 @@
 #endif
 #include <string>
 #include "Token.h"   
+#include "LexerException.h"
 extern void yyerror(const char *);  
 
 %}
 
 %option noyywrap c++ 
+%option yylineno
+
+
 
 %x COMMENT 
 
@@ -114,18 +118,19 @@ arithmetic_op  ([\-+*/%&]|<<|>>|\^)
 
 
 
-
 {identifier}    { return (int)TokenType::IDENTIFIER; }
 
 [ \t\n\r]+      /* Ignore whitespace */
 
-.               {fprintf(stderr, "Error: Unrecognized character '%s'\n", yytext);  return (int)TokenType::UNKNOWN; }
+.               {
+    throw LexerException("some file", lineno(), "Unexpected token " + std::string(yytext));
+    return (int)TokenType::UNKNOWN; }
 
 "//".*          { /* Ignore single-line comments */ }
 
 "/*"            { BEGIN(COMMENT); }
 <COMMENT>"*/" { BEGIN(INITIAL); }
-<COMMENT>\n   { }
+<COMMENT>\n    { }
 <COMMENT>.    { }
 
 %%
