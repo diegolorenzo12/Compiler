@@ -5,6 +5,7 @@
 #include <iostream>
 #include <string>
 #include "Parser.h"
+#include "FileReader.h"
 
 class Compiler
 {
@@ -14,9 +15,6 @@ public:
     int compile();
 
 private:
-    std::shared_ptr<std::fstream> sourceCodeStream;
     const std::string filename;
-    std::string preprocessCode;
-
-    std::shared_ptr<std::fstream> openFilePointerUnique(const std::string &filename, std::ios::openmode mode);
+    FileReader *fileReader;
 };
