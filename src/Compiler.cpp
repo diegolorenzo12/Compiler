@@ -3,6 +3,7 @@
 #include "TokenTable.h"
 #include "Token.h"
 #include "Lexer.h"
+#include "SymbolTable.h"
 
 Compiler::Compiler(const std::string &filename, int flags)
     : filename(filename)
