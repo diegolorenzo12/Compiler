@@ -61,6 +61,7 @@ set(SOURCES
     src/LexerException.cpp
     src/SyntacticException.cpp
     src/Symbol.cpp
+    src/SymbolTable.cpp
     ${FLEX_OUTPUT}
 )
 

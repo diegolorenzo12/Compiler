@@ -4,6 +4,7 @@
 #include "Token.h"
 #include "Lexer.h"
 #include "SymbolTable.h"
+#include "SemanticAnalyzer.h"
 
 Compiler::Compiler(const std::string &filename, int flags)
     : filename(filename)
@@ -26,6 +27,9 @@ int Compiler::compile()
 
     Parser parser(tokenTable);
     parser.parsePROGRAM();
+
+    auto globalScope = std::make_shared<SymbolTable>();
+    // SemanticAnalyzer semanticAnalyzer(symbolTable);
 
     return 0;
 }
