@@ -60,6 +60,7 @@ set(SOURCES
     src/FileReader.cpp
     src/LexerException.cpp
     src/SyntacticException.cpp
+    src/Symbol.cpp
     ${FLEX_OUTPUT}
 )
 
