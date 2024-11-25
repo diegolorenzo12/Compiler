@@ -32,7 +32,9 @@ func int main() {
     int arr[2][2] = {
         {1,2},
         {1,2}
-    }; //brace initializer
+    };
+    char string[10] = "string";
+     //brace initializer
 
 /*
     switch (y) {

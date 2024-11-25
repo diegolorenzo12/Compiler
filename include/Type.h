@@ -190,7 +190,7 @@ public:
     bool equals(const SemanticType &other) const override
     {
         const auto *otherArray = dynamic_cast<const ArrayType *>(&other);
-        return otherArray && elementType->equals(*otherArray->elementType) && size == otherArray->size;
+        return otherArray && elementType->equals(*otherArray->elementType);
     }
 };
 
