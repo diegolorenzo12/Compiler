@@ -39,13 +39,10 @@ public:
 
     void visit(Program &node) override
     {
-        // std::cout << "Program {\n";
         for (const auto &decl : node.getTopLevelDeclarations())
         {
             acceptIfNotNull(decl);
-            // std::cout << "\n";
         }
-        // std::cout << "}\n";
     }
 
     void visit(BinaryExpr &node) override
@@ -130,12 +127,28 @@ public:
     {
         acceptIfNotNull(node.getDeclarationSpecifiers());
         // wrap infered in function type
+
         auto functionType = std::make_shared<FunctionType>(inferredType);
         inferredType = functionType;
+
+        // create a new scope for the function
+        auto parentScope = symbolTable;
+        auto childScope = symbolTable->createChildScope();
+        symbolTable = childScope;
         // in declaration i save in semantic table
         acceptIfNotNull(node.getDeclarator());
-
         acceptIfNotNull(node.getBody());
+        symbolTable = parentScope;
+
+        std::cout << std::endl
+                  << std::endl
+                  << "global Scope: " << std::endl;
+        parentScope->printCurrentScope();
+
+        std::cout << std::endl
+                  << std::endl
+                  << "Current Function Scope: " << std::endl;
+        childScope->printCurrentScope();
     }
 
     void visit(Declaration &node) override
@@ -156,10 +169,8 @@ public:
 
     void visit(DeclarationSpecifiers &node) override
     {
-        // std::cout << "DeclarationSpecifiers: {";
         acceptIfNotNull(node.getType());
         acceptIfNotNull(node.getSpecifiers());
-        // std::cout << "}\n";
     }
 
     void visit(Declarator &node) override
@@ -177,17 +188,32 @@ public:
         // check if inferreed type is a primitive type to save in a variable symbol
         if (auto functionType = std::dynamic_pointer_cast<FunctionType>(inferredType))
         {
-            if (!symbolTable->insertSymbol(std::make_shared<FunctionSymbol>(identifier, functionType)))
+            std::cout << "function type " << functionType->toString() << std::endl;
+            // if symbol table has parent, insert the function there
+            if (symbolTable->getParent())
             {
-                throw std::runtime_error("Error: Variable " + identifier + " already declared.");
+                if (!symbolTable->getParent()->insertSymbol(std::make_shared<FunctionSymbol>(identifier, functionType)))
+                {
+                    throw std::runtime_error("Error: Variable " + identifier + " already declared.");
+                }
+                if (!symbolTable->insertSymbol(std::make_shared<FunctionSymbol>(identifier, functionType)))
+                {
+                    throw std::runtime_error("Error: Variable " + identifier + " already declared.");
+                }
+            }
+            else
+            {
+                throw std::runtime_error("Error: Function definition outside of function scope.");
             }
         }
         else if (auto structType = std::dynamic_pointer_cast<StructType>(inferredType))
         {
             std::shared_ptr<Symbol> currentSymbol = symbolTable->lookupSymbol(structType->getName());
-            if (currentSymbol)
+            if (currentSymbol && dynamic_cast<StructSymbol *>(currentSymbol.get()))
             {
+
                 auto currentType = currentSymbol->getType();
+                // std::cout << "currentType struct " << identifier << " with type " << currentType->toString() << std::endl;
                 if (node.isPointer())
                 {
                     currentType = std::make_shared<PointerType>(currentType, false);
@@ -196,6 +222,10 @@ public:
                 {
                     throw std::runtime_error("Error: Variable " + identifier + " already declared.");
                 }
+            }
+            else
+            {
+                throw std::runtime_error("Error: Struct " + structType->getName() + " not declared.");
             }
 
         } // array, pointer, primitive type
@@ -206,7 +236,7 @@ public:
                 /*wrap in pointer*/
                 inferredType = std::make_shared<PointerType>(inferredType, false);
             }
-            std::cout << "inserting symbol " << identifier << " with type " << inferredType->toString() << std::endl;
+            // std::cout << "inserting symbol " << identifier << " with type " << inferredType->toString() << std::endl;
             if (!symbolTable->insertSymbol(std::make_shared<VariableSymbol>(identifier, inferredType)))
             {
                 throw std::runtime_error("Error: Variable " + identifier + " already declared.");
@@ -346,7 +376,29 @@ public:
     void visit(ReturnStatement &node) override
     {
         // std::cout << "ReturnStatement ";
+
         acceptIfNotNull(node.getExpr());
+        // compare inferred type with function type.
+        if (std::shared_ptr<FunctionSymbol> functionSymbol = symbolTable->getFunctionSymbol())
+        {
+            // std cast to function type
+            if (auto functionType = std::dynamic_pointer_cast<FunctionType>(functionSymbol->getType()))
+            {
+                if (!(functionType && functionType->getReturnType() && functionType->getReturnType()->equals(*inferredType)))
+                {
+                    if (functionType && functionType->getReturnType() && functionType->getReturnType()->equals(PrimitiveSemanticType(DataType::VOID)) && node.getExpr() == nullptr)
+                    {
+                        return;
+                    }
+
+                    throw std::runtime_error("Return type does not match function type.");
+                }
+            }
+            else
+            {
+                throw std::runtime_error("Return statement found outside of function scope.");
+            }
+        }
     }
 
     void visit(ContinueStatement &node) override
@@ -425,7 +477,7 @@ public:
             throw std::runtime_error("Undeclared variable in expression: " + node.getIdentifier());
         }
         inferredType = symbol->getType();
-        std::cout << "type of symbol " << node.getIdentifier() << " is " << inferredType->toString() << std::endl;
+        // std::cout << "type of symbol " << node.getIdentifier() << " is " << inferredType->toString() << std::endl;
     }
 
     void visit(ArrayPostFixExpression &node) override
@@ -655,10 +707,8 @@ public:
 
     void visit(ParameterDeclaration &node) override
     {
-        // std::cout << "ParameterDeclaration {\n";
         acceptIfNotNull(node.getDeclarationSpecifiers());
         acceptIfNotNull(node.getDeclarator());
-        // std::cout << "}\n";
     }
 
     void visit(ParameterDeclarationList &node) override
@@ -689,8 +739,6 @@ public:
 
     void visit(StructDeclaration &node) override
     {
-        // std::cout << "StructDeclaration {\n";
-        //  std::cout << "Identifier: " << node.getIdentifier() << "\n";
         // create a type struct and save the identifier and the struct list
         auto structType = std::make_shared<StructType>(node.getIdentifier());
         inferredType = structType;
@@ -699,15 +747,19 @@ public:
         // insert struct into symbol table
         if (auto structType = std::dynamic_pointer_cast<StructType>(inferredType))
         {
-
-            if (!symbolTable->insertSymbol(std::make_shared<StructSymbol>(node.getIdentifier(), structType)))
-            {
-                // is symbol already defined, this is like a struct instance.
-                if (!node.getStructDeclarationList())
-                { // if struct is empty, then it is a struct instance
-                    return;
+            if (!node.getStructDeclarationList())
+            { // if struct is empty, then it is a struct instance
+                if (symbolTable->lookupSymbol(node.getIdentifier()) == nullptr)
+                {
+                    throw std::runtime_error("Error: Struct " + node.getIdentifier() + " is not declared, cant instanciate a struct.");
                 }
-                throw std::runtime_error("Error: Struct " + node.getIdentifier() + " already declared.");
+            }
+            else
+            {
+                if (!symbolTable->insertSymbol(std::make_shared<StructSymbol>(node.getIdentifier(), structType)))
+                {
+                    throw std::runtime_error("Error: Struct " + node.getIdentifier() + " already declared.");
+                }
             }
         }
     }
@@ -720,7 +772,7 @@ public:
         for (const auto &member : node.getStructMemberDeclarations())
         {
             acceptIfNotNull(member);
-            std::cout << "member type: " << inferredType->toString() << std::endl;
+            // std::cout << "member type: " << inferredType->toString() << std::endl;
         }
         // std::cout << "}\n";
     }

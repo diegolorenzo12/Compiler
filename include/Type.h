@@ -212,6 +212,8 @@ public:
         paramTypes.push_back(std::move(paramType));
     }
 
+    std::shared_ptr<SemanticType> getReturnType() const { return returnType; }
+
     void addParameters(std::vector<std::shared_ptr<SemanticType>> params)
     {
         paramTypes = std::move(params);

@@ -38,6 +38,7 @@ int Compiler::compile()
 
     ast->accept(semanticAnalyzer);
 
+    std::cout << "\nSymbol Table:\n";
     globalScope->printCurrentScope();
 
     return 0;

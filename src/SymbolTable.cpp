@@ -43,3 +43,17 @@ void SymbolTable::printCurrentScope() const
         std::cout << symbol->toString() << std::endl;
     }
 }
+
+std::shared_ptr<FunctionSymbol> SymbolTable::getFunctionSymbol() const
+{
+    for (const auto &[name, symbol] : symbols)
+    {
+        // Use dynamic_cast to check if the symbol is of type FunctionSymbol
+        if (auto funcSymbol = std::dynamic_pointer_cast<FunctionSymbol>(symbol))
+        {
+            return funcSymbol;
+        }
+    }
+    // Return nullptr if no FunctionSymbol exists in the scope
+    return nullptr;
+}

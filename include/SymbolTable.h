@@ -22,5 +22,7 @@ public:
 
     std::shared_ptr<SymbolTable> getParent() const;
 
+    std::shared_ptr<FunctionSymbol> getFunctionSymbol() const;
+
     void printCurrentScope() const;
 };
