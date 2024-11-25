@@ -281,13 +281,15 @@ public:
 
     void visit(BlockStmt &node) override
     {
-        // std::cout << "BlockStmt {\n";
+        // create new scope
+        auto parentScope = symbolTable;
+        auto childScope = symbolTable->createChildScope();
+        symbolTable = childScope;
         for (const auto &item : node.getItems())
         {
             acceptIfNotNull(item);
-            // std::cout << "\n";
         }
-        // std::cout << "}\n";
+        symbolTable = parentScope;
     }
 
     void visit(DeclarationWrapper &node) override
@@ -317,44 +319,44 @@ public:
 
     void visit(ExpressionStatement &node) override
     {
-        // std::cout << "ExpressionStatement ";
         acceptIfNotNull(node.getExpr());
     }
 
     void visit(SwitchStatement &node) override
     {
-        // std::cout << "SwitchStatement ";
         acceptIfNotNull(node.getCondition());
+        // cast body to block statement or LabaledStatement that is only CaseStatement or DefaultStatement
+
         acceptIfNotNull(node.getBody());
     }
 
     void visit(IfStatement &node) override
     {
-        // std::cout << "IfStatement ";
         acceptIfNotNull(node.getCondition());
         acceptIfNotNull(node.getThen());
     }
 
     void visit(WhileStatement &node) override
     {
-        // std::cout << "WhileStatement ";
         acceptIfNotNull(node.getCondition());
         acceptIfNotNull(node.getBody());
     }
 
     void visit(DoWhileStatement &node) override
     {
-        // std::cout << "DoWhileStatement ";
-
         acceptIfNotNull(node.getCondition());
         acceptIfNotNull(node.getBody());
     }
 
     void visit(ForStatement &node) override
     {
-        // std::cout << "ForStatement ";
+        // create new scope
+        auto parentScope = symbolTable;
+        auto childScope = symbolTable->createChildScope();
+        symbolTable = childScope;
         acceptIfNotNull(node.getInit());
         acceptIfNotNull(node.getStatement());
+        symbolTable = parentScope;
     }
 
     void visit(ForWitDeclaration &node) override
@@ -505,10 +507,25 @@ public:
 
     void visit(AssignmentExpressionList &node) override
     {
-        // std::cout << "AssignmentExpressionList ";
-        for (const auto &arg : node.getAssignmentExpression())
+        // cast to function type, if it cans then it is calling a function
+        if (auto functionType = std::dynamic_pointer_cast<FunctionType>(inferredType))
         {
-            acceptIfNotNull(arg);
+            for (size_t i = 0; i < node.getAssignmentExpression().size(); ++i)
+            {
+                acceptIfNotNull(node.getAssignmentExpression()[i]);
+                if (!inferredType->equals(*functionType->getParamTypes()[i]))
+                {
+                    throw std::runtime_error("Assignment types do not match.");
+                }
+                inferredType = functionType;
+            }
+        }
+        else
+        {
+            for (auto &assignment : node.getAssignmentExpression())
+            {
+                acceptIfNotNull(assignment);
+            }
         }
     }
 
@@ -567,17 +584,44 @@ public:
                 acceptIfNotNull(node.getAssignmentExpression());
                 if (!(inferredType && tempType && inferredType->equals(*tempType)))
                 {
-                    throw std::runtime_error("Assignment types do not match.");
+                    // if types dont match, check if it can be casted into function and check if return match is same type
+                    if (auto functionType = std::dynamic_pointer_cast<FunctionType>(inferredType))
+                    {
+                        if (!functionType->getReturnType()->equals(*tempType))
+                        {
+                            throw std::runtime_error("Assignment types do not match.");
+                        }
+                    }
+                    else
+                    {
+
+                        throw std::runtime_error("Assignment types do not match.");
+                    }
                 }
             }
+            // IdentifierExpression
         }
-        // IdentifierExpression
     }
 
+    // when in function call
     void visit(ArgumentsPostFixExpression &node) override
     {
-        // std::cout << "ArgumentsPostFixExpression: ";
-        acceptIfNotNull(node.getArgumentList());
+        // cast inferred type to function type
+        if (auto functionType = std::dynamic_pointer_cast<FunctionType>(inferredType))
+        {
+            // check if the number of arguments is the same as the number of parameters
+            if (node.getArgumentList() && functionType->getParamTypes().size() != node.getArgumentList()->getAssignmentExpression().size() || !node.getArgumentList())
+            {
+                throw std::runtime_error("Number of arguments does not match number of parameters in function call.");
+            }
+
+            acceptIfNotNull(node.getArgumentList());
+        }
+        else
+        {
+            throw std::runtime_error("Cannot call non-function type.");
+        }
+        // acceptIfNotNull(node.getArgumentList());
     }
 
     void visit(DotOperatorPostfixExpression &node) override

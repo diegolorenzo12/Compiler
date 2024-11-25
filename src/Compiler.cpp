@@ -31,7 +31,7 @@ int Compiler::compile()
 
     PrintVisitor printVisitor;
 
-    // ast->accept(printVisitor);
+    ast->accept(printVisitor);
 
     auto globalScope = std::make_shared<SymbolTable>();
     SemanticAnalyzer semanticAnalyzer(globalScope);

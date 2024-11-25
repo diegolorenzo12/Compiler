@@ -1,6 +1,6 @@
-func int add(int a[], int b) {
+func int add(int a, int b) {
     int result =0+1;
-    result += a[0];
+    result += a;
     return 0;
 }
 
@@ -18,7 +18,11 @@ func float prueba(){
     struct myStruct point2;
     point2.x[1] = 1;
     point2.y = 5;
-    return 0.0;
+    {
+        int point; //on another scope 
+        point = 1;
+        return 0.0;
+    }
 }
 
 
@@ -27,11 +31,25 @@ func int main() {
     int x = 10, y = 20; //one line with multiple declaration
     int arr[10] = {0, 1,2,3,4,5,6,7,8,9}; //brace initializer
 
+/*
+    switch (y) {
+    case value1:
+        // Code to execute if expression == value1
+        break;
+    case value2:
+        // Code to execute if expression == value2
+        break;
+    default:
+        // Code to execute if none of the cases match
+        break;
+    }
+*/
+
     int result = 1+2;
 
 
     // Add two numbers
-    result = add(x, y, 3);
+    result = add(x, y);
     
     // Conditional statement
     if (result=1) {
