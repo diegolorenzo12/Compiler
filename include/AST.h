@@ -125,7 +125,6 @@ private:
     std::string op_;
 };
 
-
 // Function Declaration Node
 class FunctionDecl : public ASTNode
 {
@@ -482,7 +481,7 @@ public:
 
     void accept(ASTVisitor &visitor) override
     {
-        statement_->accept(visitor);
+        visitor.visit(*this);
     }
 
     Stmt *getStatement() const { return statement_.get(); }

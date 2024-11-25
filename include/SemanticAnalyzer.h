@@ -316,8 +316,22 @@ public:
         auto parentScope = symbolTable;
         auto childScope = symbolTable->createChildScope();
         symbolTable = childScope;
+
         for (const auto &item : node.getItems())
         {
+            if (!item)
+            {
+                continue;
+            }
+            // try to cast to case or default statement and throw error if they are
+            if (auto *stmtWrapper = dynamic_cast<StatementWrapper *>(item.get()))
+            {
+
+                if (dynamic_cast<LabaledStatement *>(stmtWrapper->getStatement()))
+                {
+                    throw std::runtime_error("Error: Case or default statement found outside of switch body.");
+                }
+            }
             acceptIfNotNull(item);
         }
         symbolTable = parentScope;
