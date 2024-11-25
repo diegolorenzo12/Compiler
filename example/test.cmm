@@ -1,7 +1,10 @@
 func int prueba(){
-    a = 1;
+    int a;
+    (2>1)?a :a = 1;
+
 }
 
+/*
 struct myStruct {
     int x;
     int y;

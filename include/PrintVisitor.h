@@ -47,16 +47,6 @@ public:
         std::cout << "}";
     }
 
-    void visit(LiteralExpr &node) override
-    {
-        std::cout << node.getValue();
-    }
-
-    void visit(VariableExpr &node) override
-    {
-        std::cout << node.getName();
-    }
-
     void visit(FunctionDecl &node) override
     {
         std::cout << "Function {\n";

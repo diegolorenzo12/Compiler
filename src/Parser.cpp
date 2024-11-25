@@ -104,9 +104,6 @@ std::unique_ptr<Program> Parser::parsePROGRAM()
     }
     std::unique_ptr<Program> program = std::make_unique<Program>(std::move(topLevelDeclarations));
 
-    PrintVisitor printVisitor;
-    program->accept(printVisitor);
-
     return program;
 }
 
