@@ -1,43 +1,93 @@
-func int prueba(){
-    a = 1;
+func int add(int a, int b) {
+    int result =0+1;
+    result += a;
+    return 0;
 }
 
 struct myStruct {
-    int x;
+    int x[10];
     int y;
 };
 
 
-func int add(int a[], int b) {
-    int result =0+1;
-    result += a[0];
-    return result;
+func float prueba(){   
+    struct myStruct * point;
+    point->x[1] = 1;
+    point->y = 5;
+
+    struct myStruct point2;
+    point2.x[1] = 1;
+    point2.y = 5;
+    {
+        int point; //on another scope 
+        point = 1;
+        return 0.0;
+    }
 }
+
+
 
 func int main() {
     int x = 10, y = 20; //one line with multiple declaration
-    int arr[10] = {0, 1,2,3,4,5,6,7,8,9}; //brace initializer
-    struct Point p1;
-    p1.x = 10;
+    int arr[2][2] = {
+        {1,2},
+        {1,2}
+    };  //brace initializer
+    
+    char string[10] = "string";
 
-    result += 1+2;
-    printf("Point coordinates: (%d, %d)\n", p1.x, p1.y); //function calls
+    switch (x) {
+        int newScope = 10;
+        case 1:{
+            x++;
+            break;
+        }
+        case 2:
+            break;
+        default:
+            {
+                y++;
+                newScope--;
+                break;
+            }
+    }
+
+    int result = 1+2;
+
+    {
+
+    }
 
 
     // Add two numbers
     result = add(x, y);
-    printf("Sum: %f\n", result);
     
     // Conditional statement
-    if (result) {
-        printf("Result is positive.\n");
+    if (result=1) {
     }
 
+    int n=10;
+
     for(int i=0; n; i++){
-        printf("Result is positive.\n");
+        i=10;
+    }
+
+    //break;   break and continue outside of iteration or switch 
+    //continue;
+
+
+    do{
+    }while(1);
+
+    while(1){
+        continue;
+        break;
     }
     return 0;
 }
+
+
+/*
 
 
 /*

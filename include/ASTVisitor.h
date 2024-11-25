@@ -9,8 +9,6 @@ public:
     // Visitor methods for each AST node type
     virtual void visit(Program &node) = 0;
     virtual void visit(BinaryExpr &node) = 0;
-    virtual void visit(LiteralExpr &node) = 0;
-    virtual void visit(VariableExpr &node) = 0;
     virtual void visit(FunctionDecl &node) = 0;
     virtual void visit(Declaration &node) = 0;
     virtual void visit(PrimitiveType &node) = 0;

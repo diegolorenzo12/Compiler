@@ -43,3 +43,21 @@ void SymbolTable::printCurrentScope() const
         std::cout << symbol->toString() << std::endl;
     }
 }
+
+std::shared_ptr<FunctionSymbol> SymbolTable::getFunctionSymbol() const
+{
+    for (const auto &[name, symbol] : symbols)
+    {
+        if (auto funcSymbol = std::dynamic_pointer_cast<FunctionSymbol>(symbol))
+        {
+            return funcSymbol;
+        }
+    }
+
+    if (parent && parent->getParent())
+    {
+        return parent->getFunctionSymbol();
+    }
+
+    return nullptr;
+}

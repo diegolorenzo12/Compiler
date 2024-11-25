@@ -7,8 +7,6 @@
 // Forward declarations for visitor pattern
 class Program;
 class BinaryExpr;
-class LiteralExpr;
-class VariableExpr;
 class FunctionDecl;
 class Declaration;
 class BlockStmt;
@@ -125,40 +123,6 @@ public:
 private:
     std::unique_ptr<Expr> lhs_, rhs_;
     std::string op_;
-};
-
-// Example: Literal Expression Node (e.g., "42")
-class LiteralExpr : public Expr
-{
-public:
-    explicit LiteralExpr(int value) : value_(value) {}
-
-    void accept(ASTVisitor &visitor) override
-    {
-        visitor.visit(*this);
-    }
-
-    int getValue() const { return value_; }
-
-private:
-    int value_;
-};
-
-// Example: Variable Expression Node (e.g., "x")
-class VariableExpr : public Expr
-{
-public:
-    explicit VariableExpr(const std::string &name) : name_(name) {}
-
-    void accept(ASTVisitor &visitor) override
-    {
-        visitor.visit(*this);
-    }
-
-    const std::string &getName() const { return name_; }
-
-private:
-    std::string name_;
 };
 
 // Function Declaration Node
@@ -517,7 +481,7 @@ public:
 
     void accept(ASTVisitor &visitor) override
     {
-        statement_->accept(visitor);
+        visitor.visit(*this);
     }
 
     Stmt *getStatement() const { return statement_.get(); }

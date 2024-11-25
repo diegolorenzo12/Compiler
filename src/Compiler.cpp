@@ -4,6 +4,8 @@
 #include "Token.h"
 #include "Lexer.h"
 #include "SymbolTable.h"
+#include "SemanticAnalyzer.h"
+#include "PrintVisitor.h"
 
 Compiler::Compiler(const std::string &filename, int flags)
     : filename(filename)
@@ -22,10 +24,22 @@ int Compiler::compile()
     Lexer lex(fileReader->getFileStream());
     lex.tokenize();
     TokenTable &tokenTable = lex.getTokens();
-    tokenTable.printTokens();
+    // tokenTable.printTokens();
 
     Parser parser(tokenTable);
-    parser.parsePROGRAM();
+    std::unique_ptr<Program> ast = parser.parsePROGRAM();
+
+    PrintVisitor printVisitor;
+
+    // ast->accept(printVisitor);
+
+    auto globalScope = std::make_shared<SymbolTable>();
+    SemanticAnalyzer semanticAnalyzer(globalScope);
+
+    ast->accept(semanticAnalyzer);
+
+    std::cout << "\nGlobal Symbol Table:\n";
+    globalScope->printCurrentScope();
 
     return 0;
 }
