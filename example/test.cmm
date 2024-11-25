@@ -1,6 +1,7 @@
 func int prueba(){
+    int b[2];
     int a;
-    (2>1)?a :a = 1;
+    a = b[1] +=  1233.25324;
 
 }
 

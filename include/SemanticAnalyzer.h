@@ -411,6 +411,7 @@ public:
             throw std::runtime_error("Undeclared variable in expression: " + node.getIdentifier());
         }
         inferredType = symbol->getType();
+        std::cout << "type of symbol " << node.getIdentifier() << " is " << inferredType->toString() << std::endl;
     }
 
     void visit(ArrayPostFixExpression &node) override
@@ -452,22 +453,59 @@ public:
 
     void visit(AssignmentExpression &node) override
     {
-        acceptIfNotNull(node.getConditionalExpression());
-        if (node.getAssignmentOperator() != nullptr && node.getAssignmentExpression() != nullptr)
+        // have to check conditional expression is only an ident
+        if (node.getConditionalExpression() != nullptr && (node.getConditionalExpression()->getExpression() != nullptr || node.getConditionalExpression()->getConditionalExpression() != nullptr))
         {
-            std::shared_ptr<SemanticType> tempType = inferredType;
-            // check that type is not constant. Constants dont allow assignments.
-            if (tempType->isConst())
+            throw std::runtime_error("lvalue required as left operand of assignment");
+        }
+        if (node.getConditionalExpression() != nullptr && node.getConditionalExpression()->getLogicalOrExpression() != nullptr)
+        {
+            acceptIfNotNull(node.getConditionalExpression());
+            if (node.getAssignmentOperator() != nullptr && node.getAssignmentExpression() != nullptr)
             {
-                throw std::runtime_error("Cannot assign to a constant.");
-            }
-            acceptIfNotNull(node.getAssignmentOperator());
-            acceptIfNotNull(node.getAssignmentExpression());
-            if (inferredType->equals(tempType))
-            {
-                throw std::runtime_error("Assignment types do not match.");
+
+                if (auto logicalOrExpression = dynamic_cast<BinaryExpr *>(node.getConditionalExpression()->getLogicalOrExpression()))
+                {
+                    throw std::runtime_error("lvalue required as left operand of assignment");
+                }
+
+                if (auto postfix = dynamic_cast<PostfixExpressions *>(node.getConditionalExpression()->getLogicalOrExpression()))
+                {
+                    // check that postfix is type identifier expression
+                    if (postfix->getPrimaryExpression() == nullptr)
+                    {
+                        throw std::runtime_error("Primary expression in lvalue not found during assignment.");
+                    }
+                    if (dynamic_cast<ConstantExpression *>(postfix->getPrimaryExpression()))
+                    {
+                        throw std::runtime_error("Assigment must be to an identifier, got constant.");
+                    }
+                    if (dynamic_cast<ParenthesizedExpression *>(postfix->getPrimaryExpression()))
+                    {
+                        throw std::runtime_error("Assigment must be to an identifier, got parenthesis.");
+                    }
+
+                    if (!dynamic_cast<IdentifierExpression *>(postfix->getPrimaryExpression()))
+                    {
+                        throw std::runtime_error("Assigment must be to an identifier 2.");
+                    }
+                }
+
+                std::shared_ptr<SemanticType> tempType = inferredType;
+                // check that type is not constant. Constants dont allow assignments.
+                if (tempType->isConst())
+                {
+                    throw std::runtime_error("Cannot assign to a constant.");
+                }
+                acceptIfNotNull(node.getAssignmentOperator());
+                acceptIfNotNull(node.getAssignmentExpression());
+                if (!(inferredType && tempType && inferredType->equals(*tempType)))
+                {
+                    throw std::runtime_error("Assignment types do not match.");
+                }
             }
         }
+        // IdentifierExpression
     }
 
     void visit(ArgumentsPostFixExpression &node) override

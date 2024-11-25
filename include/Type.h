@@ -3,6 +3,7 @@
 #include <vector>
 #include <memory>
 #include <optional>
+#include <iostream>
 
 // Base class for all types
 class SemanticType
@@ -136,6 +137,7 @@ public:
     bool equals(const SemanticType &other) const override
     {
         const auto *otherPrimitive = dynamic_cast<const PrimitiveSemanticType *>(&other);
+        std::cout << "current " << dataTypeToString(name) << " new " << dataTypeToString(otherPrimitive->name) << std::endl;
         return otherPrimitive && name == otherPrimitive->name;
     }
 
