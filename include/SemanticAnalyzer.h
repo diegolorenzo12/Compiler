@@ -47,15 +47,12 @@ public:
 
     void visit(BinaryExpr &node) override
     {
-        // Visit the left-hand side (LHS) of the binary expression
         acceptIfNotNull(node.getLHS());
-        auto lhsType = inferredType; // Store the type of the left-hand side
+        auto lhsType = inferredType;
 
-        // Visit the right-hand side (RHS) of the binary expression
         acceptIfNotNull(node.getRHS());
-        auto rhsType = inferredType; // Store the type of the right-hand side
+        auto rhsType = inferredType;
 
-        // Ensure that the types of LHS and RHS are compatible based on the operator
         if (!lhsType || !rhsType)
         {
             throw std::runtime_error("Both operands of binary expression must have valid types.");
@@ -328,26 +325,27 @@ public:
 
     void visit(DeclarationWrapper &node) override
     {
-        // std::cout << "DeclarationWrapper ";
         acceptIfNotNull(node.getDeclaration());
     }
 
     void visit(StatementWrapper &node) override
     {
-        // std::cout << "StatementWrapper ";
         acceptIfNotNull(node.getStatement());
     }
 
     void visit(CaseStatement &node) override
     {
-        // std::cout << "CaseStatement ";
         acceptIfNotNull(node.getExpr());
+        // check that this is constant
+        if (!inferredType->isConst())
+        {
+            throw std::runtime_error("Case expression must be a constant.");
+        }
         acceptIfNotNull(node.getStatement());
     }
 
     void visit(DefaultStatement &node) override
     {
-        // std::cout << "DefaultStatement ";
         acceptIfNotNull(node.getStatement());
     }
 
@@ -358,10 +356,52 @@ public:
 
     void visit(SwitchStatement &node) override
     {
-        acceptIfNotNull(node.getCondition());
-        // cast body to block statement or LabaledStatement that is only CaseStatement or DefaultStatement
+        // create a new scope
+        auto parentScope = symbolTable;
+        auto childScope = symbolTable->createChildScope();
+        symbolTable = childScope;
 
-        acceptIfNotNull(node.getBody());
+        acceptIfNotNull(node.getCondition());
+        auto conditionType = inferredType;
+
+        if (auto *block = dynamic_cast<BlockStmt *>(node.getBody()))
+        {
+            bool hasDefault = false;
+            for (const std::unique_ptr<BlockItemBase> &item : block->getItems())
+            {
+                if (auto *stmtWrapper = dynamic_cast<StatementWrapper *>(item.get()))
+                {
+                    auto *wrappedStmt = stmtWrapper->getStatement();
+                    // cast to case or default statement
+                    if (auto *caseStmt = dynamic_cast<CaseStatement *>(wrappedStmt))
+                    {
+                        acceptIfNotNull(caseStmt);
+                    }
+                    else if (auto *defaultStmt = dynamic_cast<DefaultStatement *>(wrappedStmt))
+                    {
+                        if (hasDefault)
+                        {
+                            throw std::runtime_error("Error: Multiple default statements are not allowed in a switch body.");
+                        }
+                        hasDefault = true;
+                        acceptIfNotNull(defaultStmt);
+                    }
+                    else
+                    {
+                        throw std::runtime_error("Error: Only LabeledStatement (Case or Default) is allowed in a Switch body.");
+                    }
+                }
+                else
+                {
+                    acceptIfNotNull(item);
+                }
+            }
+        }
+        else
+        {
+            throw std::runtime_error("Error: Switch body must be a BlockStmt.");
+        }
+        symbolTable = parentScope;
     }
 
     void visit(IfStatement &node) override

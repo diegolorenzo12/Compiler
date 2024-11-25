@@ -36,19 +36,23 @@ func int main() {
     char string[10] = "string";
      //brace initializer
 
-/*
-    switch (y) {
-    case value1:
-        // Code to execute if expression == value1
-        break;
-    case value2:
-        // Code to execute if expression == value2
-        break;
-    default:
-        // Code to execute if none of the cases match
-        break;
+
+    switch (x) {
+        int newScope = 10;
+        case 1:{
+            x++;
+            break;
+        }
+        case 2:
+            break;
+        default:
+            {
+                y++;
+                newScope--;
+                break;
+            }
     }
-*/
+
 
     int result = 1+2;
 

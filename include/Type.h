@@ -131,7 +131,7 @@ public:
 
     std::string toString() const override
     {
-        return (isConstQualified ? "const " : "") + dataTypeToString(name);
+        return (isConstQualified ? " const " : "") + dataTypeToString(name) + "  in primitive";
     }
 
     bool equals(const SemanticType &other) const override
