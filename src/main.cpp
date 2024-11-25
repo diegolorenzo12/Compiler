@@ -4,9 +4,9 @@
 int main()
 {
     Compiler compiler("/home/diego/Compiler/example/test.cmm", 0);
-    int res = compiler.compile();
     try
     {
+        int res = compiler.compile();
         std::cout << std::endl
                   << "Compilation successful." << std::endl;
     }

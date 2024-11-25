@@ -15,6 +15,10 @@ private:
     std::shared_ptr<SymbolTable> symbolTable;
     std::shared_ptr<SemanticType> inferredType;
 
+    // helper variables
+    bool insideSwitch = false;
+    bool insideLoop = false;
+
 public:
     explicit SemanticAnalyzer(std::shared_ptr<SymbolTable> symbolTable) : symbolTable(std::move(symbolTable)) {}
 
@@ -136,16 +140,6 @@ public:
         acceptIfNotNull(node.getDeclarator());
         acceptIfNotNull(node.getBody());
         symbolTable = parentScope;
-
-        std::cout << std::endl
-                  << std::endl
-                  << "global Scope: " << std::endl;
-        parentScope->printCurrentScope();
-
-        std::cout << std::endl
-                  << std::endl
-                  << "Current Function Scope: " << std::endl;
-        childScope->printCurrentScope();
     }
 
     void visit(Declaration &node) override
@@ -161,7 +155,6 @@ public:
 
     void visit(Specifier &node) override
     {
-        // std::cout << "Specifier:" << node.getSpecifier() << ", SpecifierType:" << node.getSpecifierType();
     }
 
     void visit(DeclarationSpecifiers &node) override
@@ -185,7 +178,6 @@ public:
         // check if inferreed type is a primitive type to save in a variable symbol
         if (auto functionType = std::dynamic_pointer_cast<FunctionType>(inferredType))
         {
-            std::cout << "function type " << functionType->toString() << std::endl;
             // if symbol table has parent, insert the function there
             if (symbolTable->getParent())
             {
@@ -210,7 +202,6 @@ public:
             {
 
                 auto currentType = currentSymbol->getType();
-                // std::cout << "currentType struct " << identifier << " with type " << currentType->toString() << std::endl;
                 if (node.isPointer())
                 {
                     currentType = std::make_shared<PointerType>(currentType, false);
@@ -233,7 +224,6 @@ public:
                 /*wrap in pointer*/
                 inferredType = std::make_shared<PointerType>(inferredType, false);
             }
-            // std::cout << "inserting symbol " << identifier << " with type " << inferredType->toString() << std::endl;
             if (!symbolTable->insertSymbol(std::make_shared<VariableSymbol>(identifier, inferredType)))
             {
                 throw std::runtime_error("Error: Variable " + identifier + " already declared.");
@@ -255,13 +245,11 @@ public:
 
     void visit(DeclaratorList &node) override
     {
-        // std::cout << "DeclaratorList {\n";
         auto currentType = inferredType;
         for (const auto &decl : node.getDeclarators())
         {
             acceptIfNotNull(decl);
         }
-        // std::cout << "}\n";
     }
 
     void visit(ExpressionInitializer &node) override
@@ -374,6 +362,7 @@ public:
         auto parentScope = symbolTable;
         auto childScope = symbolTable->createChildScope();
         symbolTable = childScope;
+        insideSwitch = true;
 
         acceptIfNotNull(node.getCondition());
         auto conditionType = inferredType;
@@ -415,6 +404,7 @@ public:
         {
             throw std::runtime_error("Error: Switch body must be a BlockStmt.");
         }
+        insideSwitch = false;
         symbolTable = parentScope;
     }
 
@@ -427,13 +417,17 @@ public:
     void visit(WhileStatement &node) override
     {
         acceptIfNotNull(node.getCondition());
+        insideLoop = true;
         acceptIfNotNull(node.getBody());
+        insideLoop = false;
     }
 
     void visit(DoWhileStatement &node) override
     {
         acceptIfNotNull(node.getCondition());
+        insideLoop = true;
         acceptIfNotNull(node.getBody());
+        insideLoop = false;
     }
 
     void visit(ForStatement &node) override
@@ -443,13 +437,15 @@ public:
         auto childScope = symbolTable->createChildScope();
         symbolTable = childScope;
         acceptIfNotNull(node.getInit());
+
+        insideLoop = true;
         acceptIfNotNull(node.getStatement());
+        insideLoop = false;
         symbolTable = parentScope;
     }
 
     void visit(ForWitDeclaration &node) override
     {
-        // std::cout << "ForWitDeclaration ";
         acceptIfNotNull(node.getDeclaration());
         acceptIfNotNull(node.getExpr());
         acceptIfNotNull(node.getOptionalExpr());
@@ -457,7 +453,6 @@ public:
 
     void visit(ForWithExpression &node) override
     {
-        // std::cout << "ForWithExpression ";
         acceptIfNotNull(node.getExpr());
         acceptIfNotNull(node.getExpr2());
         acceptIfNotNull(node.getOptionalExpr());
@@ -465,7 +460,6 @@ public:
 
     void visit(ReturnStatement &node) override
     {
-        // std::cout << "ReturnStatement ";
 
         acceptIfNotNull(node.getExpr());
         // compare inferred type with function type.
@@ -493,12 +487,18 @@ public:
 
     void visit(ContinueStatement &node) override
     {
-        // std::cout << "ContinueStatement ";
+        if (insideLoop == false)
+        {
+            throw std::runtime_error("Continue statement found outside of loop statement.");
+        }
     }
 
     void visit(BreakStatement &node) override
     {
-        // std::cout << "BreakStatement ";
+        if (insideLoop == false && insideSwitch == false)
+        {
+            throw std::runtime_error("Break statement found outside of loop or switch statement.");
+        }
     }
 
     void visit(ConditionalExpression &node) override
@@ -533,7 +533,6 @@ public:
     void visit(ParenthesizedExpression &node) override
     {
         acceptIfNotNull(node.getExpr());
-        // std::cout << inferredType->toString() << " in parenthesis" << std::endl;
     }
 
     void visit(ConstantExpression &node) override
@@ -542,7 +541,6 @@ public:
         {
         case INTEGER_CONSTANT:
             inferredType = std::make_shared<PrimitiveSemanticType>(DataType::INT, true);
-            // std::cout << inferredType->toString() << " in const int " << std::endl;
             break;
         case FLOAT_CONSTANT:
             inferredType = std::make_shared<PrimitiveSemanticType>(DataType::FLOAT, true);
@@ -567,12 +565,10 @@ public:
             throw std::runtime_error("Undeclared variable in expression: " + node.getIdentifier());
         }
         inferredType = symbol->getType();
-        // std::cout << "type of symbol " << node.getIdentifier() << " is " << inferredType->toString() << std::endl;
     }
 
     void visit(ArrayPostFixExpression &node) override
     {
-        // std::cout << "ArrayPostFixExpression ";
         if (inferredType->isConst())
         {
             throw std::runtime_error("Cannot access array at constant.");
@@ -619,7 +615,6 @@ public:
 
     void visit(AssignmentOperator &node) override
     {
-        // std::cout << "AssignmentOperator: " << node.getOp();
     }
 
     void visit(AssignmentExpression &node) override
@@ -714,7 +709,6 @@ public:
 
     void visit(DotOperatorPostfixExpression &node) override
     {
-        // std::cout << "DotOperatorPostfixExpression " << node.getIdentifier() << " ";
         if (auto structType = dynamic_cast<StructType *>(inferredType.get()))
         {
             // In this case, we just need to find the field within the struct
@@ -792,7 +786,6 @@ public:
 
     void visit(PostfixExpressions &node) override
     {
-        // std::cout << "PostfixExpressions ";
         acceptIfNotNull(node.getPrimaryExpression());
 
         for (const auto &expr : node.getPostfixExpressions())
@@ -803,29 +796,20 @@ public:
 
     void visit(UnaryIncrementDecrementOperator &node) override
     {
-        // std::cout << "UnaryIncrementDecrementOperator " << node.getOp() << " {";
         acceptIfNotNull(node.getUnaryExpr());
-        // std::cout << "}";
     }
 
     void visit(IdentifierList &node) override
     {
-        // std::cout << "IdentifierList {\n";
         for (const auto &id : node.getIdentifiers())
         {
-            // std::cout << id << " ";
         }
-        // std::cout << "}\n";
     }
 
     void visit(ArrayDirectDeclarator &node) override
     {
         // wrap current inferred type in an array type
         auto arrayType = std::make_shared<ArrayType>(inferredType, 0);
-        if (node.getIsStatic())
-        {
-            // std::cout << "IsStatic:True, ";
-        }
         acceptIfNotNull(node.getTypeQualifier());
         acceptIfNotNull(node.getArrSize());
         // check that expression in arraysize is a valid number
@@ -864,9 +848,7 @@ public:
 
     void visit(AnonimousStruct &node) override
     {
-        // std::cout << "AnonimousStruct {\n";
         acceptIfNotNull(node.getStructDeclarationList());
-        // std::cout << "}\n";
     }
 
     void visit(StructDeclaration &node) override
@@ -898,22 +880,18 @@ public:
 
     void visit(StructMemberDeclarationList &node) override
     {
-        // std::cout << "StructMemberDeclarationList {\n";
 
         // for each member encounter, add it to the struct type
         for (const auto &member : node.getStructMemberDeclarations())
         {
             acceptIfNotNull(member);
-            // std::cout << "member type: " << inferredType->toString() << std::endl;
         }
-        // std::cout << "}\n";
     }
 
     void visit(StructMemberDeclaration &node) override
     {
         if (auto structType = std::dynamic_pointer_cast<StructType>(inferredType))
         {
-            // std::cout << "StructMemberDeclaration {\n";
             acceptIfNotNull(node.getTypeSpecifier());
             auto membersType = inferredType;
 
@@ -946,10 +924,5 @@ public:
         {
             throw std::runtime_error("Struct member declaration found outside of struct.");
         }
-    }
-
-private:
-    DataType inferType(Expr &expr)
-    {
     }
 };
