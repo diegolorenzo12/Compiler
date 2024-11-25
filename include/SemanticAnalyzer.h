@@ -243,7 +243,17 @@ public:
             }
         }
 
+        auto tempType = inferredType;
         acceptIfNotNull(node.getInitializer()); // in symbol initializer
+        if (node.getInitializer())
+        {
+            // compare inferred type with initializer type
+            if (!tempType->equals(*inferredType))
+            {
+                throw std::runtime_error("Initializer type does not match declared type.");
+            }
+        }
+        inferredType = tempType;
     }
 
     void visit(DeclaratorList &node) override
@@ -259,24 +269,48 @@ public:
 
     void visit(ExpressionInitializer &node) override
     {
-        // std::cout << "Initializer ";
         acceptIfNotNull(node.getExpr());
     }
 
     void visit(BraceInitializer &node) override
     {
-        // std::cout << "BraceInitializer";
+        auto tempType = inferredType;
+        if (auto arrayType = std::dynamic_pointer_cast<ArrayType>(tempType))
+        {
+            inferredType = arrayType->getElementType();
+        }
+        else
+        {
+            throw std::runtime_error("Invalid brace initializer not in array type.");
+        }
         acceptIfNotNull(node.getInitializerList());
+        inferredType = tempType;
     }
 
     void visit(InitializerList &node) override
     {
-        // std::cout << "BraceInitializer";
+        auto tempType = inferredType;
         for (const auto &initializer : node.getInitializerList())
         {
-            acceptIfNotNull(initializer);
-            // std::cout << "\n";
+            if (auto *expressionInitializer = dynamic_cast<ExpressionInitializer *>(initializer.get()))
+            {
+                acceptIfNotNull(expressionInitializer);
+
+                if (!tempType->equals(*inferredType))
+                {
+                    throw std::runtime_error("Initializer type does not match declared type.");
+                }
+            }
+            else if (auto *braceInitializer = dynamic_cast<BraceInitializer *>(initializer.get()))
+            {
+                acceptIfNotNull(braceInitializer);
+            }
+            else
+            {
+                throw std::runtime_error("Invalid initializer type.");
+            }
         }
+        inferredType = tempType;
     }
 
     void visit(BlockStmt &node) override
