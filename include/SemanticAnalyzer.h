@@ -166,11 +166,6 @@ public:
     {
         std::string identifier = node.getIdentifier();
 
-        if (node.isPointer())
-        {
-            /*wrap in pointer*/
-            inferredType = std::make_shared<PointerType>(inferredType, false);
-        }
         acceptIfNotNull(node.getDeclarator());
         for (const auto &decl : node.getDirectDeclarators())
         {
@@ -187,16 +182,35 @@ public:
                 throw std::runtime_error("Error: Variable " + identifier + " already declared.");
             }
         }
-        else if (auto primitiveType = dynamic_cast<StructType *>(inferredType.get()))
+        else if (auto structType = std::dynamic_pointer_cast<StructType>(inferredType))
         {
-            // if (!symbolTable->insertSymbol(std::make_shared<StructSymbol>(identifier, inferredType)))
-            // {
-            //     throw std::runtime_error("Error: Variable " + identifier + " already declared.");
-            // }
+            std::shared_ptr<Symbol> currentSymbol = symbolTable->lookupSymbol(structType->getName());
+            if (currentSymbol)
+            {
+                auto currentType = currentSymbol->getType();
+                if (node.isPointer())
+                {
+                    currentType = std::make_shared<PointerType>(currentType, false);
+                }
+                if (!symbolTable->insertSymbol(std::make_shared<VariableSymbol>(identifier, currentType)))
+                {
+                    throw std::runtime_error("Error: Variable " + identifier + " already declared.");
+                }
+            }
+
         } // array, pointer, primitive type
-        else if (!symbolTable->insertSymbol(std::make_shared<VariableSymbol>(identifier, inferredType)))
+        else
         {
-            throw std::runtime_error("Error: Variable " + identifier + " already declared.");
+            if (node.isPointer())
+            {
+                /*wrap in pointer*/
+                inferredType = std::make_shared<PointerType>(inferredType, false);
+            }
+            std::cout << "inserting symbol " << identifier << " with type " << inferredType->toString() << std::endl;
+            if (!symbolTable->insertSymbol(std::make_shared<VariableSymbol>(identifier, inferredType)))
+            {
+                throw std::runtime_error("Error: Variable " + identifier + " already declared.");
+            }
         }
 
         acceptIfNotNull(node.getInitializer()); // in symbol initializer
@@ -676,27 +690,78 @@ public:
     void visit(StructDeclaration &node) override
     {
         // std::cout << "StructDeclaration {\n";
-        // std::cout << "Identifier: " << node.getIdentifier() << "\n";
+        //  std::cout << "Identifier: " << node.getIdentifier() << "\n";
+        // create a type struct and save the identifier and the struct list
+        auto structType = std::make_shared<StructType>(node.getIdentifier());
+        inferredType = structType;
+
         acceptIfNotNull(node.getStructDeclarationList());
-        // std::cout << "}\n";
+        // insert struct into symbol table
+        if (auto structType = std::dynamic_pointer_cast<StructType>(inferredType))
+        {
+
+            if (!symbolTable->insertSymbol(std::make_shared<StructSymbol>(node.getIdentifier(), structType)))
+            {
+                // is symbol already defined, this is like a struct instance.
+                if (!node.getStructDeclarationList())
+                { // if struct is empty, then it is a struct instance
+                    return;
+                }
+                throw std::runtime_error("Error: Struct " + node.getIdentifier() + " already declared.");
+            }
+        }
     }
 
     void visit(StructMemberDeclarationList &node) override
     {
         // std::cout << "StructMemberDeclarationList {\n";
+
+        // for each member encounter, add it to the struct type
         for (const auto &member : node.getStructMemberDeclarations())
         {
             acceptIfNotNull(member);
+            std::cout << "member type: " << inferredType->toString() << std::endl;
         }
         // std::cout << "}\n";
     }
 
     void visit(StructMemberDeclaration &node) override
     {
-        // std::cout << "StructMemberDeclaration {\n";
-        acceptIfNotNull(node.getTypeSpecifier());
-        acceptIfNotNull(node.getDeclaratorList());
-        // std::cout << "}\n";
+        if (auto structType = std::dynamic_pointer_cast<StructType>(inferredType))
+        {
+            // std::cout << "StructMemberDeclaration {\n";
+            acceptIfNotNull(node.getTypeSpecifier());
+            auto membersType = inferredType;
+
+            if (node.getDeclaratorList())
+            {
+                for (const auto &decl : node.getDeclaratorList()->getDeclarators())
+                {
+                    auto currentMemberType = membersType;
+                    if (decl)
+                    {
+                        acceptIfNotNull(decl->getDeclarator());
+                        for (const auto &dirDecl : decl->getDirectDeclarators())
+                        {
+                            acceptIfNotNull(dirDecl);
+                            currentMemberType = inferredType;
+                        }
+
+                        if (decl->isPointer())
+                        {
+                            currentMemberType = std::make_shared<PointerType>(currentMemberType, false);
+                        }
+                        // insert into struct
+                        structType->addField(decl->getIdentifier(), currentMemberType);
+                    }
+                }
+            }
+            inferredType = structType;
+        }
+        else
+        {
+            throw std::runtime_error("Struct member declaration found outside of struct.");
+        }
     }
 
 private:

@@ -137,7 +137,6 @@ public:
     bool equals(const SemanticType &other) const override
     {
         const auto *otherPrimitive = dynamic_cast<const PrimitiveSemanticType *>(&other);
-        std::cout << "current " << dataTypeToString(name) << " new " << dataTypeToString(otherPrimitive->name) << std::endl;
         return otherPrimitive && name == otherPrimitive->name;
     }
 
@@ -261,6 +260,22 @@ private:
 public:
     explicit StructType(std::string name, std::vector<std::pair<std::string, std::shared_ptr<SemanticType>>> fields)
         : name(std::move(name)), fields(std::move(fields)) {}
+
+    explicit StructType(std::string name)
+        : name(std::move(name)) {}
+
+    void addField(const std::string &fieldName, std::shared_ptr<SemanticType> fieldType)
+    {
+        // check that the field does not already exist before adding
+        for (const auto &field : fields)
+        {
+            if (field.first == fieldName)
+            {
+                throw std::runtime_error("Field '" + fieldName + "' already exists in struct " + name);
+            }
+        }
+        fields.emplace_back(fieldName, std::move(fieldType));
+    }
 
     std::string toString() const override
     {

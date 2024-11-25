@@ -1,15 +1,21 @@
-func int prueba(){
-    int b[2];
-    int a;
-    a = b[1] +=  1233.25324;
+struct myStruct {
+    int x[10];
+    int y;
+};
 
+
+func int prueba(){
+    struct myStruct * point;
+    point->x[1] = 1;
+    point->y = 5;
+
+    struct myStruct point2;
+    point2.x[1] = 1;
+    point2.y = 5;
 }
 
 /*
-struct myStruct {
-    int x;
-    int y;
-};
+
 
 
 func int add(int a[], int b) {
