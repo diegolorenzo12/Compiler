@@ -24,7 +24,7 @@ int Compiler::compile()
     Lexer lex(fileReader->getFileStream());
     lex.tokenize();
     TokenTable &tokenTable = lex.getTokens();
-    // tokenTable.printTokens();
+    tokenTable.printTokens();
 
     Parser parser(tokenTable);
     std::unique_ptr<Program> ast = parser.parsePROGRAM();
