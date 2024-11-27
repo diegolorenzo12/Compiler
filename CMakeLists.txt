@@ -94,30 +94,35 @@ enable_testing()
 # Find Google Test (provided by Conan)
 find_package(GTest REQUIRED)
 
-# Add the test executable
-add_executable(lexer_test tests/lexer_test.cpp)
+# Function to add a compiler test
+function(add_compiler_test target_name test_file)
+    add_executable(${target_name} ${test_file})
+    target_include_directories(${target_name} PUBLIC ${CMAKE_SOURCE_DIR}/include)
+    target_sources(${target_name} PRIVATE
+        src/Token.cpp
+        src/TokenTable.cpp
+        src/Compiler.cpp
+        src/Lexer.cpp
+        src/Parser.cpp
+        src/FileReader.cpp
+        src/Symbol.cpp
+        src/SymbolTable.cpp
+        src/ErrorManager.cpp
+        ${FLEX_OUTPUT}
+    )
+    target_link_libraries(${target_name} GTest::gtest_main)
+    add_test(NAME ${target_name} COMMAND ${target_name})
+endfunction()
 
-target_include_directories(lexer_test PUBLIC
-    ${CMAKE_SOURCE_DIR}/include
+# Add tests
+add_compiler_test(parser_test tests/parser_test.cpp)
+add_compiler_test(lexer_test tests/lexer_test.cpp)
+add_compiler_test(semantic_test tests/semantic_test.cpp)
+
+add_custom_target(run_tests
+    COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure
+    COMMENT "Running all tests"
 )
-
-# Link Google Test libraries to the lexer_test executable
-target_link_libraries(lexer_test GTest::gtest_main)
-
-target_sources(lexer_test PRIVATE
-    src/Token.cpp
-    src/TokenTable.cpp
-    src/Compiler.cpp
-    src/Lexer.cpp
-    src/Parser.cpp
-    src/FileReader.cpp
-    src/Symbol.cpp
-    src/SymbolTable.cpp
-    src/ErrorManager.cpp
-)
-
-# Register the test with CTest
-add_test(NAME LexerTest COMMAND lexer_test)
 
 add_custom_target(run
     COMMAND $<TARGET_FILE:Compiler>

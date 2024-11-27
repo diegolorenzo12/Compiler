@@ -22,12 +22,6 @@ identifier      [A-Za-z_][A-Za-z0-9_]*
 int_constant    [0-9]+ 
 float_constant  [0-9]+\.[0-9]+([eE][-+]?[0-9]+)? 
 string          \"[^\n"]*\"
-punctuation     [;,:.()->{}[\]?]
-comp_op        (==|!=|<=|>=|<|>|&&|\|\|)
-increment_op    (\+\+|\-\-)
-assign_op      (=|\+=|\-=|\*=|\/=|%=|<<=|>>=|&=|\^=|\|=)
-arithmetic_op  ([\-+*/%&]|<<|>>|\^)
-
 
 
 %%
