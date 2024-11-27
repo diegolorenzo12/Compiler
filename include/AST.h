@@ -70,8 +70,9 @@ public:
     ASTNode(int line) : line_(line) {}  
     virtual ~ASTNode() = default;
 
-    // Accept method for the visitor
     virtual void accept(ASTVisitor &visitor) = 0;
+
+    int getLine() const { return line_; }
 
 protected: 
     int line_;

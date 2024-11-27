@@ -4,6 +4,7 @@
 #include "SymbolTable.h"
 #include <memory>
 #include <stdexcept>
+#include "ErrorManager.h"
 
 /*
 Semantic Analyzer ABSTRACT SYNTAX TREE visitor
@@ -59,7 +60,7 @@ public:
 
         if (!lhsType || !rhsType)
         {
-            throw std::runtime_error("Both operands of binary expression must have valid types.");
+            throw SemanticException(node.getLine(), "Both operands of binary expression must have valid types.");
         }
 
         // Operator-dependent type inference
@@ -86,7 +87,7 @@ public:
             }
             else
             {
-                throw std::runtime_error("Operands must be numeric for binary arithmetic operation.");
+                throw SemanticException(node.getLine(), "Operands must be numeric for binary arithmetic operation.");
             }
         }
         else if (node.getOp() == "==" || node.getOp() == "!=" || node.getOp() == "<" || node.getOp() == ">" ||
@@ -103,7 +104,7 @@ public:
             }
             else
             {
-                throw std::runtime_error("Operands must be comparable for binary comparison operation.");
+                throw SemanticException(node.getLine(), "Operands must be comparable for binary comparison operation.");
             }
         }
         else if (node.getOp() == "&&" || node.getOp() == "||")
@@ -115,12 +116,12 @@ public:
             }
             else
             {
-                throw std::runtime_error("Operands must be boolean for binary logical operation.");
+                throw SemanticException(node.getLine(), "Operands must be boolean for binary logical operation.");
             }
         }
         else
         {
-            throw std::runtime_error("Unsupported operator for binary expression.");
+            throw SemanticException(node.getLine(), "Unsupported operator for binary expression.");
         }
     }
 
@@ -183,16 +184,16 @@ public:
             {
                 if (!symbolTable->getParent()->insertSymbol(std::make_shared<FunctionSymbol>(identifier, functionType)))
                 {
-                    throw std::runtime_error("Error: Variable " + identifier + " already declared.");
+                    throw SemanticException(node.getLine(), "Error: Variable " + identifier + " already declared.");
                 }
                 if (!symbolTable->insertSymbol(std::make_shared<FunctionSymbol>(identifier, functionType)))
                 {
-                    throw std::runtime_error("Error: Variable " + identifier + " already declared.");
+                    throw SemanticException(node.getLine(), "Error: Variable " + identifier + " already declared.");
                 }
             }
             else
             {
-                throw std::runtime_error("Error: Function definition outside of function scope.");
+                throw SemanticException(node.getLine(), "Error: Function definition outside of function scope.");
             }
         }
         else if (auto structType = std::dynamic_pointer_cast<StructType>(inferredType))
@@ -208,12 +209,12 @@ public:
                 }
                 if (!symbolTable->insertSymbol(std::make_shared<VariableSymbol>(identifier, currentType)))
                 {
-                    throw std::runtime_error("Error: Variable " + identifier + " already declared.");
+                    throw SemanticException(node.getLine(), "Error: Variable " + identifier + " already declared.");
                 }
             }
             else
             {
-                throw std::runtime_error("Error: Struct " + structType->getName() + " not declared.");
+                throw SemanticException(node.getLine(), "Error: Struct " + structType->getName() + " not declared.");
             }
 
         } // array, pointer, primitive type
@@ -226,7 +227,7 @@ public:
             }
             if (!symbolTable->insertSymbol(std::make_shared<VariableSymbol>(identifier, inferredType)))
             {
-                throw std::runtime_error("Error: Variable " + identifier + " already declared.");
+                throw SemanticException(node.getLine(), "Error: Variable " + identifier + " already declared.");
             }
         }
 
@@ -237,7 +238,7 @@ public:
             // compare inferred type with initializer type
             if (!tempType->equals(*inferredType))
             {
-                throw std::runtime_error("Initializer type does not match declared type.");
+                throw SemanticException(node.getLine(), "Initializer type does not match declared type.");
             }
         }
         inferredType = tempType;
@@ -266,7 +267,7 @@ public:
         }
         else
         {
-            throw std::runtime_error("Invalid brace initializer not in array type.");
+            throw SemanticException(node.getLine(), "Invalid brace initializer not in array type.");
         }
         acceptIfNotNull(node.getInitializerList());
         inferredType = tempType;
@@ -283,7 +284,7 @@ public:
 
                 if (!tempType->equals(*inferredType))
                 {
-                    throw std::runtime_error("Initializer type does not match declared type.");
+                    throw SemanticException(node.getLine(), "Initializer type does not match declared type.");
                 }
             }
             else if (auto *braceInitializer = dynamic_cast<BraceInitializer *>(initializer.get()))
@@ -292,7 +293,7 @@ public:
             }
             else
             {
-                throw std::runtime_error("Invalid initializer type.");
+                throw SemanticException(node.getLine(), "Invalid initializer type.");
             }
         }
         inferredType = tempType;
@@ -317,7 +318,7 @@ public:
 
                 if (dynamic_cast<LabaledStatement *>(stmtWrapper->getStatement()))
                 {
-                    throw std::runtime_error("Error: Case or default statement found outside of switch body.");
+                    throw SemanticException(node.getLine(), "Error: Case or default statement found outside of switch body.");
                 }
             }
             acceptIfNotNull(item);
@@ -341,7 +342,7 @@ public:
         // check that this is constant
         if (!inferredType->isConst())
         {
-            throw std::runtime_error("Case expression must be a constant.");
+            throw SemanticException(node.getLine(), "Case expression must be a constant.");
         }
         acceptIfNotNull(node.getStatement());
     }
@@ -384,14 +385,14 @@ public:
                     {
                         if (hasDefault)
                         {
-                            throw std::runtime_error("Error: Multiple default statements are not allowed in a switch body.");
+                            throw SemanticException(node.getLine(), "Error: Multiple default statements are not allowed in a switch body.");
                         }
                         hasDefault = true;
                         acceptIfNotNull(defaultStmt);
                     }
                     else
                     {
-                        throw std::runtime_error("Error: Only LabeledStatement (Case or Default) is allowed in a Switch body.");
+                        throw SemanticException(node.getLine(), "Error: Only LabeledStatement (Case or Default) is allowed in a Switch body.");
                     }
                 }
                 else
@@ -402,7 +403,7 @@ public:
         }
         else
         {
-            throw std::runtime_error("Error: Switch body must be a BlockStmt.");
+            throw SemanticException(node.getLine(), "Error: Switch body must be a BlockStmt.");
         }
         insideSwitch = false;
         symbolTable = parentScope;
@@ -475,12 +476,12 @@ public:
                         return;
                     }
 
-                    throw std::runtime_error("Return type does not match function type.");
+                    throw SemanticException(node.getLine(), "Return type does not match function type.");
                 }
             }
             else
             {
-                throw std::runtime_error("Return statement found outside of function scope.");
+                throw SemanticException(node.getLine(), "Return statement found outside of function scope.");
             }
         }
     }
@@ -489,7 +490,7 @@ public:
     {
         if (insideLoop == false)
         {
-            throw std::runtime_error("Continue statement found outside of loop statement.");
+            throw SemanticException(node.getLine(), "Continue statement found outside of loop statement.");
         }
     }
 
@@ -497,7 +498,7 @@ public:
     {
         if (insideLoop == false && insideSwitch == false)
         {
-            throw std::runtime_error("Break statement found outside of loop or switch statement.");
+            throw SemanticException(node.getLine(), "Break statement found outside of loop or switch statement.");
         }
     }
 
@@ -510,7 +511,7 @@ public:
         {
             if (!inferredType || !inferredType->equals(PrimitiveSemanticType(DataType::BOOL)))
             {
-                throw std::runtime_error("Condition of conditional expression must be of type 'bool'.");
+                throw SemanticException(node.getLine(), "Condition of conditional expression must be of type 'bool'.");
             }
         }
 
@@ -524,7 +525,7 @@ public:
 
         if (!trueType->equals(*falseType))
         {
-            throw std::runtime_error("Types of true and false branches must match in conditional expression.");
+            throw SemanticException(node.getLine(), "Types of true and false branches must match in conditional expression.");
         }
 
         inferredType = trueType;
@@ -553,7 +554,7 @@ public:
             break;
         }
         default:
-            throw std::runtime_error("Unknown constant type.");
+            throw SemanticException(node.getLine(), "Unknown constant type.");
         }
     }
 
@@ -562,7 +563,7 @@ public:
         auto symbol = symbolTable->lookupSymbol(node.getIdentifier());
         if (!symbol)
         {
-            throw std::runtime_error("Undeclared variable in expression: " + node.getIdentifier());
+            throw SemanticException(node.getLine(), "Undeclared variable in expression: " + node.getIdentifier());
         }
         inferredType = symbol->getType();
     }
@@ -571,7 +572,7 @@ public:
     {
         if (inferredType->isConst())
         {
-            throw std::runtime_error("Cannot access array at constant.");
+            throw SemanticException(node.getLine(), "Cannot access array at constant.");
         }
         if (auto arrayType = dynamic_cast<ArrayType *>(inferredType.get()))
         {
@@ -585,7 +586,7 @@ public:
         }
         else
         {
-            throw std::runtime_error("Cannot access array at non-array type.");
+            throw SemanticException(node.getLine(), "Cannot access array at non-array type.");
         }
     }
 
@@ -599,7 +600,7 @@ public:
                 acceptIfNotNull(node.getAssignmentExpression()[i]);
                 if (!inferredType->equals(*functionType->getParamTypes()[i]))
                 {
-                    throw std::runtime_error("Assignment types do not match.");
+                    throw SemanticException(node.getLine(), "Assignment types do not match.");
                 }
                 inferredType = functionType;
             }
@@ -622,7 +623,7 @@ public:
         // have to check conditional expression is only an ident
         if (node.getConditionalExpression() != nullptr && (node.getConditionalExpression()->getExpression() != nullptr || node.getConditionalExpression()->getConditionalExpression() != nullptr))
         {
-            throw std::runtime_error("lvalue required as left operand of assignment");
+            throw SemanticException(node.getLine(), "lvalue required as left operand of assignment");
         }
         if (node.getConditionalExpression() != nullptr && node.getConditionalExpression()->getLogicalOrExpression() != nullptr)
         {
@@ -632,7 +633,7 @@ public:
 
                 if (auto logicalOrExpression = dynamic_cast<BinaryExpr *>(node.getConditionalExpression()->getLogicalOrExpression()))
                 {
-                    throw std::runtime_error("lvalue required as left operand of assignment");
+                    throw SemanticException(node.getLine(), "lvalue required as left operand of assignment");
                 }
 
                 if (auto postfix = dynamic_cast<PostfixExpressions *>(node.getConditionalExpression()->getLogicalOrExpression()))
@@ -640,20 +641,20 @@ public:
                     // check that postfix is type identifier expression
                     if (postfix->getPrimaryExpression() == nullptr)
                     {
-                        throw std::runtime_error("Primary expression in lvalue not found during assignment.");
+                        throw SemanticException(node.getLine(), "Primary expression in lvalue not found during assignment.");
                     }
                     if (dynamic_cast<ConstantExpression *>(postfix->getPrimaryExpression()))
                     {
-                        throw std::runtime_error("Assigment must be to an identifier, got constant.");
+                        throw SemanticException(node.getLine(), "Assigment must be to an identifier, got constant.");
                     }
                     if (dynamic_cast<ParenthesizedExpression *>(postfix->getPrimaryExpression()))
                     {
-                        throw std::runtime_error("Assigment must be to an identifier, got parenthesis.");
+                        throw SemanticException(node.getLine(), "Assigment must be to an identifier, got parenthesis.");
                     }
 
                     if (!dynamic_cast<IdentifierExpression *>(postfix->getPrimaryExpression()))
                     {
-                        throw std::runtime_error("Assigment must be to an identifier 2.");
+                        throw SemanticException(node.getLine(), "Assigment must be to an identifier 2.");
                     }
                 }
 
@@ -661,7 +662,7 @@ public:
                 // check that type is not constant. Constants dont allow assignments.
                 if (tempType->isConst())
                 {
-                    throw std::runtime_error("Cannot assign to a constant.");
+                    throw SemanticException(node.getLine(), "Cannot assign to a constant.");
                 }
                 acceptIfNotNull(node.getAssignmentOperator());
                 acceptIfNotNull(node.getAssignmentExpression());
@@ -672,13 +673,13 @@ public:
                     {
                         if (!functionType->getReturnType()->equals(*tempType))
                         {
-                            throw std::runtime_error("Assignment types do not match.");
+                            throw SemanticException(node.getLine(), "Assignment types do not match.");
                         }
                     }
                     else
                     {
 
-                        throw std::runtime_error("Assignment types do not match.");
+                        throw SemanticException(node.getLine(), "Assignment types do not match.");
                     }
                 }
             }
@@ -695,14 +696,14 @@ public:
             // check if the number of arguments is the same as the number of parameters
             if (node.getArgumentList() && functionType->getParamTypes().size() != node.getArgumentList()->getAssignmentExpression().size() || !node.getArgumentList())
             {
-                throw std::runtime_error("Number of arguments does not match number of parameters in function call.");
+                throw SemanticException(node.getLine(), "Number of arguments does not match number of parameters in function call.");
             }
 
             acceptIfNotNull(node.getArgumentList());
         }
         else
         {
-            throw std::runtime_error("Cannot call non-function type.");
+            throw SemanticException(node.getLine(), "Cannot call non-function type.");
         }
         // acceptIfNotNull(node.getArgumentList());
     }
@@ -728,12 +729,12 @@ public:
 
             if (!foundField)
             {
-                throw std::runtime_error("Field '" + fieldName + "' not found in struct " + structType->getName());
+                throw SemanticException(node.getLine(), "Field '" + fieldName + "' not found in struct " + structType->getName());
             }
         }
         else
         {
-            throw std::runtime_error("Cannot access member of non-struct type using dot operator.");
+            throw SemanticException(node.getLine(), "Cannot access member of non-struct type using dot operator.");
         }
     }
 
@@ -758,17 +759,17 @@ public:
 
                 if (!foundField)
                 {
-                    throw std::runtime_error("Field '" + fieldName + "' not found in struct.");
+                    throw SemanticException(node.getLine(), "Field '" + fieldName + "' not found in struct.");
                 }
             }
             else
             {
-                throw std::runtime_error("Pointer does not point to a struct type.");
+                throw SemanticException(node.getLine(), "Pointer does not point to a struct type.");
             }
         }
         else
         {
-            throw std::runtime_error("Cannot access member of non-pointer type using arrow operator.");
+            throw SemanticException(node.getLine(), "Cannot access member of non-pointer type using arrow operator.");
         }
     }
 
@@ -776,11 +777,11 @@ public:
     {
         if (inferredType->isConst())
         {
-            throw std::runtime_error("Cannot increment ++ or -- at constant.");
+            throw SemanticException(node.getLine(), "Cannot increment ++ or -- at constant.");
         }
         if (node.getOp() != "++" && node.getOp() != "--")
         {
-            throw std::runtime_error("Unknown increment/decrement operator: " + node.getOp());
+            throw SemanticException(node.getLine(), "Unknown increment/decrement operator: " + node.getOp());
         }
     }
 
@@ -815,7 +816,7 @@ public:
         // check that expression in arraysize is a valid number
         if (!inferredType->equals(PrimitiveSemanticType(DataType::INT)))
         {
-            throw std::runtime_error("Array size must be an integer.");
+            throw SemanticException(node.getLine(), "Array size must be an integer.");
         }
 
         inferredType = arrayType;
@@ -842,7 +843,7 @@ public:
         }
         else
         {
-            throw std::runtime_error("Parameters can only be added to function types.");
+            throw SemanticException(node.getLine(), "Parameters can only be added to function types.");
         }
     }
 
@@ -865,14 +866,14 @@ public:
             { // if struct is empty, then it is a struct instance
                 if (symbolTable->lookupSymbol(node.getIdentifier()) == nullptr)
                 {
-                    throw std::runtime_error("Error: Struct " + node.getIdentifier() + " is not declared, cant instanciate a struct.");
+                    throw SemanticException(node.getLine(), "Error: Struct " + node.getIdentifier() + " is not declared, cant instanciate a struct.");
                 }
             }
             else
             {
                 if (!symbolTable->insertSymbol(std::make_shared<StructSymbol>(node.getIdentifier(), structType)))
                 {
-                    throw std::runtime_error("Error: Struct " + node.getIdentifier() + " already declared.");
+                    throw SemanticException(node.getLine(), "Error: Struct " + node.getIdentifier() + " already declared.");
                 }
             }
         }
@@ -922,7 +923,7 @@ public:
         }
         else
         {
-            throw std::runtime_error("Struct member declaration found outside of struct.");
+            throw SemanticException(node.getLine(), "Struct member declaration found outside of struct.");
         }
     }
 };
