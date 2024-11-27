@@ -6,7 +6,7 @@
 #endif
 #include <string>
 #include "Token.h"   
-#include "LexerException.h"
+#include "ErrorManager.h"
 extern void yyerror(const char *);  
 
 %}

@@ -1,20 +1,10 @@
 #include <stdexcept>
-#include "SyntacticException.h"
+#include "ErrorManager.h"
 #include "Parser.h"
 #include "PrintVisitor.h"
 /*
 HELPER FUNCTIONS
 */
-
-//  bool char double float int long short signed struct unsigned void
-// bool Parser::isBasicType() const
-// {
-//     const std::string &tokenValue = currentToken.getValue();
-//     return tokenValue == "bool" || tokenValue == "char" || tokenValue == "double" ||
-//            tokenValue == "float" || tokenValue == "int" || tokenValue == "long" ||
-//            tokenValue == "short" || tokenValue == "signed" || tokenValue == "struct" ||
-//            tokenValue == "unsigned" || tokenValue == "void";
-// }
 
 bool Parser::isBasicType() const
 {
@@ -49,15 +39,9 @@ bool Parser::isExpressionFirst() const
 //  func bool char double float int long short signed struct unsigned void
 bool Parser::isDeclarationFirst() const
 {
-    // if (currentToken.getType() != TokenType::KEYWORD)
-    // {
-    //     return false;
-    // }
-
     const std::string &tokenValue = currentToken.getValue();
 
     return isBasicType() || (currentToken.getType() == TokenType::FUNC);
-    // tokenValue == "func";
 }
 
 //       ( ++ -- ; FLOAT_CONSTANT IDENTIFIER INTEGER_CONSTANT STRING_LITERAL bool break case char continue default do double float for if int long return short signed sizeof struct switch unsigned void while {
@@ -69,8 +53,6 @@ bool Parser::isBlockFirst() const
 //       ( ++ -- ; FLOAT_CONSTANT IDENTIFIER INTEGER_CONSTANT STRING_LITERAL break case continue default do for if return sizeof switch while {
 bool Parser::isStatementFirst() const
 {
-    // const std::string &tokenValue = currentToken.getValue();
-
     TokenType tokenType = currentToken.getType();
 
     return tokenType == TokenType::INC_OP ||
@@ -93,19 +75,6 @@ bool Parser::isStatementFirst() const
            tokenType == TokenType::SIZEOF ||
            tokenType == TokenType::SWITCH ||
            tokenType == TokenType::WHILE;
-
-    // return (currentToken.getType() == TokenType::INC_OP) ||
-    //        (currentToken.getType() == TokenType::DEC_OP) ||
-    //        (currentToken.getType() == TokenType::FLOAT_CONSTANT) ||
-    //        (currentToken.getType() == TokenType::INTEGER_CONSTANT) ||
-    //        (currentToken.getType() == TokenType::IDENTIFIER) ||
-    //        (currentToken.getType() == TokenType::STRING_LITERAL) ||
-    //        (tokenValue == "{" || tokenValue == ";" || tokenValue == "(") ||
-    //        (tokenValue == "break" || tokenValue == "case" ||
-    //         tokenValue == "continue" || tokenValue == "default" ||
-    //         tokenValue == "do" || tokenValue == "for" || tokenValue == "if" ||
-    //         tokenValue == "return" || tokenValue == "sizeof" ||
-    //         tokenValue == "switch" || tokenValue == "while");
 }
 
 void Parser::consume()
@@ -144,7 +113,7 @@ std::unique_ptr<Program> Parser::parsePROGRAM()
     {
         throw SyntacticException(currentToken.getLineNumber(), "Unexpected token: " + currentToken.getValue());
     }
-    std::unique_ptr<Program> program = std::make_unique<Program>(std::move(topLevelDeclarations));
+    std::unique_ptr<Program> program = std::make_unique<Program>(std::move(topLevelDeclarations), currentToken.getLineNumber());
 
     return program;
 }
@@ -173,7 +142,7 @@ std::unique_ptr<Declaration> Parser::parseDeclaration()
 {
     std::unique_ptr<DeclarationSpecifiers> DeclarationSpec = parseDeclarationSpecifiers();
     std::unique_ptr<DeclaratorList> declaratorList = parseDeclarationFac();
-    return std::make_unique<Declaration>(std::move(DeclarationSpec), std::move(declaratorList));
+    return std::make_unique<Declaration>(std::move(DeclarationSpec), std::move(declaratorList), currentToken.getLineNumber());
 }
 
 // FIRST(INIT_DECLARATOR_LIST)= 	( * IDENTIFIER
@@ -216,7 +185,7 @@ std::unique_ptr<AssignmentExpressionList> Parser::parseArgumentExpressionList()
         consume();
         expressionList.push_back(parseAssignmentExpression());
     }
-    return std::make_unique<AssignmentExpressionList>(std::move(expressionList));
+    return std::make_unique<AssignmentExpressionList>(std::move(expressionList), currentToken.getLineNumber());
 }
 
 // ASSIGNMENT_EXPRESSION -> CONDITIONAL_EXPRESSION ASSIGNMENT_EXPRESSION_FAC
@@ -229,11 +198,11 @@ std::unique_ptr<AssignmentExpression> Parser::parseAssignmentExpression()
     {
         std::unique_ptr<AssignmentOperator> assigmentOperator = parseAssignmentOperator();
         std::unique_ptr<AssignmentExpression> assigmentExpression = parseAssignmentExpression();
-        return std::make_unique<AssignmentExpression>(std::move(conditionalExpression), std::move(assigmentExpression), std::move(assigmentOperator));
+        return std::make_unique<AssignmentExpression>(std::move(conditionalExpression), std::move(assigmentExpression), std::move(assigmentOperator), currentToken.getLineNumber());
     }
     else
     {
-        return std::make_unique<AssignmentExpression>(std::move(conditionalExpression), nullptr, nullptr);
+        return std::make_unique<AssignmentExpression>(std::move(conditionalExpression), nullptr, nullptr, currentToken.getLineNumber());
     }
 }
 
@@ -254,7 +223,7 @@ std::unique_ptr<AssignmentOperator> Parser::parseAssignmentOperator()
     TokenType type = currentToken.getType();
     if (type == TokenType::EQUAL || type == TokenType::MUL_ASSIGN || type == TokenType::DIV_ASSIGN || type == TokenType::MOD_ASSIGN || type == TokenType::ADD_ASSIGN || type == TokenType::SUB_ASSIGN || type == TokenType::LEFT_ASSIGN || type == TokenType::RIGHT_ASSIGN || type == TokenType::AND_ASSIGN || type == TokenType::XOR_ASSIGN || type == TokenType::OR_ASSIGN)
     {
-        std::unique_ptr<AssignmentOperator> assigmentOperator = std::make_unique<AssignmentOperator>(currentToken.getValue());
+        std::unique_ptr<AssignmentOperator> assigmentOperator = std::make_unique<AssignmentOperator>(currentToken.getValue(), currentToken.getLineNumber());
         consume();
         return assigmentOperator;
     }
@@ -299,12 +268,12 @@ std::unique_ptr<BlockItemBase> Parser::parseBlockItem()
     if (isBasicType())
     {
         std::unique_ptr<Declaration> declaration = parseDeclaration();
-        return std::make_unique<DeclarationWrapper>(std::move(declaration));
+        return std::make_unique<DeclarationWrapper>(std::move(declaration), currentToken.getLineNumber());
     }
     else if (isStatementFirst())
     {
         std::unique_ptr<Stmt> statement = parseStatement();
-        return std::make_unique<StatementWrapper>(std::move(statement));
+        return std::make_unique<StatementWrapper>(std::move(statement), currentToken.getLineNumber());
     }
     else
     {
@@ -323,7 +292,7 @@ std::unique_ptr<BlockStmt> Parser::parseBlockItemList()
     {
         blockItems.push_back(parseBlockItem());
     }
-    return std::make_unique<BlockStmt>(std::move(blockItems));
+    return std::make_unique<BlockStmt>(std::move(blockItems), currentToken.getLineNumber());
 }
 
 // CONDITIONAL_EXPRESSION -> LOGICAL_OR_EXPRESSION CONDITIONAL_EXPRESSION_PRIME
@@ -345,9 +314,9 @@ std::unique_ptr<ConditionalExpression> Parser::parseConditionalExpression()
             throw SyntacticException(currentToken.getLineNumber(), "Expected ':' Token");
         }
         std::unique_ptr<ConditionalExpression> conditionalExpr = parseConditionalExpression();
-        return std::make_unique<ConditionalExpression>(std::move(logicalOrExpr), std::move(expr), std::move(conditionalExpr));
+        return std::make_unique<ConditionalExpression>(std::move(logicalOrExpr), std::move(expr), std::move(conditionalExpr), currentToken.getLineNumber());
     }
-    return std::make_unique<ConditionalExpression>(std::move(logicalOrExpr), nullptr, nullptr);
+    return std::make_unique<ConditionalExpression>(std::move(logicalOrExpr), nullptr, nullptr, currentToken.getLineNumber());
 }
 
 // CONSTANT -> INTEGER_CONSTANT | FLOAT_CONSTANT | STRING_LITERAL
@@ -355,19 +324,19 @@ std::unique_ptr<ConstantExpression> Parser::parseConstant()
 {
     if (currentToken.getType() == TokenType::INTEGER_CONSTANT)
     {
-        std::unique_ptr<ConstantExpression> constant = std::make_unique<ConstantExpression>(currentToken.getValue(), ConstantType::INTEGER_CONSTANT);
+        std::unique_ptr<ConstantExpression> constant = std::make_unique<ConstantExpression>(currentToken.getValue(), ConstantType::INTEGER_CONSTANT, currentToken.getLineNumber());
         consume();
         return constant;
     }
     else if (currentToken.getType() == TokenType::FLOAT_CONSTANT)
     {
-        std::unique_ptr<ConstantExpression> constant = std::make_unique<ConstantExpression>(currentToken.getValue(), ConstantType::FLOAT_CONSTANT);
+        std::unique_ptr<ConstantExpression> constant = std::make_unique<ConstantExpression>(currentToken.getValue(), ConstantType::FLOAT_CONSTANT, currentToken.getLineNumber());
         consume();
         return constant;
     }
     else if (currentToken.getType() == TokenType::STRING_LITERAL)
     {
-        std::unique_ptr<ConstantExpression> constant = std::make_unique<ConstantExpression>(currentToken.getValue(), ConstantType::STRING_LITERAL);
+        std::unique_ptr<ConstantExpression> constant = std::make_unique<ConstantExpression>(currentToken.getValue(), ConstantType::STRING_LITERAL, currentToken.getLineNumber());
         consume();
         return constant;
     }
@@ -400,9 +369,9 @@ std::unique_ptr<DeclarationSpecifiers> Parser::parseDeclarationSpecifiers()
     std::unique_ptr<Specifier> specifier = parseDeclarationSpecifiersPrime();
     if (specifier != nullptr)
     {
-        return std::make_unique<DeclarationSpecifiers>(std::move(type), std::move(specifier));
+        return std::make_unique<DeclarationSpecifiers>(std::move(type), std::move(specifier), currentToken.getLineNumber());
     }
-    return std::make_unique<DeclarationSpecifiers>(std::move(type), nullptr);
+    return std::make_unique<DeclarationSpecifiers>(std::move(type), nullptr, currentToken.getLineNumber());
 }
 
 // FIRST(TYPE_QUALIFIER)=  const restrict volatile
@@ -435,14 +404,14 @@ std::unique_ptr<Declarator> Parser::parseDeclarator()
 {
     if (currentToken.getType() == TokenType::ASTERISK)
     {
-        std::unique_ptr<Declarator> declarator = std::make_unique<Declarator>();
+        std::unique_ptr<Declarator> declarator = std::make_unique<Declarator>(currentToken.getLineNumber());
         declarator->setPointer(parsePointer());
         parseDirectDeclarator(declarator);
         return declarator;
     }
     else if (currentToken.getType() == TokenType::LPAREN || currentToken.getType() == TokenType::IDENTIFIER)
     {
-        std::unique_ptr<Declarator> declarator = std::make_unique<Declarator>();
+        std::unique_ptr<Declarator> declarator = std::make_unique<Declarator>(currentToken.getLineNumber());
         parseDirectDeclarator(declarator);
         return declarator;
     }
@@ -504,7 +473,7 @@ void Parser::parseDirectDeclaratorPrime(std::unique_ptr<Declarator> &declarator)
                 throw SyntacticException(currentToken.getLineNumber(), "Expected closing ] in declarator");
             }
             consume();
-            std::unique_ptr<ArrayDirectDeclarator> arrayDeclarator = std::make_unique<ArrayDirectDeclarator>(std::move(expr), std::move(typeQualifier), isStatic);
+            std::unique_ptr<ArrayDirectDeclarator> arrayDeclarator = std::make_unique<ArrayDirectDeclarator>(std::move(expr), std::move(typeQualifier), isStatic, currentToken.getLineNumber());
             declarator->addDirectDeclarator(std::move(arrayDeclarator));
         }
         // in function definition
@@ -535,13 +504,13 @@ std::unique_ptr<Expr> Parser::parseEqualityExpression()
         {
             consume();
             std::unique_ptr<Expr> rhs = parseRelationalExpression();
-            lhs = std::make_unique<BinaryExpr>(std::move(lhs), "==", std::move(rhs));
+            lhs = std::make_unique<BinaryExpr>(std::move(lhs), "==", std::move(rhs), currentToken.getLineNumber());
         }
         else if (currentToken.getType() == TokenType::NE_OP)
         {
             consume();
             std::unique_ptr<Expr> rhs = parseRelationalExpression();
-            lhs = std::make_unique<BinaryExpr>(std::move(lhs), "!=", std::move(rhs));
+            lhs = std::make_unique<BinaryExpr>(std::move(lhs), "!=", std::move(rhs), currentToken.getLineNumber());
         }
     }
     return lhs;
@@ -559,7 +528,7 @@ std::unique_ptr<Expr> Parser::parseEXPRESSION()
         consume();
         expressions.push_back(parseAssignmentExpression());
     }
-    return std::make_unique<AssignmentExpressionList>(std::move(expressions));
+    return std::make_unique<AssignmentExpressionList>(std::move(expressions), currentToken.getLineNumber());
 }
 
 // EXPRESSION_STATEMENT -> ; | EXPRESSION ;
@@ -597,11 +566,11 @@ std::unique_ptr<ForInitStatement> Parser::parseForInitStatement()
         std::unique_ptr<Declaration> declaration = parseDeclaration();
         std::unique_ptr<Expr> expression = parseExpressionStatement();
         std::unique_ptr<Expr> optionalExpression = parseForOptionalExpression();
-        return std::make_unique<ForWitDeclaration>(std::move(declaration), std::move(expression), std::move(optionalExpression));
+        return std::make_unique<ForWitDeclaration>(std::move(declaration), std::move(expression), std::move(optionalExpression), currentToken.getLineNumber());
     }
     else if (isExpressionFirst() || currentToken.getType() == TokenType::SEMICOLON)
     {
-        return std::make_unique<ForWithExpression>(parseExpressionStatement(), parseExpressionStatement(), parseForOptionalExpression());
+        return std::make_unique<ForWithExpression>(parseExpressionStatement(), parseExpressionStatement(), parseForOptionalExpression(), currentToken.getLineNumber());
     }
     else
     {
@@ -632,7 +601,8 @@ std::unique_ptr<FunctionDecl> Parser::parseFunctionDefinition()
         std::unique_ptr<FunctionDecl> functionDecl = std::make_unique<FunctionDecl>(
             std::move(declarationSpecifiers),
             std::move(declarator),
-            std::move(block));
+            std::move(block), 
+            currentToken.getLineNumber());
         return functionDecl;
     }
 
@@ -668,7 +638,7 @@ std::unique_ptr<Specifier> Parser::parseFunctionSpecifier()
     {
         // save it here
         consume();
-        return std::make_unique<Specifier>(currentToken.getValue(), "function");
+        return std::make_unique<Specifier>(currentToken.getValue(), "function", currentToken.getLineNumber());
     }
     else
     {
@@ -709,7 +679,7 @@ std::unique_ptr<IdentifierList> Parser::parseIdentifierList()
     {
         throw SyntacticException(currentToken.getLineNumber(), "Expected identifier");
     }
-    return std::make_unique<IdentifierList>(std::move(identifiers));
+    return std::make_unique<IdentifierList>(std::move(identifiers), currentToken.getLineNumber());
 }
 
 // FIRST(INITIALIZER_BRACE_FAC)=	{
@@ -719,12 +689,12 @@ std::unique_ptr<Initializer> Parser::parseInitializer()
 {
     if (currentToken.getType() == TokenType::LBRACE)
     {
-        std::unique_ptr<BraceInitializer> braceInitializer = std::make_unique<BraceInitializer>(std::move(parseInitializerBraceFac()));
+        std::unique_ptr<BraceInitializer> braceInitializer = std::make_unique<BraceInitializer>(std::move(parseInitializerBraceFac()), currentToken.getLineNumber());
         return braceInitializer;
     }
     else if (isExpressionFirst())
     {
-        std::unique_ptr<ExpressionInitializer> ExpInitializer = std::make_unique<ExpressionInitializer>(std::move(parseAssignmentExpression()));
+        std::unique_ptr<ExpressionInitializer> ExpInitializer = std::make_unique<ExpressionInitializer>(std::move(parseAssignmentExpression()), currentToken.getLineNumber());
         return ExpInitializer;
     }
     else
@@ -770,7 +740,7 @@ std::unique_ptr<InitializerList> Parser::parseInitializerList()
         consume();
         initializers.push_back(parseInitializer());
     }
-    return std::make_unique<InitializerList>(std::move(initializers));
+    return std::make_unique<InitializerList>(std::move(initializers), currentToken.getLineNumber());
 
     return nullptr;
 }
@@ -811,7 +781,7 @@ std::unique_ptr<DeclaratorList> Parser::parseInitDeclaratorList()
         consume();
         declarators.push_back(std::move(parseInitDeclarator()));
     }
-    return std::make_unique<DeclaratorList>(std::move(declarators));
+    return std::make_unique<DeclaratorList>(std::move(declarators), currentToken.getLineNumber());
 }
 
 // ITERATION_STATEMENT -> while ( EXPRESSION ) STATEMENT | do STATEMENT while ( EXPRESSION ) ; | for ( FOR_INIT_STATEMENT ) STATEMENT
@@ -832,7 +802,7 @@ std::unique_ptr<IterationStatement> Parser::parseIterationStatement()
             throw SyntacticException(currentToken.getLineNumber(), "Expected closing ) in while statement");
         }
         consume();
-        return std::make_unique<WhileStatement>(std::move(expr), parseStatement());
+        return std::make_unique<WhileStatement>(std::move(expr), parseStatement(), currentToken.getLineNumber());
     }
     else if (currentToken.getType() == TokenType::DO)
     {
@@ -859,7 +829,7 @@ std::unique_ptr<IterationStatement> Parser::parseIterationStatement()
             throw SyntacticException(currentToken.getLineNumber(), "Expected ; in do-while statement");
         }
         consume();
-        return std::make_unique<DoWhileStatement>(std::move(expr), std::move(statement));
+        return std::make_unique<DoWhileStatement>(std::move(expr), std::move(statement), currentToken.getLineNumber());
     }
     else if (currentToken.getType() == TokenType::FOR)
     {
@@ -875,7 +845,7 @@ std::unique_ptr<IterationStatement> Parser::parseIterationStatement()
             throw SyntacticException(currentToken.getLineNumber(), "Expected closing ) in for statement");
         }
         consume();
-        return std::make_unique<ForStatement>(std::move(forInitStatement), parseStatement());
+        return std::make_unique<ForStatement>(std::move(forInitStatement), parseStatement(), currentToken.getLineNumber());
     }
     else
     {
@@ -896,7 +866,7 @@ std::unique_ptr<JumpStatement> Parser::parseJumpStatement()
             throw SyntacticException(currentToken.getLineNumber(), "Expected ; in continue statement");
         }
         consume();
-        return std::make_unique<ContinueStatement>();
+        return std::make_unique<ContinueStatement>(currentToken.getLineNumber());
     }
     else if (currentToken.getType() == TokenType::BREAK)
     {
@@ -906,12 +876,12 @@ std::unique_ptr<JumpStatement> Parser::parseJumpStatement()
             throw SyntacticException(currentToken.getLineNumber(), "Expected ; in break statement");
         }
         consume();
-        return std::make_unique<BreakStatement>();
+        return std::make_unique<BreakStatement>(currentToken.getLineNumber());
     }
     else if (currentToken.getType() == TokenType::RETURN)
     {
         consume();
-        return std::make_unique<ReturnStatement>(std::move(parseExpressionStatement()));
+        return std::make_unique<ReturnStatement>(std::move(parseExpressionStatement()), currentToken.getLineNumber());
     }
     else
     {
@@ -934,7 +904,7 @@ std::unique_ptr<LabaledStatement> Parser::parseLabeledStatement()
         }
         consume();
         std::unique_ptr<Stmt> statement = parseStatement();
-        return std::make_unique<CaseStatement>(std::move(expr), std::move(statement));
+        return std::make_unique<CaseStatement>(std::move(expr), std::move(statement), currentToken.getLineNumber());
     }
     else if (currentToken.getType() == TokenType::DEFAULT)
     {
@@ -945,7 +915,7 @@ std::unique_ptr<LabaledStatement> Parser::parseLabeledStatement()
         }
         consume();
         std::unique_ptr<Stmt> statement = parseStatement();
-        return std::make_unique<DefaultStatement>(std::move(statement));
+        return std::make_unique<DefaultStatement>(std::move(statement), currentToken.getLineNumber());
     }
     else
     {
@@ -965,7 +935,7 @@ std::unique_ptr<Expr> Parser::parseExclusiveOrExpression()
     {
         consume();
         std::unique_ptr<Expr> rhs = parseAndExpression();
-        lhs = std::make_unique<BinaryExpr>(std::move(lhs), "^", std::move(rhs));
+        lhs = std::make_unique<BinaryExpr>(std::move(lhs), "^", std::move(rhs), currentToken.getLineNumber());
     }
     return lhs;
 }
@@ -978,7 +948,7 @@ std::unique_ptr<Expr> Parser::parseInclusiveOrExpression()
     {
         consume();
         std::unique_ptr<Expr> rhs = parseExclusiveOrExpression();
-        lhs = std::make_unique<BinaryExpr>(std::move(lhs), "|", std::move(rhs));
+        lhs = std::make_unique<BinaryExpr>(std::move(lhs), "|", std::move(rhs), currentToken.getLineNumber());
     }
     return lhs;
 }
@@ -993,7 +963,7 @@ std::unique_ptr<Expr> Parser::parseLogicalAndExpression()
     {
         consume();
         std::unique_ptr<Expr> rhs = parseInclusiveOrExpression();
-        lhs = std::make_unique<BinaryExpr>(std::move(lhs), "&&", std::move(rhs));
+        lhs = std::make_unique<BinaryExpr>(std::move(lhs), "&&", std::move(rhs), currentToken.getLineNumber());
     }
     return lhs;
 }
@@ -1009,7 +979,7 @@ std::unique_ptr<Expr> Parser::parseLogicalOrExpression()
         std::string op = currentToken.getValue();
         consume();
         std::unique_ptr<Expr> rhs = parseLogicalAndExpression();
-        lhs = std::make_unique<BinaryExpr>(std::move(lhs), op, std::move(rhs));
+        lhs = std::make_unique<BinaryExpr>(std::move(lhs), op, std::move(rhs), currentToken.getLineNumber());
     }
 
     return lhs;
@@ -1027,7 +997,7 @@ std::unique_ptr<Expr> Parser::parseAdditveExpression()
         std::string op = currentToken.getValue();
         consume();
         std::unique_ptr<Expr> rhs = parseMultiplicativeExpression();
-        lhs = std::make_unique<BinaryExpr>(std::move(lhs), op, std::move(rhs));
+        lhs = std::make_unique<BinaryExpr>(std::move(lhs), op, std::move(rhs), currentToken.getLineNumber());
     }
     return lhs;
 }
@@ -1042,7 +1012,7 @@ std::unique_ptr<Expr> Parser::parseAndExpression()
     {
         consume();
         std::unique_ptr<Expr> rhs = parseEqualityExpression();
-        lhs = std::make_unique<BinaryExpr>(std::move(lhs), "&", std::move(rhs));
+        lhs = std::make_unique<BinaryExpr>(std::move(lhs), "&", std::move(rhs), currentToken.getLineNumber());
     }
     return lhs;
 }
@@ -1060,7 +1030,7 @@ std::unique_ptr<Expr> Parser::parseMultiplicativeExpression()
         std::string op = currentToken.getValue();
         consume();
         std::unique_ptr<Expr> rhs = parseUnaryExpression();
-        lhs = std::make_unique<BinaryExpr>(std::move(lhs), op, std::move(rhs));
+        lhs = std::make_unique<BinaryExpr>(std::move(lhs), op, std::move(rhs), currentToken.getLineNumber());
         type = currentToken.getType();
     }
     return lhs;
@@ -1074,12 +1044,12 @@ std::unique_ptr<PrimaryExpression> Parser::parsePrimaryExpression()
     {
         std::string identifier = currentToken.getValue();
         consume();
-        return std::make_unique<IdentifierExpression>(identifier);
+        return std::make_unique<IdentifierExpression>(identifier, currentToken.getLineNumber());
     }
     else if (currentToken.getType() == TokenType::LPAREN)
     {
         consume();
-        std::unique_ptr<ParenthesizedExpression> parenthesizedExpr = std::make_unique<ParenthesizedExpression>(std::move(parseEXPRESSION()));
+        std::unique_ptr<ParenthesizedExpression> parenthesizedExpr = std::make_unique<ParenthesizedExpression>(std::move(parseEXPRESSION()), currentToken.getLineNumber());
         if (currentToken.getType() != TokenType::RPAREN)
         {
             throw SyntacticException(currentToken.getLineNumber(), "Expected closing ) in primary expression");
@@ -1113,7 +1083,7 @@ std::unique_ptr<Expr> Parser::parseRelationalExpression()
         std::string op = currentToken.getValue();
         consume();
         std::unique_ptr<Expr> rhs = parseShiftExpression();
-        lhs = std::make_unique<BinaryExpr>(std::move(lhs), op, std::move(rhs));
+        lhs = std::make_unique<BinaryExpr>(std::move(lhs), op, std::move(rhs), currentToken.getLineNumber());
         type = currentToken.getType();
     }
     return lhs;
@@ -1124,7 +1094,7 @@ std::unique_ptr<ParameterDeclaration> Parser::parseParameterDeclaration()
 {
     std::unique_ptr<DeclarationSpecifiers> declarationSpecifiers = parseDeclarationSpecifiers();
     std::unique_ptr<Declarator> declarator = parseParamDeclFac();
-    return std::make_unique<ParameterDeclaration>(std::move(declarationSpecifiers), std::move(declarator));
+    return std::make_unique<ParameterDeclaration>(std::move(declarationSpecifiers), std::move(declarator), currentToken.getLineNumber());
 }
 
 // PARAMETER_LIST -> PARAMETER_DECLARATION PARAMETER_LIST_PRIME
@@ -1139,7 +1109,7 @@ std::unique_ptr<ParameterDeclarationList> Parser::parseParameterList()
         consume();
         parameters.push_back(parseParameterDeclaration());
     }
-    return std::make_unique<ParameterDeclarationList>(std::move(parameters));
+    return std::make_unique<ParameterDeclarationList>(std::move(parameters), currentToken.getLineNumber());
 }
 
 // FIRST(IDENTIFIER_LIST)=  IDENTIFIER
@@ -1208,7 +1178,7 @@ std::unique_ptr<PostfixExpressions> Parser::parsePostfixExpression()
         if (currentToken.getType() == TokenType::LBRACKET && currentToken.getValue() == "[")
         {
             consume();
-            std::unique_ptr<ArrayPostFixExpression> arrayPostFixExpr = std::make_unique<ArrayPostFixExpression>(parseEXPRESSION());
+            std::unique_ptr<ArrayPostFixExpression> arrayPostFixExpr = std::make_unique<ArrayPostFixExpression>(parseEXPRESSION(), currentToken.getLineNumber());
             if (currentToken.getType() != TokenType::RBRACKET || currentToken.getValue() != "]")
             {
                 throw SyntacticException(currentToken.getLineNumber(), "Expected closing ] in postfix expression");
@@ -1219,7 +1189,7 @@ std::unique_ptr<PostfixExpressions> Parser::parsePostfixExpression()
         else if (currentToken.getType() == TokenType::LPAREN)
         {
             consume();
-            std::unique_ptr<ArgumentsPostFixExpression> argsPostFixExpr = std::make_unique<ArgumentsPostFixExpression>(parsePostfixArguments());
+            std::unique_ptr<ArgumentsPostFixExpression> argsPostFixExpr = std::make_unique<ArgumentsPostFixExpression>(parsePostfixArguments(), currentToken.getLineNumber());
             if (currentToken.getType() != TokenType::RPAREN)
             {
                 throw SyntacticException(currentToken.getLineNumber(), "Expected closing ) in postfix expression");
@@ -1234,7 +1204,7 @@ std::unique_ptr<PostfixExpressions> Parser::parsePostfixExpression()
             {
                 throw SyntacticException(currentToken.getLineNumber(), "Expected identifier after . in postfix expression");
             }
-            std::unique_ptr<DotOperatorPostfixExpression> dotOperatorPostfixExpr = std::make_unique<DotOperatorPostfixExpression>(currentToken.getValue());
+            std::unique_ptr<DotOperatorPostfixExpression> dotOperatorPostfixExpr = std::make_unique<DotOperatorPostfixExpression>(currentToken.getValue(), currentToken.getLineNumber());
             consume();
             postfixExpressions.push_back(std::move(dotOperatorPostfixExpr));
         }
@@ -1245,13 +1215,13 @@ std::unique_ptr<PostfixExpressions> Parser::parsePostfixExpression()
             {
                 throw SyntacticException(currentToken.getLineNumber(), "Expected identifier after -> in postfix expression");
             }
-            std::unique_ptr<ArrowOperatorPostfixExpression> arrowOperatorPostfixExpr = std::make_unique<ArrowOperatorPostfixExpression>(currentToken.getValue());
+            std::unique_ptr<ArrowOperatorPostfixExpression> arrowOperatorPostfixExpr = std::make_unique<ArrowOperatorPostfixExpression>(currentToken.getValue(), currentToken.getLineNumber());
             consume();
             postfixExpressions.push_back(std::move(arrowOperatorPostfixExpr));
         }
         else if (currentToken.getType() == TokenType::INC_OP || currentToken.getType() == TokenType::DEC_OP)
         {
-            std::unique_ptr<IncrementDecrementPostfixExpression> incrementOperatorPostfixExpr = std::make_unique<IncrementDecrementPostfixExpression>(currentToken.getValue());
+            std::unique_ptr<IncrementDecrementPostfixExpression> incrementOperatorPostfixExpr = std::make_unique<IncrementDecrementPostfixExpression>(currentToken.getValue(), currentToken.getLineNumber());
             consume();
             postfixExpressions.push_back(std::move(incrementOperatorPostfixExpr));
         }
@@ -1260,7 +1230,7 @@ std::unique_ptr<PostfixExpressions> Parser::parsePostfixExpression()
             break;
         }
     }
-    return std::make_unique<PostfixExpressions>(std::move(primaryExpr), std::move(postfixExpressions));
+    return std::make_unique<PostfixExpressions>(std::move(primaryExpr), std::move(postfixExpressions), currentToken.getLineNumber());
 }
 
 // SELECTION_STATEMENT -> if ( EXPRESSION ) STATEMENT | switch ( EXPRESSION ) STATEMENT
@@ -1280,7 +1250,7 @@ std::unique_ptr<SelectionStatement> Parser::parseSelectionStatement()
             throw SyntacticException(currentToken.getLineNumber(), "Expected closing ) in if statement");
         }
         consume();
-        return std::make_unique<IfStatement>(std::move(expression), std::move(parseStatement()));
+        return std::make_unique<IfStatement>(std::move(expression), std::move(parseStatement()), currentToken.getLineNumber());
     }
     else if (currentToken.getType() == TokenType::SWITCH)
     {
@@ -1296,7 +1266,7 @@ std::unique_ptr<SelectionStatement> Parser::parseSelectionStatement()
             throw SyntacticException(currentToken.getLineNumber(), "Expected closing ) in switch statement");
         }
         consume();
-        return std::make_unique<SwitchStatement>(std::move(expression), std::move(parseStatement()));
+        return std::make_unique<SwitchStatement>(std::move(expression), std::move(parseStatement()), currentToken.getLineNumber());
     }
     else
     {
@@ -1317,7 +1287,7 @@ std::unique_ptr<Expr> Parser::parseShiftExpression()
         std::string op = currentToken.getValue();
         consume();
         std::unique_ptr<Expr> rhs = parseAdditveExpression();
-        lhs = std::make_unique<BinaryExpr>(std::move(lhs), op, std::move(rhs));
+        lhs = std::make_unique<BinaryExpr>(std::move(lhs), op, std::move(rhs), currentToken.getLineNumber());
     }
     return lhs;
 }
@@ -1343,7 +1313,7 @@ std::unique_ptr<Stmt> Parser::parseStatement()
     else if (isExpressionFirst() || type == TokenType::SEMICOLON)
     {
         std::unique_ptr<Expr> expression = parseExpressionStatement();
-        return std::make_unique<ExpressionStatement>(std::move(expression));
+        return std::make_unique<ExpressionStatement>(std::move(expression), currentToken.getLineNumber());
     }
     else if (type == TokenType::IF || type == TokenType::SWITCH)
     {
@@ -1384,7 +1354,7 @@ std::unique_ptr<Specifier> Parser::parseStorageSpecifier()
     if (type == TokenType::STATIC || type == TokenType::AUTO || type == TokenType::REGISTER)
     {
         consume();
-        return std::make_unique<Specifier>(currentToken.getValue(), "Storage");
+        return std::make_unique<Specifier>(currentToken.getValue(), "Storage", currentToken.getLineNumber());
     }
     else
     {
@@ -1400,7 +1370,7 @@ std::unique_ptr<StructMemberDeclaration> Parser::parseSTRUCT_DECLARATION()
     // SPECIFIER_QUALIFIER_LIST -> TYPE_SPECIFIER
     std::unique_ptr<Type> Type = parseTypeSpecifier();
     std::unique_ptr<DeclaratorList> declaratorList = parseSTRUCT_DECL_FAC();
-    return std::make_unique<StructMemberDeclaration>(std::move(Type), std::move(declaratorList));
+    return std::make_unique<StructMemberDeclaration>(std::move(Type), std::move(declaratorList), currentToken.getLineNumber());
 }
 
 // STRUCT_DECLARATION_LIST -> STRUCT_DECLARATION STRUCT_DECLARATION_LIST_PRIME
@@ -1415,7 +1385,7 @@ std::unique_ptr<StructMemberDeclarationList> Parser::parseSTRUCT_DECLARATION_LIS
     {
         structMemberDeclarations.push_back(parseSTRUCT_DECLARATION());
     }
-    return std::make_unique<StructMemberDeclarationList>(std::move(structMemberDeclarations));
+    return std::make_unique<StructMemberDeclarationList>(std::move(structMemberDeclarations), currentToken.getLineNumber());
 }
 
 // STRUCT_DECLARATOR_LIST -> DECLARATOR STRUCT_DECLARATOR_LIST_PRIME
@@ -1430,7 +1400,7 @@ std::unique_ptr<DeclaratorList> Parser::parseSTRUCT_DECLARATOR_LIST()
         consume();
         declarators.push_back(parseDeclarator());
     }
-    return std::make_unique<DeclaratorList>(std::move(declarators));
+    return std::make_unique<DeclaratorList>(std::move(declarators), currentToken.getLineNumber());
 }
 
 // FIRST(STRUCT_DECLARATOR_LIST)=    ( * IDENTIFIER
@@ -1486,14 +1456,14 @@ std::unique_ptr<StructSpecifier> Parser::parseSTRUCT_SPEC_FAC()
             throw SyntacticException(currentToken.getLineNumber(), "Expected closing } in struct specifier");
         }
         consume();
-        return std::make_unique<AnonimousStruct>(std::move(structMemberDeclarationList));
+        return std::make_unique<AnonimousStruct>(std::move(structMemberDeclarationList), currentToken.getLineNumber());
     }
     else if (currentToken.getType() == TokenType::IDENTIFIER)
     {
         std::string identifier = currentToken.getValue();
         consume();
         std::unique_ptr<StructMemberDeclarationList> structMemberDeclarationList = parseSTRUCT_SPEC_FAC2();
-        return std::make_unique<StructDeclaration>(std::move(structMemberDeclarationList), identifier);
+        return std::make_unique<StructDeclaration>(std::move(structMemberDeclarationList), identifier, currentToken.getLineNumber());
     }
     else
     {
@@ -1528,7 +1498,7 @@ std::unique_ptr<Specifier> Parser::parseTypeQualifier()
         std::string specifier = currentToken.getValue();
         std::string type = "Qualifier";
         consume();
-        return std::make_unique<Specifier>(specifier, type);
+        return std::make_unique<Specifier>(specifier, type, currentToken.getLineNumber());
     }
     else
     {
@@ -1564,7 +1534,7 @@ std::unique_ptr<Type> Parser::parseTypeSpecifier()
     {
         std::string type = currentToken.getValue();
         consume();
-        return std::make_unique<PrimitiveType>(type);
+        return std::make_unique<PrimitiveType>(type, currentToken.getLineNumber());
     }
     else if (currentToken.getType() == TokenType::STRUCT)
     {
@@ -1592,12 +1562,12 @@ std::unique_ptr<UnaryExpr> Parser::parseUnaryExpression()
     {
         std::string op = currentToken.getValue();
         consume();
-        return std::make_unique<UnaryIncrementDecrementOperator>(std::move(op), parseUnaryExpression());
+        return std::make_unique<UnaryIncrementDecrementOperator>(std::move(op), parseUnaryExpression(), currentToken.getLineNumber());
     }
     else if (currentToken.getType() == TokenType::SIZEOF)
     {
         consume();
-        return std::make_unique<UnaryIncrementDecrementOperator>("sizeof", parseUnaryExpression());
+        return std::make_unique<UnaryIncrementDecrementOperator>("sizeof", parseUnaryExpression(), currentToken.getLineNumber());
     }
     else
     {

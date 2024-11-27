@@ -67,18 +67,22 @@ class StructMemberDeclaration;
 class ASTNode
 {
 public:
+    ASTNode(int line) : line_(line) {}  
     virtual ~ASTNode() = default;
 
     // Accept method for the visitor
     virtual void accept(ASTVisitor &visitor) = 0;
+
+protected: 
+    int line_;
 };
 
 // Program node as the root of the AST
 class Program : public ASTNode
 {
 public:
-    Program(std::vector<std::unique_ptr<ASTNode>> topLevelDeclarations)
-        : topLevelDeclarations_(std::move(topLevelDeclarations)) {}
+    Program(std::vector<std::unique_ptr<ASTNode>> topLevelDeclarations, int line)
+        : topLevelDeclarations_(std::move(topLevelDeclarations)), ASTNode(line) {}
 
     void accept(ASTVisitor &visitor) override
     {
@@ -97,18 +101,22 @@ private:
 // Expression node base class
 class Expr : public ASTNode
 {
+public:
+    Expr(int line) : ASTNode(line) {}
 };
 
 // Statement node base class
 class Stmt : public ASTNode
 {
+public:
+    Stmt(int line) : ASTNode(line) {}
 };
 
 class BinaryExpr : public Expr
 {
 public:
-    BinaryExpr(std::unique_ptr<Expr> lhs, std::string op, std::unique_ptr<Expr> rhs)
-        : lhs_(std::move(lhs)), op_(op), rhs_(std::move(rhs)) {}
+    BinaryExpr(std::unique_ptr<Expr> lhs, std::string op, std::unique_ptr<Expr> rhs, int line)
+        : lhs_(std::move(lhs)), op_(op), rhs_(std::move(rhs)), Expr(line) {}
 
     void accept(ASTVisitor &visitor) override
     {
@@ -129,8 +137,8 @@ private:
 class FunctionDecl : public ASTNode
 {
 public:
-    FunctionDecl(std::unique_ptr<DeclarationSpecifiers> declarationSpecifiers, std::unique_ptr<Declarator> declarator, std::unique_ptr<BlockStmt> block)
-        : declarationSpecifiers_(std::move(declarationSpecifiers)), declarator_(std::move(declarator)), block_(std::move(block)) {}
+    FunctionDecl(std::unique_ptr<DeclarationSpecifiers> declarationSpecifiers, std::unique_ptr<Declarator> declarator, std::unique_ptr<BlockStmt> block, int line)
+        : declarationSpecifiers_(std::move(declarationSpecifiers)), declarator_(std::move(declarator)), block_(std::move(block)), ASTNode(line) {}
 
     void accept(ASTVisitor &visitor) override
     {
@@ -149,6 +157,7 @@ private:
 class Type : public ASTNode
 {
 public:
+    Type(int line) : ASTNode(line) {}
     virtual ~Type() = default;
     virtual void accept(ASTVisitor &visitor) = 0;
 };
@@ -156,8 +165,8 @@ public:
 class PrimitiveType : public Type
 {
 public:
-    PrimitiveType(std::string baseType, bool isPointer = false)
-        : baseType_(std::move(baseType)) {}
+    PrimitiveType(std::string baseType, int line)
+        : baseType_(std::move(baseType)), Type(line) {}
 
     void accept(ASTVisitor &visitor) override
     {
@@ -173,7 +182,8 @@ private:
 class Specifier : public ASTNode
 {
 public:
-    explicit Specifier(std::string specifier, std::string specifierType) : specifier_(std::move(specifier)), specifierType_(std::move(specifierType)) {}
+    explicit Specifier(std::string specifier, std::string specifierType, int line) 
+        : specifier_(std::move(specifier)), specifierType_(std::move(specifierType)), ASTNode(line) {}
 
     void accept(ASTVisitor &visitor) override
     {
@@ -191,8 +201,8 @@ private:
 class DeclarationSpecifiers : public ASTNode
 {
 public:
-    DeclarationSpecifiers(std::unique_ptr<Type> type, std::unique_ptr<Specifier> specifiers)
-        : type_(std::move(type)), specifier_(std::move(specifiers)) {}
+    DeclarationSpecifiers(std::unique_ptr<Type> type, std::unique_ptr<Specifier> specifiers, int line)
+        : type_(std::move(type)), specifier_(std::move(specifiers)), ASTNode(line) {}
 
     void accept(ASTVisitor &visitor) override
     {
@@ -210,6 +220,7 @@ private:
 class DirectDeclarator : public ASTNode
 {
 public:
+    DirectDeclarator (int line) : ASTNode(line) {}
     virtual ~DirectDeclarator() = default;
 
     // Accept method for the visitor
@@ -219,7 +230,7 @@ public:
 class Declarator : public ASTNode
 {
 public:
-    Declarator() {}
+    Declarator(int line): ASTNode(line) {}
 
     void accept(ASTVisitor &visitor) override
     {
@@ -255,8 +266,8 @@ private:
 class ArrayDirectDeclarator : public DirectDeclarator
 {
 public:
-    ArrayDirectDeclarator(std::unique_ptr<Expr> ArrSize, std::unique_ptr<Specifier> typeQualifier, bool isStatic)
-        : ArrSize(std::move(ArrSize)), typeQualifier(std::move(typeQualifier)), isStatic(isStatic) {}
+    ArrayDirectDeclarator(std::unique_ptr<Expr> ArrSize, std::unique_ptr<Specifier> typeQualifier, bool isStatic, int line)
+        : ArrSize(std::move(ArrSize)), typeQualifier(std::move(typeQualifier)), isStatic(isStatic), DirectDeclarator(line) {}
 
     void accept(ASTVisitor &visitor) override
     {
@@ -275,6 +286,7 @@ private:
 class FunctionDirectDeclarator : public DirectDeclarator
 {
 public:
+    FunctionDirectDeclarator(int line) : DirectDeclarator(line) {}
     virtual ~FunctionDirectDeclarator() = default;
     virtual void accept(ASTVisitor &visitor) = 0;
 };
@@ -282,8 +294,8 @@ public:
 class IdentifierList : public FunctionDirectDeclarator
 {
 public:
-    IdentifierList(std::vector<std::string> identifiers)
-        : identifiers_(std::move(identifiers)) {}
+    IdentifierList(std::vector<std::string> identifiers, int line)
+        : identifiers_(std::move(identifiers)) , FunctionDirectDeclarator(line){}
 
     void accept(ASTVisitor &visitor) override
     {
@@ -299,8 +311,8 @@ private:
 class ParameterDeclaration : public ASTNode
 {
 public:
-    ParameterDeclaration(std::unique_ptr<DeclarationSpecifiers> declarationSpecifiers, std::unique_ptr<Declarator> declarator)
-        : declarationSpecifiers_(std::move(declarationSpecifiers)), declarator_(std::move(declarator)) {}
+    ParameterDeclaration(std::unique_ptr<DeclarationSpecifiers> declarationSpecifiers, std::unique_ptr<Declarator> declarator, int line)
+        : declarationSpecifiers_(std::move(declarationSpecifiers)), declarator_(std::move(declarator)), ASTNode(line) {}
 
     void accept(ASTVisitor &visitor) override
     {
@@ -318,8 +330,8 @@ private:
 class ParameterDeclarationList : public FunctionDirectDeclarator
 {
 public:
-    ParameterDeclarationList(std::vector<std::unique_ptr<ParameterDeclaration>> parameters)
-        : parameters_(std::move(parameters)) {}
+    ParameterDeclarationList(std::vector<std::unique_ptr<ParameterDeclaration>> parameters, int line)
+        : parameters_(std::move(parameters)) , FunctionDirectDeclarator(line){}
 
     void accept(ASTVisitor &visitor) override
     {
@@ -335,8 +347,8 @@ private:
 class DeclaratorList : public ASTNode
 {
 public:
-    DeclaratorList(std::vector<std::unique_ptr<Declarator>> declarators)
-        : declarators_(std::move(declarators)) {}
+    DeclaratorList(std::vector<std::unique_ptr<Declarator>> declarators, int line)
+        : declarators_(std::move(declarators)), ASTNode(line) {}
 
     void accept(ASTVisitor &visitor) override
     {
@@ -352,8 +364,8 @@ private:
 class Declaration : public ASTNode
 {
 public:
-    Declaration(std::unique_ptr<DeclarationSpecifiers> declarationSpecifiers, std::unique_ptr<DeclaratorList> declaratorList)
-        : declarationSpecifiers_(std::move(declarationSpecifiers)), declaratorList_(std::move(declaratorList)) {}
+    Declaration(std::unique_ptr<DeclarationSpecifiers> declarationSpecifiers, std::unique_ptr<DeclaratorList> declaratorList, int line)
+        : declarationSpecifiers_(std::move(declarationSpecifiers)), declaratorList_(std::move(declaratorList)), ASTNode(line) {}
 
     void accept(ASTVisitor &visitor) override
     {
@@ -373,13 +385,14 @@ private:
 class Initializer : public ASTNode
 {
 public:
+    Initializer(int line) : ASTNode(line) {}
     void accept(ASTVisitor &visitor) override = 0;
 };
 
 class ExpressionInitializer : public Initializer
 {
 public:
-    ExpressionInitializer(std::unique_ptr<Expr> expr) : expr_(std::move(expr)) {}
+    ExpressionInitializer(std::unique_ptr<Expr> expr, int line) : expr_(std::move(expr)), Initializer(line){}
     void accept(ASTVisitor &visitor) override
     {
         visitor.visit(*this);
@@ -396,8 +409,8 @@ private:
 class BraceInitializer : public Initializer
 {
 public:
-    BraceInitializer(std::unique_ptr<InitializerList> initializerList)
-        : initializerList_(std::move(initializerList)) {}
+    BraceInitializer(std::unique_ptr<InitializerList> initializerList, int line)
+        : initializerList_(std::move(initializerList)), Initializer(line) {}
 
     void accept(ASTVisitor &visitor) override
     {
@@ -413,8 +426,8 @@ private:
 class InitializerList : public ASTNode
 {
 public:
-    InitializerList(std::vector<std::unique_ptr<Initializer>> InitializerList)
-        : InitializerList_(std::move(InitializerList)) {}
+    InitializerList(std::vector<std::unique_ptr<Initializer>> InitializerList, int line)
+        : InitializerList_(std::move(InitializerList)), ASTNode(line) {}
 
     void accept(ASTVisitor &visitor) override
     {
@@ -435,6 +448,7 @@ private:
 class BlockItemBase : public Stmt
 {
 public:
+    BlockItemBase(int line) : Stmt(line) {}
     virtual ~BlockItemBase() = default;
     virtual void accept(ASTVisitor &visitor) = 0; // Interface for visiting
 };
@@ -442,7 +456,7 @@ public:
 class BlockStmt : public Stmt
 {
 public:
-    BlockStmt(std::vector<std::unique_ptr<BlockItemBase>> item) : item_(std::move(item)) {}
+    BlockStmt(std::vector<std::unique_ptr<BlockItemBase>> item, int line) : item_(std::move(item)), Stmt(line) {}
 
     void accept(ASTVisitor &visitor) override
     {
@@ -459,8 +473,8 @@ private:
 class DeclarationWrapper : public BlockItemBase
 {
 public:
-    DeclarationWrapper(std::unique_ptr<Declaration> declaration)
-        : declaration_(std::move(declaration)) {}
+    DeclarationWrapper(std::unique_ptr<Declaration> declaration, int line)
+        : declaration_(std::move(declaration)), BlockItemBase(line) {}
 
     void accept(ASTVisitor &visitor) override
     {
@@ -476,8 +490,8 @@ private:
 class StatementWrapper : public BlockItemBase
 {
 public:
-    StatementWrapper(std::unique_ptr<Stmt> statement)
-        : statement_(std::move(statement)) {}
+    StatementWrapper(std::unique_ptr<Stmt> statement, int line)
+        : statement_(std::move(statement)), BlockItemBase(line) {}
 
     void accept(ASTVisitor &visitor) override
     {
@@ -493,6 +507,7 @@ private:
 class LabaledStatement : public Stmt
 {
 public:
+    LabaledStatement(int line) : Stmt(line) {}
     virtual ~LabaledStatement() = default;
     virtual void accept(ASTVisitor &visitor) = 0;
 };
@@ -500,8 +515,8 @@ public:
 class CaseStatement : public LabaledStatement
 {
 public:
-    CaseStatement(std::unique_ptr<Expr> expr, std::unique_ptr<Stmt> statement)
-        : expr_(std::move(expr)), statement_(std::move(statement)) {}
+    CaseStatement(std::unique_ptr<Expr> expr, std::unique_ptr<Stmt> statement, int line)
+        : expr_(std::move(expr)), statement_(std::move(statement)), LabaledStatement(line) {}
 
     void accept(ASTVisitor &visitor) override
     {
@@ -519,8 +534,8 @@ private:
 class DefaultStatement : public LabaledStatement
 {
 public:
-    DefaultStatement(std::unique_ptr<Stmt> statement)
-        : statement_(std::move(statement)) {}
+    DefaultStatement(std::unique_ptr<Stmt> statement, int line)
+        : statement_(std::move(statement)), LabaledStatement(line) {}
 
     void accept(ASTVisitor &visitor) override
     {
@@ -536,7 +551,7 @@ private:
 class ExpressionStatement : public Stmt
 {
 public:
-    ExpressionStatement(std::unique_ptr<Expr> expr) : expr_(std::move(expr)) {}
+    ExpressionStatement(std::unique_ptr<Expr> expr, int line) : expr_(std::move(expr)), Stmt(line) {}
 
     void accept(ASTVisitor &visitor) override
     {
@@ -552,6 +567,7 @@ private:
 class SelectionStatement : public Stmt
 {
 public:
+    SelectionStatement(int line) : Stmt(line) {}
     virtual ~SelectionStatement() = default;
     virtual void accept(ASTVisitor &visitor) = 0;
 };
@@ -559,8 +575,8 @@ public:
 class SwitchStatement : public SelectionStatement
 {
 public:
-    SwitchStatement(std::unique_ptr<Expr> condition, std::unique_ptr<Stmt> body)
-        : condition_(std::move(condition)), body_(std::move(body)) {}
+    SwitchStatement(std::unique_ptr<Expr> condition, std::unique_ptr<Stmt> body, int line)
+        : condition_(std::move(condition)), body_(std::move(body)), SelectionStatement(line) {}
 
     void accept(ASTVisitor &visitor) override
     {
@@ -578,8 +594,8 @@ private:
 class IfStatement : public SelectionStatement
 {
 public:
-    IfStatement(std::unique_ptr<Expr> condition, std::unique_ptr<Stmt> then)
-        : condition_(std::move(condition)), then_(std::move(then)) {}
+    IfStatement(std::unique_ptr<Expr> condition, std::unique_ptr<Stmt> then, int line)
+        : condition_(std::move(condition)), then_(std::move(then)), SelectionStatement(line) {}
 
     void accept(ASTVisitor &visitor) override
     {
@@ -597,6 +613,7 @@ private:
 class IterationStatement : public Stmt
 {
 public:
+    IterationStatement(int line): Stmt(line) {}
     virtual ~IterationStatement() = default;
     virtual void accept(ASTVisitor &visitor) = 0;
 };
@@ -604,6 +621,7 @@ public:
 class ForInitStatement : public Stmt
 {
 public:
+    ForInitStatement(int line): Stmt(line) {}
     virtual ~ForInitStatement() = default;
     virtual void accept(ASTVisitor &visitor) = 0;
 };
@@ -611,8 +629,8 @@ public:
 class ForStatement : public IterationStatement
 {
 public:
-    ForStatement(std::unique_ptr<ForInitStatement> init, std::unique_ptr<Stmt> statement)
-        : init_(std::move(init)), statement_(std::move(statement)) {}
+    ForStatement(std::unique_ptr<ForInitStatement> init, std::unique_ptr<Stmt> statement, int line)
+        : init_(std::move(init)), statement_(std::move(statement)), IterationStatement (line){}
 
     void accept(ASTVisitor &visitor) override
     {
@@ -630,8 +648,8 @@ private:
 class ForWitDeclaration : public ForInitStatement
 {
 public:
-    ForWitDeclaration(std::unique_ptr<Declaration> declaration, std::unique_ptr<Expr> expr, std::unique_ptr<Expr> optionalExpr)
-        : declaration_(std::move(declaration)), expr_(std::move(expr)), optionalExpr_(std::move(optionalExpr)) {}
+    ForWitDeclaration(std::unique_ptr<Declaration> declaration, std::unique_ptr<Expr> expr, std::unique_ptr<Expr> optionalExpr, int line)
+        : declaration_(std::move(declaration)), expr_(std::move(expr)), optionalExpr_(std::move(optionalExpr)), ForInitStatement (line){}
 
     void accept(ASTVisitor &visitor) override
     {
@@ -651,8 +669,8 @@ private:
 class ForWithExpression : public ForInitStatement
 {
 public:
-    ForWithExpression(std::unique_ptr<Expr> expr, std::unique_ptr<Expr> expr2, std::unique_ptr<Expr> optionalExpr)
-        : expr_(std::move(expr)), expr2_(std::move(expr2)), optionalExpr_(std::move(optionalExpr)) {}
+    ForWithExpression(std::unique_ptr<Expr> expr, std::unique_ptr<Expr> expr2, std::unique_ptr<Expr> optionalExpr, int line)
+        : expr_(std::move(expr)), expr2_(std::move(expr2)), optionalExpr_(std::move(optionalExpr)), ForInitStatement(line) {}
 
     void accept(ASTVisitor &visitor) override
     {
@@ -672,8 +690,8 @@ private:
 class WhileStatement : public IterationStatement
 {
 public:
-    WhileStatement(std::unique_ptr<Expr> condition, std::unique_ptr<Stmt> body)
-        : condition_(std::move(condition)), body_(std::move(body)) {}
+    WhileStatement(std::unique_ptr<Expr> condition, std::unique_ptr<Stmt> body, int line)
+        : condition_(std::move(condition)), body_(std::move(body)), IterationStatement (line){}
 
     void accept(ASTVisitor &visitor) override
     {
@@ -691,8 +709,8 @@ private:
 class DoWhileStatement : public IterationStatement
 {
 public:
-    DoWhileStatement(std::unique_ptr<Expr> condition, std::unique_ptr<Stmt> body)
-        : condition_(std::move(condition)), body_(std::move(body)) {}
+    DoWhileStatement(std::unique_ptr<Expr> condition, std::unique_ptr<Stmt> body, int line)
+        : condition_(std::move(condition)), body_(std::move(body)), IterationStatement(line) {}
 
     void accept(ASTVisitor &visitor) override
     {
@@ -709,12 +727,16 @@ private:
 
 class JumpStatement : public Stmt
 {
+public:
+    JumpStatement(int line) : Stmt(line) {}
+    virtual ~JumpStatement() = default;
+    virtual void accept(ASTVisitor &visitor) = 0;
 };
 
 class ReturnStatement : public JumpStatement
 {
 public:
-    ReturnStatement(std::unique_ptr<Expr> expr) : expr_(std::move(expr)) {}
+    ReturnStatement(std::unique_ptr<Expr> expr, int line) : expr_(std::move(expr)), JumpStatement(line) {}
 
     void accept(ASTVisitor &visitor) override
     {
@@ -730,6 +752,8 @@ private:
 class ContinueStatement : public JumpStatement
 {
 public:
+    ContinueStatement(int line) : JumpStatement(line) {}
+
     void accept(ASTVisitor &visitor) override
     {
         visitor.visit(*this);
@@ -739,6 +763,8 @@ public:
 class BreakStatement : public JumpStatement
 {
 public:
+    BreakStatement(int line) : JumpStatement(line) {}
+
     void accept(ASTVisitor &visitor) override
     {
         visitor.visit(*this);
@@ -748,8 +774,8 @@ public:
 class ConditionalExpression : public Expr
 {
 public:
-    ConditionalExpression(std::unique_ptr<Expr> logicalOrExpression, std::unique_ptr<Expr> expression, std::unique_ptr<ConditionalExpression> conditionalExpression)
-        : logicalOrExpression(std::move(logicalOrExpression)), expression(std::move(expression)), conditionalExpression(std::move(conditionalExpression)) {}
+    ConditionalExpression(std::unique_ptr<Expr> logicalOrExpression, std::unique_ptr<Expr> expression, std::unique_ptr<ConditionalExpression> conditionalExpression, int line)
+        : logicalOrExpression(std::move(logicalOrExpression)), expression(std::move(expression)), conditionalExpression(std::move(conditionalExpression)), Expr(line) {}
 
     void accept(ASTVisitor &visitor) override
     {
@@ -769,6 +795,7 @@ private:
 class PrimaryExpression : public Expr
 {
 public:
+    PrimaryExpression(int line) : Expr(line) {}
     virtual ~PrimaryExpression() = default;
     virtual void accept(ASTVisitor &visitor) = 0;
 };
@@ -776,7 +803,7 @@ public:
 class IdentifierExpression : public PrimaryExpression
 {
 public:
-    IdentifierExpression(std::string identifier) : identifier(identifier) {}
+    IdentifierExpression(std::string identifier, int line) : identifier(identifier), PrimaryExpression(line) {}
 
     void accept(ASTVisitor &visitor) override
     {
@@ -799,7 +826,7 @@ enum ConstantType
 class ConstantExpression : public PrimaryExpression
 {
 public:
-    ConstantExpression(std::string constant, ConstantType type) : constant(constant), constantType(type) {}
+    ConstantExpression(std::string constant, ConstantType type, int line) : constant(constant), constantType(type), PrimaryExpression(line) {}
 
     void accept(ASTVisitor &visitor) override
     {
@@ -831,7 +858,7 @@ private:
 class ParenthesizedExpression : public PrimaryExpression
 {
 public:
-    ParenthesizedExpression(std::unique_ptr<Expr> expr) : expr(std::move(expr)) {}
+    ParenthesizedExpression(std::unique_ptr<Expr> expr, int line) : expr(std::move(expr)), PrimaryExpression(line) {}
 
     void accept(ASTVisitor &visitor) override
     {
@@ -847,6 +874,7 @@ private:
 class PostfixExpressionBase : public Expr
 {
 public:
+    PostfixExpressionBase(int line) : Expr(line) {}
     virtual ~PostfixExpressionBase() = default;
     virtual void accept(ASTVisitor &visitor) = 0;
 };
@@ -854,7 +882,7 @@ public:
 class ArrayPostFixExpression : public PostfixExpressionBase
 {
 public:
-    ArrayPostFixExpression(std::unique_ptr<Expr> expr) : ArraySize(std::move(expr)) {}
+    ArrayPostFixExpression(std::unique_ptr<Expr> expr, int line) : ArraySize(std::move(expr)), PostfixExpressionBase(line) {}
 
     void accept(ASTVisitor &visitor) override
     {
@@ -870,8 +898,8 @@ private:
 class AssignmentExpression : public Expr
 {
 public:
-    AssignmentExpression(std::unique_ptr<ConditionalExpression> conditionalExpression, std::unique_ptr<AssignmentExpression> assigmentExpression, std::unique_ptr<AssignmentOperator> assigmentOperator)
-        : conditionalExpression(std::move(conditionalExpression)), assigmentExpression(std::move(assigmentExpression)), assigmentOperator(std::move(assigmentOperator)) {}
+    AssignmentExpression(std::unique_ptr<ConditionalExpression> conditionalExpression, std::unique_ptr<AssignmentExpression> assigmentExpression, std::unique_ptr<AssignmentOperator> assigmentOperator, int line)
+        : conditionalExpression(std::move(conditionalExpression)), assigmentExpression(std::move(assigmentExpression)), assigmentOperator(std::move(assigmentOperator)), Expr(line){}
 
     void accept(ASTVisitor &visitor) override
     {
@@ -891,8 +919,8 @@ private:
 class AssignmentOperator : public Expr
 {
 public:
-    AssignmentOperator(std::string op)
-        : op(std::move(op)) {}
+    AssignmentOperator(std::string op, int line)
+        : op(std::move(op)), Expr(line) {}
 
     void accept(ASTVisitor &visitor) override
     {
@@ -908,8 +936,8 @@ private:
 class AssignmentExpressionList : public Expr
 {
 public:
-    AssignmentExpressionList(std::vector<std::unique_ptr<AssignmentExpression>> assigmentExpression)
-        : assigmentExpression(std::move(assigmentExpression)) {}
+    AssignmentExpressionList(std::vector<std::unique_ptr<AssignmentExpression>> assigmentExpression, int line)
+        : assigmentExpression(std::move(assigmentExpression)), Expr(line) {}
 
     void accept(ASTVisitor &visitor) override
     {
@@ -933,7 +961,8 @@ private:
 class ArgumentsPostFixExpression : public PostfixExpressionBase
 {
 public:
-    ArgumentsPostFixExpression(std::unique_ptr<AssignmentExpressionList> argumentList) : argumentList(std::move(argumentList)) {}
+    ArgumentsPostFixExpression(std::unique_ptr<AssignmentExpressionList> argumentList, int line)
+        : argumentList(std::move(argumentList)), PostfixExpressionBase(line) {}
 
     void accept(ASTVisitor &visitor) override
     {
@@ -946,14 +975,10 @@ private:
     std::unique_ptr<AssignmentExpressionList> argumentList;
 };
 
-// class StructPostfixExpression : public PostfixExpression
-// {
-// };
-
 class DotOperatorPostfixExpression : public PostfixExpressionBase
 {
 public:
-    DotOperatorPostfixExpression(std::string identifier) : identifier(identifier) {}
+    DotOperatorPostfixExpression(std::string identifier, int line) : identifier(identifier), PostfixExpressionBase(line) {}
 
     void accept(ASTVisitor &visitor) override
     {
@@ -969,7 +994,7 @@ private:
 class ArrowOperatorPostfixExpression : public PostfixExpressionBase
 {
 public:
-    ArrowOperatorPostfixExpression(std::string identifier) : identifier(identifier) {}
+    ArrowOperatorPostfixExpression(std::string identifier, int line) : identifier(identifier), PostfixExpressionBase(line) {}
 
     void accept(ASTVisitor &visitor) override
     {
@@ -985,7 +1010,7 @@ private:
 class IncrementDecrementPostfixExpression : public PostfixExpressionBase
 {
 public:
-    IncrementDecrementPostfixExpression(std::string op) : op(op) {}
+    IncrementDecrementPostfixExpression(std::string op, int line) : op(op), PostfixExpressionBase (line) {}
 
     void accept(ASTVisitor &visitor) override
     {
@@ -1001,6 +1026,7 @@ private:
 class UnaryExpr : public Expr
 {
 public:
+    UnaryExpr(int line) : Expr(line) {}
     virtual ~UnaryExpr() = default;
     virtual void accept(ASTVisitor &visitor) = 0;
 };
@@ -1008,8 +1034,8 @@ public:
 class PostfixExpressions : public UnaryExpr
 {
 public:
-    PostfixExpressions(std::unique_ptr<PrimaryExpression> primaryExpression, std::vector<std::unique_ptr<PostfixExpressionBase>> postfixExpression)
-        : primaryExpression(std::move(primaryExpression)), postfixExpression(std::move(postfixExpression)) {}
+    PostfixExpressions(std::unique_ptr<PrimaryExpression> primaryExpression, std::vector<std::unique_ptr<PostfixExpressionBase>> postfixExpression, int line)
+        : primaryExpression(std::move(primaryExpression)), postfixExpression(std::move(postfixExpression)), UnaryExpr(line) {}
 
     void accept(ASTVisitor &visitor) override
     {
@@ -1036,8 +1062,8 @@ private:
 class UnaryIncrementDecrementOperator : public UnaryExpr
 {
 public:
-    UnaryIncrementDecrementOperator(std::string op, std::unique_ptr<UnaryExpr> unaryExpr)
-        : op(op), unaryExpr(std::move(unaryExpr)) {}
+    UnaryIncrementDecrementOperator(std::string op, std::unique_ptr<UnaryExpr> unaryExpr, int line)
+        : op(op), unaryExpr(std::move(unaryExpr)), UnaryExpr(line) {}
 
     void accept(ASTVisitor &visitor) override
     {
@@ -1056,6 +1082,7 @@ private:
 class StructSpecifier : public Type
 {
 public:
+    StructSpecifier(int line) : Type(line) {}
     virtual ~StructSpecifier() = default;
     virtual void accept(ASTVisitor &visitor) = 0;
 };
@@ -1063,8 +1090,8 @@ public:
 class AnonimousStruct : public StructSpecifier
 {
 public:
-    AnonimousStruct(std::unique_ptr<StructMemberDeclarationList> structDeclarationList)
-        : structMemberDeclarationList(std::move(structDeclarationList)) {}
+    AnonimousStruct(std::unique_ptr<StructMemberDeclarationList> structDeclarationList, int line)
+        : structMemberDeclarationList(std::move(structDeclarationList)), StructSpecifier(line){}
 
     void accept(ASTVisitor &visitor) override
     {
@@ -1080,8 +1107,8 @@ private:
 class StructDeclaration : public StructSpecifier
 {
 public:
-    StructDeclaration(std::unique_ptr<StructMemberDeclarationList> structDeclarationList, std::string identifier)
-        : structMemberDeclarationList(std::move(structDeclarationList)), identifier(identifier) {}
+    StructDeclaration(std::unique_ptr<StructMemberDeclarationList> structDeclarationList, std::string identifier, int line)
+        : structMemberDeclarationList(std::move(structDeclarationList)), identifier(identifier), StructSpecifier(line) {}
 
     void accept(ASTVisitor &visitor) override
     {
@@ -1099,8 +1126,8 @@ private:
 class StructMemberDeclarationList : public ASTNode
 {
 public:
-    StructMemberDeclarationList(std::vector<std::unique_ptr<StructMemberDeclaration>> structMemberDeclarations)
-        : structMemberDeclarations(std::move(structMemberDeclarations)) {}
+    StructMemberDeclarationList(std::vector<std::unique_ptr<StructMemberDeclaration>> structMemberDeclarations, int line)
+        : structMemberDeclarations(std::move(structMemberDeclarations)), ASTNode(line) {}
 
     void accept(ASTVisitor &visitor) override
     {
@@ -1119,8 +1146,8 @@ private:
 class StructMemberDeclaration : public ASTNode
 {
 public:
-    StructMemberDeclaration(std::unique_ptr<Type> type, std::unique_ptr<DeclaratorList> declaratorList)
-        : typeSpecifier(std::move(type)), declaratorList(std::move(declaratorList)) {}
+    StructMemberDeclaration(std::unique_ptr<Type> type, std::unique_ptr<DeclaratorList> declaratorList, int line)
+        : typeSpecifier(std::move(type)), declaratorList(std::move(declaratorList)), ASTNode(line) {}
 
     void accept(ASTVisitor &visitor) override
     {
