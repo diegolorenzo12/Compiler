@@ -18,6 +18,7 @@ A compiler for a C-like programming language, with a reduced set of instructions
   - [Parser](#parser)
 - [Semantic Analysis](#semantic-analysis)
 - [Installation and Running](#installation-and-running)
+- [Testing and Validation](#testing-and-validation)
 - [Tools and Development Environment](#tools-and-development-environment)
 - [Conclusions and Future Work](#conclusions-and-future-work)
 - [References](#references)
@@ -205,6 +206,56 @@ To build and run the project, execute:
 ```bash
 cd build/
 cmake --build . --target run
+```
+
+## Testing and Validation
+
+### Testing Methodology
+To ensure the reliability and correctness of the compiler, we adopted a rigorous testing methodology using **Google Test (GTest)**. Testing is organized into three main categories, corresponding to key stages of the compiler's frontend:
+
+1. **Lexer Tests**  
+   - Verifies tokenization of valid code.  
+   - Ensures that invalid input correctly raises lexer errors.
+
+2. **Parser Tests**  
+   - Confirms syntactically valid code generates the correct parse tree.  
+   - Validates that syntactic errors are detected and reported accurately.
+
+3. **Semantic Tests**  
+   - Checks that semantically valid code passes without errors.  
+   - Detects and reports semantic issues like type mismatches, undeclared variables, and invalid operations.
+
+Each test case evaluates whether errors are correctly identified and ensures the compiler progresses smoothly to the next phase when no errors are present.
+
+### Results Obtained
+The testing framework successfully validated the following:
+
+- **Error Handling**  
+  - Lexer errors are detected and reported with specific error messages.  
+  - Parser errors (e.g., unmatched brackets or invalid syntax) are identified and halt further compilation.  
+  - Semantic errors (e.g., undeclared variables or type mismatch) are properly flagged.
+
+- **Compilation Success**  
+  - Valid code compiles successfully through each stage, up to the tested phase.  
+  - No crashes or unexpected behavior occur when processing valid input.
+
+The tests confirmed the expected behavior for all scenarios and ensured stable and predictable compiler operation.
+
+![image](https://github.com/user-attachments/assets/b25eb52c-78cd-4493-8cf6-35048028f654)
+
+
+### Specific Test Cases
+Specific test cases can be found in:
+- [tests/lexer_test.cpp](tests/lexer_test.cpp)
+- [tests/parser_test.cpp](tests/parser_test.cpp)
+- [tests/semantic_test.cpp](tests/semantic_test.cpp)
+
+### Running tests
+Use cmake to compile the project and specifically target all the components, including the tests. Then use the ctest command to run the tests. 
+```bash
+cd build/
+cmake --build . --target all
+ctest
 ```
 
 ## Tools and Development Environment
