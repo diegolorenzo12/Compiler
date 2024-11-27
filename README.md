@@ -15,7 +15,7 @@ A compiler for a C-like programming language, with a reduced set of instructions
 - [Lexical Analysis](#lexical-analysis)
   - [Automata](#automata)
 - [Syntax Analysis](#syntax-analysis)
-  - [Parser](#parser)
+  - [Parser](#parser-implementation)
 - [Semantic Analysis](#semantic-analysis)
 - [Installation and Running](#installation-and-running)
 - [Testing and Validation](#testing-and-validation)
