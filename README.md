@@ -269,7 +269,7 @@ For installation instructions, see the [Installation and Running](#installation-
 
 ## Demonstration
 ### Source code example:
-```
+```cpp
 func int add(int a, int b) {
     int result = 0 + 1;
     result += a;
