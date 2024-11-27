@@ -271,7 +271,7 @@ For installation instructions, see the [Installation and Running](#installation-
 ### Source code example:
 ```cpp
 func int add(int a, int b) {
-    int result = 0 + 1;
+    int result = b;
     result += a;
     return 0;
 }
@@ -281,7 +281,6 @@ struct myStruct {
     int y;
 };
 
-/*
 
 func float prueba() {   
     struct myStruct * point;
@@ -299,9 +298,9 @@ func float prueba() {
 
     struct Anonimo {
         int point[10];
-        int prueba;
+        int test;
     };
-    Anonimo.point = 2;
+    Anonimo.test = 2;
 }
 
 func int main() {
@@ -347,9 +346,6 @@ func int main() {
         i = 10;
     }
 
-    //break;   break and continue outside of iteration or switch 
-    //continue;
-
     do {
     } while (1);
 
@@ -359,16 +355,6 @@ func int main() {
     }
     return 0;
 }
-
-/*
-    // For testing lexer
-    123 23424 1423
-    1.2432 342.543 13423.32453
-    ; . : ( ) -> { } [] ? 
-    ++ --
-    = += -= *= /= %= <<= >>= &= ^= |=
-    + - * / & << >> ^
-*/
 ```
 
 
