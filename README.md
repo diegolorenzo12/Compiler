@@ -268,35 +268,146 @@ ctest
 For installation instructions, see the [Installation and Running](#installation-and-running) section.
 
 ## Demonstration
-
 ### Source code example:
-<!-- Add your source code here -->
+```
+func int add(int a, int b) {
+    int result = 0 + 1;
+    result += a;
+    return 0;
+}
+
+struct myStruct {
+    int x[10];
+    int y;
+};
+
+/*
+
+func float prueba() {   
+    struct myStruct * point;
+    point->x[1] = 1;
+    point->y = 5;
+
+    struct myStruct point2;
+    point2.x[1] = 1;
+    point2.y = 5;
+    {
+        int point; //on another scope 
+        point = 1;
+        return 0.0;
+    }
+
+    struct Anonimo {
+        int point[10];
+        int prueba;
+    };
+    Anonimo.point = 2;
+}
+
+func int main() {
+    int x = 10, y = 20; // one line with multiple declaration
+    int arr[2][2] = {
+        {1, 2},
+        {1, 2}
+    };  // brace initializer
+    
+    char string[10] = "string";
+
+    switch (x) {
+        int newScope = 10;
+        case 1: {
+            x++;
+            break;
+        }
+        case 2:
+            break;
+        default: {
+            y++;
+            newScope--;
+            break;
+        }
+    }
+
+    int result = 1 + 2;
+
+    {
+
+    }
+
+    // Add two numbers
+    result = add(x, y);
+    
+    // Conditional statement
+    if (result = 1) {
+    }
+
+    int n = 10;
+
+    for (int i = 0; n; i++) {
+        i = 10;
+    }
+
+    //break;   break and continue outside of iteration or switch 
+    //continue;
+
+    do {
+    } while (1);
+
+    while (1) {
+        continue;
+        break;
+    }
+    return 0;
+}
+
+/*
+    // For testing lexer
+    123 23424 1423
+    1.2432 342.543 13423.32453
+    ; . : ( ) -> { } [] ? 
+    ++ --
+    = += -= *= /= %= <<= >>= &= ^= |=
+    + - * / & << >> ^
+*/
+```
+
 
 ### Compilation process:
-<!-- Describe your compilation process here -->
+The process begins when the source code is passed to the lexer, which breaks the raw code into tokens—meaningful units like keywords, identifiers, and operators. The lexer uses regular expressions or finite automata (like DFA) to match patterns and generate a token stream, which is then passed to the syntactic analyzer (parser).
 
+The syntactic analyzer processes the token stream based on the grammar rules of the language, checking if the sequence of tokens forms valid structures (expressions, statements, etc.). It constructs a syntax tree or Abstract Syntax Tree (AST) representing the structure of the program. If there are any syntax errors, such as missing parentheses or incorrect function calls, the parser catches them and reports the issue.
+
+Next, the semantic analyzer examines the AST for logical consistency. This includes checking type correctness (e.g., adding an integer to a string), variable scope, and the validity of operations based on the data types. If there are semantic errors (such as undeclared variables or type mismatches), the semantic analyzer identifies and reports them.
+
+If the code passes through all these stages without errors, the compilation is considered successful. However, if any errors are detected during lexing, parsing, or semantic analysis, the respective analyzer reports the error and halts further compilation, allowing the developer to correct the issues before retrying the process.
 ### Execution of the compiled code:
-<!-- Describe how to execute the compiled code here -->
+![CompilationSuccess](https://github.com/user-attachments/assets/35313feb-a88d-42b3-b6d7-c0eb67129165)
 
 ## Challenges and Solutions
 
 ### Technical or design problems:
-<!-- Describe the technical or design problems here -->
+- Implementing a manual lexical analyzer using DFA transition tables was challenging due to the number of errors caused by the inefficient handling of ambiguous cases, such as keywords resembling identifiers.
+- Eliminating left recursion and factoring common prefixes in the grammar was complex and led to inconsistencies in the LL(1) top-down parsing process.
 
 ### Strategies adopted to overcome challenges:
-<!-- Describe the strategies used to overcome challenges here -->
+- The project transitioned to Flex to simplify the process and enable greater abstraction in defining lexical rules.
+- Changes to the grammar were carefully documented, supported by syntax diagrams and First and Follow analysis.
+- An LL(1) parser was developed using a recursive descent approach to construct the Abstract Syntax Tree (AST).
+- A semantic analyzer was implemented to perform consistency checks between variable declarations and usage, ensuring operations are valid according to data types.
+- Error handling was improved across all phases (lexical, syntactic, and semantic).
+
 
 ### Lessons learned:
-<!-- Share the lessons learned here -->
-
+- Modularity: Designing a compiler with a modular architecture allows each phase to be developed and tested independently.
+- Continuous Documentation: Recording every design decision and maintaining a change log facilitates understanding and collaboration in complex projects.
+- Iterative Testing: Conducting continuous testing at each phase helped identify errors early, saving time in later stages of development.
 
 ## Conclusions and Future Work
+This project successfully developed a functional compiler for C--, covering the initial phases of the compilation process, from lexical analysis to semantic analysis. Although intermediate code generation was not implemented, the modular approach laid a solid foundation for future extensions and potential adaptation to various architectures and platforms.
 
-### todo when project finish
+Throughout development, several technical challenges related to grammar and error handling were overcome by implementing practical solutions such as utilizing specialized tools (Flex) and simplifying grammar design. Semantic analysis validated the consistency of the source code in areas such as type handling and variable scope.
 
-- **Summary of objectives achieved:**
-- **Performance evaluation:**
-- **Proposals for future improvements:**
+The result is an extensible and educationally suitable compiler that provides a robust foundation for expanding its capabilities in the future. Future stages could include implementing intermediate code generation, code optimization, and support for advanced language features.
 
 ## References
 
