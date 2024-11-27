@@ -8,7 +8,7 @@
 #include "PrintVisitor.h"
 
 Compiler::Compiler(const std::string &filename, int flags)
-    : filename(filename)
+    : filename(filename), flags(flags)
 {
     this->fileReader = FileReader::getInstance();
     this->fileReader->openFile(filename, std::ios::in);
@@ -24,13 +24,18 @@ int Compiler::compile()
     Lexer lex(fileReader->getFileStream());
     lex.tokenize();
     TokenTable &tokenTable = lex.getTokens();
-    tokenTable.printTokens();
+    if(flags == 1) {
+        return 0;
+    }
+    //tokenTable.printTokens();
 
     Parser parser(tokenTable);
     std::unique_ptr<Program> ast = parser.parsePROGRAM();
+    if(flags == 2) {
+        return 0;
+    }
 
-    PrintVisitor printVisitor;
-
+    //PrintVisitor printVisitor;
     // ast->accept(printVisitor);
 
     auto globalScope = std::make_shared<SymbolTable>();
@@ -38,8 +43,8 @@ int Compiler::compile()
 
     ast->accept(semanticAnalyzer);
 
-    std::cout << "\nGlobal Symbol Table:\n";
-    globalScope->printCurrentScope();
+    //std::cout << "\nGlobal Symbol Table:\n";
+    //globalScope->printCurrentScope();
 
     return 0;
 }

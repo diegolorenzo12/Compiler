@@ -3,7 +3,7 @@
 
 int main()
 {
-    Compiler compiler("./test.cmm", 0);
+    Compiler compiler("./test.cmm",0);
     try
     {
         int res = compiler.compile();

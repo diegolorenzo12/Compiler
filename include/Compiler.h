@@ -17,4 +17,5 @@ public:
 private:
     const std::string filename;
     FileReader *fileReader;
+    int flags;
 };

@@ -1,91 +1,67 @@
 #include <gtest/gtest.h>
-#include "TokenTable.h"
-#include "Token.h"
+#include "Compiler.h"
+#include "ErrorManager.h"
 #include <memory>
 #include <fstream>
 #include <sstream>
 #include <iostream>
 
 
-// TEST(LexerTest, BasicKeywordAndIdentifier)
-// {
-//     std::string sourceCode = "int main() { return 0; }";
-//     std::shared_ptr<std::fstream> stream = std::make_shared<std::fstream>();
-//     stream->open("temp_source_code.txt", std::ios::out);
-//     *stream << sourceCode;
-//     stream->close();
+std::string createTempFile(const std::string& content) {
+    std::string tempFileName = "temp_test_file_lexer.cmm";
+    std::ofstream tempFile(tempFileName);
+    if (!tempFile) {
+        throw std::runtime_error("Unable to create temporary file");
+    }
+    tempFile << content;
+    tempFile.close();
+    return tempFileName;
+}
 
-//     stream->open("temp_source_code.txt", std::ios::in);
+void deleteTempFile(const std::string &fileName)
+{
+    if (std::remove(fileName.c_str()) != 0)
+    {
+        std::cerr << "Failed to delete temporary file: " << fileName << std::endl;
+    }
+}
 
-//     TableDrivenLexer lexer(stream);
-//     lexer.tokenize();
-//     TokenTable &tokens = lexer.getTokens(); 
+TEST(CompilerTests, unregonizedTokenError)
+{
+    std::string fileContent = R"(
+    
+    int main() {
+        $ // unregonized token, lexer error
+        x = 1;
 
-//     ASSERT_EQ(tokens.size(), 9); // Expect 9 tokens: int, main, (, ), {, return, 0, ;}
+    })";
+    std::string tempFileName = createTempFile(fileContent);
 
-//     EXPECT_EQ(tokens.front().getType(), TokenType::KEYWORD);
-//     EXPECT_EQ(tokens.front().getValue(), "int");
-//     tokens.pop_front();
+    EXPECT_THROW({
+            Compiler compiler(tempFileName, 1);
+            compiler.compile(); }, LexerException);
 
-//     EXPECT_EQ(tokens.front().getType(), TokenType::IDENTIFIER);
-//     EXPECT_EQ(tokens.front().getValue(), "main");
-//     tokens.pop_front();
+    deleteTempFile(tempFileName);
+}
 
-//     EXPECT_EQ(tokens.front().getType(), TokenType::PUNCTUATION);
-//     EXPECT_EQ(tokens.front().getValue(), "(");
-//     tokens.pop_front();
+TEST(CompilerTests, testAllTokenTypes)
+{
+    const std::string testInput = R"(
+        inline restrict volatile static auto register const char short long float double signed unsigned bool struct
+        if else switch case default while do for continue break return sizeof void int func
+        >>= <<= += -= *= /= %= &= ^= |= >> << ++ -- -> || && <= >= == != { ; } , : = ( ) [ ] . & ! ~ - + * / % < > ^ | ?
+        // This is a single-line comment
+        /* This is a
+        multi-line comment */
+        "string_literal_example"
+        12345
+        67890.12345
+        identifier_example)";
+    std::string tempFileName = createTempFile(testInput);
 
-//     EXPECT_EQ(tokens.front().getType(), TokenType::PUNCTUATION);
-//     EXPECT_EQ(tokens.front().getValue(), ")");
-//     tokens.pop_front();
+    EXPECT_NO_THROW({
+            Compiler compiler(tempFileName, 1);
+            compiler.compile(); });
 
-//     EXPECT_EQ(tokens.front().getType(), TokenType::PUNCTUATION);
-//     EXPECT_EQ(tokens.front().getValue(), "{");
-//     tokens.pop_front();
-
-//     EXPECT_EQ(tokens.front().getType(), TokenType::KEYWORD);
-//     EXPECT_EQ(tokens.front().getValue(), "return");
-//     tokens.pop_front();
-
-//     EXPECT_EQ(tokens.front().getType(), TokenType::CONSTANT);
-//     EXPECT_EQ(tokens.front().getValue(), "0");
-//     tokens.pop_front();
-
-//     EXPECT_EQ(tokens.front().getType(), TokenType::PUNCTUATION);
-//     EXPECT_EQ(tokens.front().getValue(), ";");
-//     tokens.pop_front();
-
-//     EXPECT_EQ(tokens.front().getType(), TokenType::PUNCTUATION);
-//     EXPECT_EQ(tokens.front().getValue(), "}");
-
-//     // Clean up temporary file
-//     stream->close();
-//     std::remove("temp_source_code.txt");
-// }
-
-// TEST(LexerTest, KeywordTest){
-//     std::string sourceCode = "auto break case const continue default do double else extern float for goto if int long register return short signed sizeof static struct switch typedef union unsigned void volatile while";
-//     std::shared_ptr<std::fstream> stream = std::make_shared<std::fstream>();
-//     stream->open("temp_source_code.cmm", std::ios::out);
-//     *stream << sourceCode;
-//     stream->close();
-
-//     stream->open("temp_source_code.cmm", std::ios::in);
-//     TableDrivenLexer lexer(stream);
-
-//     lexer.tokenize();
-
-//     TokenTable &tokens = lexer.getTokens();
-
-//     ASSERT_EQ(tokens.size(), 30); // 30 total tokens
-
-//     while(!tokens.isEmpty()){
-
-//         EXPECT_EQ(tokens.front().getTypeAsString(), "KEYWORD");
-//         tokens.pop_front();
-//     }
-
-
-//     stream->close();
-//     std::remove("temp_source_code.cmm");
-// }
+    deleteTempFile(tempFileName);
+}
