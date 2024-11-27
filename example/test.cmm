@@ -9,6 +9,8 @@ struct myStruct {
     int y;
 };
 
+/*
+
 
 func float prueba(){   
     struct myStruct * point;
@@ -23,6 +25,12 @@ func float prueba(){
         point = 1;
         return 0.0;
     }
+
+    struct Anonimo{
+        int point[10];
+        int prueba;
+    };
+    Anonimo.point = 2;
 }
 
 
@@ -50,6 +58,7 @@ func int main() {
                 newScope--;
                 break;
             }
+            
     }
 
     int result = 1+2;
@@ -87,7 +96,7 @@ func int main() {
 }
 
 
-/*
+
 
 
 /*

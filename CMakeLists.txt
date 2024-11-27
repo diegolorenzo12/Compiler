@@ -58,10 +58,9 @@ set(SOURCES
     src/Lexer.cpp
     src/Parser.cpp
     src/FileReader.cpp
-    src/LexerException.cpp
-    src/SyntacticException.cpp
     src/Symbol.cpp
     src/SymbolTable.cpp
+    src/ErrorManager.cpp
     ${FLEX_OUTPUT}
 )
 
@@ -108,6 +107,13 @@ target_link_libraries(lexer_test GTest::gtest_main)
 target_sources(lexer_test PRIVATE
     src/Token.cpp
     src/TokenTable.cpp
+    src/Compiler.cpp
+    src/Lexer.cpp
+    src/Parser.cpp
+    src/FileReader.cpp
+    src/Symbol.cpp
+    src/SymbolTable.cpp
+    src/ErrorManager.cpp
 )
 
 # Register the test with CTest

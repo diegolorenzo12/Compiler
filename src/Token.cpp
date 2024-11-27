@@ -9,36 +9,179 @@ TokenType Token::getType() const
 {
     return type;
 }
+#include "Token.h"
 
 std::string Token::getTypeAsString() const
 {
     switch (type)
     {
-    case TokenType::KEYWORD:
-        return "KEYWORD";
+    case TokenType::UNKNOWN:
+        return "UNKNOWN";
     case TokenType::IDENTIFIER:
         return "IDENTIFIER";
-    case TokenType::PUNCTUATION:
-        return "PUNCTUATION";
+    case TokenType::INLINE:
+        return "INLINE";
+    case TokenType::RESTRICT:
+        return "RESTRICT";
+    case TokenType::VOLATILE:
+        return "VOLATILE";
+    case TokenType::STATIC:
+        return "STATIC";
+    case TokenType::AUTO:
+        return "AUTO";
+    case TokenType::REGISTER:
+        return "REGISTER";
+    case TokenType::CONST:
+        return "CONST";
+    case TokenType::CHAR:
+        return "CHAR";
+    case TokenType::SHORT:
+        return "SHORT";
+    case TokenType::LONG:
+        return "LONG";
+    case TokenType::FLOAT:
+        return "FLOAT";
+    case TokenType::DOUBLE:
+        return "DOUBLE";
+    case TokenType::SIGNED:
+        return "SIGNED";
+    case TokenType::UNSIGNED:
+        return "UNSIGNED";
+    case TokenType::BOOL:
+        return "BOOL";
+    case TokenType::STRUCT:
+        return "STRUCT";
+    case TokenType::IF:
+        return "IF";
+    case TokenType::ELSE:
+        return "ELSE";
+    case TokenType::SWITCH:
+        return "SWITCH";
+    case TokenType::CASE:
+        return "CASE";
+    case TokenType::DEFAULT:
+        return "DEFAULT";
+    case TokenType::WHILE:
+        return "WHILE";
+    case TokenType::DO:
+        return "DO";
+    case TokenType::FOR:
+        return "FOR";
+    case TokenType::CONTINUE:
+        return "CONTINUE";
+    case TokenType::BREAK:
+        return "BREAK";
+    case TokenType::RETURN:
+        return "RETURN";
+    case TokenType::SIZEOF:
+        return "SIZEOF";
+    case TokenType::VOID:
+        return "VOID";
+    case TokenType::INT:
+        return "INT";
+    case TokenType::FUNC:
+        return "FUNC";
+
+    case TokenType::RIGHT_ASSIGN:
+        return "RIGHT_ASSIGN";
+    case TokenType::LEFT_ASSIGN:
+        return "LEFT_ASSIGN";
+    case TokenType::ADD_ASSIGN:
+        return "ADD_ASSIGN";
+    case TokenType::SUB_ASSIGN:
+        return "SUB_ASSIGN";
+    case TokenType::MUL_ASSIGN:
+        return "MUL_ASSIGN";
+    case TokenType::DIV_ASSIGN:
+        return "DIV_ASSIGN";
+    case TokenType::MOD_ASSIGN:
+        return "MOD_ASSIGN";
+    case TokenType::AND_ASSIGN:
+        return "AND_ASSIGN";
+    case TokenType::XOR_ASSIGN:
+        return "XOR_ASSIGN";
+    case TokenType::OR_ASSIGN:
+        return "OR_ASSIGN";
+    case TokenType::RIGHT_OP:
+        return "RIGHT_OP";
+    case TokenType::LEFT_OP:
+        return "LEFT_OP";
+    case TokenType::INC_OP:
+        return "INC_OP";
+    case TokenType::DEC_OP:
+        return "DEC_OP";
+    case TokenType::PTR_OP:
+        return "PTR_OP";
+    case TokenType::AND_OP:
+        return "AND_OP";
+    case TokenType::OR_OP:
+        return "OR_OP";
+    case TokenType::LE_OP:
+        return "LE_OP";
+    case TokenType::GE_OP:
+        return "GE_OP";
+    case TokenType::EQ_OP:
+        return "EQ_OP";
+    case TokenType::NE_OP:
+        return "NE_OP";
+    case TokenType::SEMICOLON:
+        return "SEMICOLON";
+    case TokenType::LBRACE:
+        return "LBRACE";
+    case TokenType::RBRACE:
+        return "RBRACE";
+    case TokenType::COMMA:
+        return "COMMA";
+    case TokenType::COLON:
+        return "COLON";
+    case TokenType::EQUAL:
+        return "EQUAL";
+    case TokenType::LPAREN:
+        return "LPAREN";
+    case TokenType::RPAREN:
+        return "RPAREN";
+    case TokenType::LBRACKET:
+        return "LBRACKET";
+    case TokenType::RBRACKET:
+        return "RBRACKET";
+    case TokenType::DOT:
+        return "DOT";
+    case TokenType::AMPERSAND:
+        return "AMPERSAND";
+    case TokenType::EXCLAMATION:
+        return "EXCLAMATION";
+    case TokenType::TILDE:
+        return "TILDE";
+    case TokenType::MINUS:
+        return "MINUS";
+    case TokenType::PLUS:
+        return "PLUS";
+    case TokenType::ASTERISK:
+        return "ASTERISK";
+    case TokenType::SLASH:
+        return "SLASH";
+    case TokenType::PERCENT:
+        return "PERCENT";
+    case TokenType::LESS_THAN:
+        return "LESS_THAN";
+    case TokenType::GREATER_THAN:
+        return "GREATER_THAN";
+    case TokenType::CARET:
+        return "CARET";
+    case TokenType::PIPE:
+        return "PIPE";
+    case TokenType::QUESTION_MARK:
+        return "QUESTION_MARK";
     case TokenType::INTEGER_CONSTANT:
         return "INTEGER_CONSTANT";
     case TokenType::FLOAT_CONSTANT:
         return "FLOAT_CONSTANT";
     case TokenType::STRING_LITERAL:
         return "STRING_LITERAL";
-    case TokenType::UNKNOWN:
-        return "UNKNOWN";
-    case TokenType::ARITHMETIC_OPERATOR:
-        return "ARITHMETIC_OPERATOR";
-    case TokenType::COMPARISON_OPERATOR:
-        return "COMPARISON_OPERATOR";
-    case TokenType::ASSIGNMENT_OPERATOR:
-        return "ASSIGNMENT_OPERATOR";
-    case TokenType::INCREMENT_OPERATOR:
-        return "INCREMENT_OPERATOR";
     case TokenType::END_OF_FILE:
         return "END_OF_FILE";
+
     default:
-        return "INVALID_TYPE";
+        return "UNKNOWN";
     }
 }
