@@ -20,6 +20,8 @@ A compiler for a C-like programming language, with a reduced set of instructions
 - [Installation and Running](#installation-and-running)
 - [Testing and Validation](#testing-and-validation)
 - [Tools and Development Environment](#tools-and-development-environment)
+- [Demonstration](#demonstration)
+- [Challenges and Solutions](#challenges-and-solutions)
 - [Conclusions and Future Work](#conclusions-and-future-work)
 - [References](#references)
 
@@ -264,6 +266,28 @@ ctest
 - **Development tools:** CMake, Conan for package management
 
 For installation instructions, see the [Installation and Running](#installation-and-running) section.
+
+## Demonstration
+
+### Source code example:
+<!-- Add your source code here -->
+
+### Compilation process:
+<!-- Describe your compilation process here -->
+
+### Execution of the compiled code:
+<!-- Describe how to execute the compiled code here -->
+
+## Challenges and Solutions
+
+### Technical or design problems:
+<!-- Describe the technical or design problems here -->
+
+### Strategies adopted to overcome challenges:
+<!-- Describe the strategies used to overcome challenges here -->
+
+### Lessons learned:
+<!-- Share the lessons learned here -->
 
 
 ## Conclusions and Future Work
