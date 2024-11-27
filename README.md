@@ -161,13 +161,187 @@ The parser was implemented as a **recursive descent parser**, designed to confor
 These adjustments helped streamline the grammar, making it more suitable for top-down parsing while preserving essential language functionality. 
 
 ## Semantic Analysis
-### todo when project finish
 
-- **Semantic analysis:**
+### Overview
+The semantic analyzer handles the classification of composite data types (structs, pointers, primitives, etc.). A symbol table was designed where each symbol is associated with its type and value. This symbol table uses a hash table with chained scopes, facilitating the creation and deletion of scopes.  
 
-  - Use of grammars and syntax trees.
+The Visitor pattern decouples the AST from the semantic analyzer, allowing efficient traversal of the tree and performing semantic analysis.
 
-- **Examples:**
+### Features and Examples
+
+#### 1. Variables Out of Scope
+The analyzer ensures variables are accessed only within their valid scope.
+
+```c
+func int calculate_sum(int a, int b) {
+    return a + b;
+}
+
+func int main() {
+    int x = 5;
+    {
+        int y = 10;
+        int result = calculate_sum(x, y); // Valid
+    }
+    int result = calculate_sum(x, y); // Error: 'y' is out of scope
+    return 0;
+}
+```
+
+#### 2. Type Checking in Assignments
+Assignments are checked to ensure type compatibility and that the Lvalue is not constant.
+
+```c
+func int double_value(int a) {
+    return 2 * a;
+}
+
+func int main() {
+    1 = 10; // Error: Cannot assign to a constant Lvalue
+
+    char str[10] = "hello";
+    int doubled = double_value(str); // Error: Implicit type conversion from 'char[]' to 'int'
+    return 0;
+}
+```
+
+#### 3. Data Type Compatibility in Expressions
+The analyzer ensures expressions involve compatible types.
+
+```c
+func int main() {
+    int a = 5;
+    a = (1>3) + 4; // bool + int
+    return 0;
+}
+```
+
+#### 4. Return Type Consistency
+The return type of a function must match the declared type.
+
+```c
+func int square(int n) {
+    return n * n;
+}
+
+func void print_value(int n) {
+    return n; // Error: Return type 'void' cannot return a value
+}
+
+func int main() {
+    int result = square(4); // Valid
+    return 0;
+}
+```
+
+#### 5. Function Signature Matching
+Function calls must match the declared function signature.
+
+```c
+func int multiply(int a, int b) {
+    return a * b;
+}
+
+func int main() {
+    int product = multiply(3, 4); // Valid
+    product = multiply(3);       // Error: Incorrect number of arguments
+    product = multiply(2, "hi"); // Error: Incorrect Type
+    return 0;
+}
+```
+
+#### 6. Struct Member Access
+The analyzer ensures struct members exist and match their types.
+
+```c
+struct Point {
+    int x;
+    int y;
+};
+
+func int calculate_distance(struct Point p) {
+    return p.x * p.x + p.y * p.y;
+}
+
+func int main() {
+    struct Point p;
+    p.x=3;
+    p.y=4;
+    int distance = calculate_distance(p); // Valid
+    int error = p.z; // Error: 'z' is not a member of 'Point'
+    return 0;
+}
+```
+
+#### 7. Pointer Arrow (->) Operator Usage
+Pointers must use the arrow operator correctly when accessing members of a struct.
+
+```c
+struct Node {
+    int data;
+    struct Node *next;
+};
+
+func int get_data(struct Node *node) {
+    return node->data;
+}
+
+func int main() {
+    struct Node *ptr;
+    int value = get_data(ptr); // Valid
+    return 0;
+}
+```
+
+#### 8. Break and Continue Statement Validation
+The analyzer checks that break and continue statements are used only inside loops or switch statements.
+
+```c
+func void loop_example() {
+    while (1) {
+        break; // Valid
+    }
+}
+
+func int main() {
+    if (1) {
+        break; // Error: 'break' outside of a loop or switch
+    }
+    loop_example();
+    return 0;
+}
+```
+
+#### 9. Array Initialization with Brace {} Matching Dimensions
+The initializer must match the declared array dimensions.
+
+```c
+
+func int main() {
+    int arr[3] = {1, 2, 3}; // Valid
+    return 0;
+}
+```
+
+#### 10. Constant Types in Case Statements
+case labels must be constant expressions.
+
+```c
+func int get_status(int value) {
+    switch (value) {
+        case 1: // Valid
+            return 0;
+        case value + 1: // Error: 'value + 1' is not a constant expression
+            return -1;
+    }
+    return 1;
+}
+
+func int main() {
+    int result = get_status(1);
+    return 0;
+}
+```
 
 ## Installation and Running
 
